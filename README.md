@@ -1,4 +1,4 @@
-# ᚢ·ᚾ·ᛏ Old Norse Dictionary (v1.0) — By Gjakkr Dagnýjarson
+# ᚢ·ᚾ·ᛏ Old Norse Dictionary (v1.2) — By Gjakkr Dagnýjarson
 
 A fast, zero-tracking, **100% offline** Old Norse dictionary and morphological reference web app combining **111,488 headwords** across four major scholarly lexicons.
 
@@ -10,7 +10,7 @@ A fast, zero-tracking, **100% offline** Old Norse dictionary and morphological r
   * **Windows / Mac / Chromebook (Chrome or Edge):** Click the **Install** icon in the address bar.
 
 ## Key Features
-* **111,488 Old Norse Headwords** in authentic Old Norse alphabetical order (`A Á B D Ð E É F G H I Í J K L M N O Ó P R S T U Ú V Y Ý Þ Æ Ø Ǫ Œ`).
+* **111,488 Old Norse Headwords** in authentic Old Norse alphabetical order (`A Á B D Ð E É F G H I Í J K L M N O Ó P R S T U Ú V Y Ý Þ Æ Ǽ Ø Ǫ Œ`).
 * **Reverse Inflected-Form Search:** Type conjugated verbs or declined nouns (e.g., *kattar*, *sérð*) to trace directly back to their root lemma.
 * **39,374+ 4-Case Noun Declensions & Verb Conjugation Tables.**
 * **Preposition Case Government (*Stjórn*) Cards:** Instant Accusative, Dative, and Genitive case rules for Old Norse prepositions (`af`, `frá`, `til`, `at`, `á`, `í`, `með`, `við`, etc.).
