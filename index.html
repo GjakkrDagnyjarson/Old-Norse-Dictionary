@@ -21,7 +21,7 @@ html,body{width:100%;height:100%;background:#140D08;color:#F5E3C6;font-family:Ge
 .item{padding:9px 6px;border-bottom:1px solid rgba(138,98,54,.35);cursor:pointer}
 .ihw{font-size:17px;font-weight:bold;color:#F5B82E}
 .imeta{font-size:12px;color:#D8BE96;font-family:sans-serif}
-.dhw{font-size:23px;font-weight:bold;color:#F5B82E;display:flex;justify-content:space-between;align-items:center;gap:8px}.rbtn{padding:5px 10px;border-radius:8px;border:1.2px solid #8A6236;background:#3A2515;color:#F5E3C6;font-weight:bold;font-size:12px;font-family:sans-serif;cursor:pointer;flex-shrink:0}.rbtn:active{background:#633F22}
+.dhw{font-size:23px;font-weight:bold;color:#F5B82E;display:flex;justify-content:space-between;align-items:center;gap:8px}.rbtn{padding:4px 12px;font-size:16px;line-height:1;border-radius:8px;border:1.2px solid #8A6236;background:#3A2515;color:#F5E3C6;font-weight:bold;font-size:12px;font-family:sans-serif;cursor:pointer;flex-shrink:0}.rbtn:active{background:#633F22}
 .drune{font-size:17px;color:#E0B256;margin:3px 0 6px}
 .sec{font-size:11px;font-weight:bold;letter-spacing:.7px;color:#F5B82E;font-family:sans-serif;margin:11px 0 4px;border-bottom:1px solid rgba(245,184,46,.3);padding-bottom:2px}
 .prep{background:rgba(42,72,38,.5);border:1px solid #6DA865;border-radius:8px;padding:8px 10px;font-size:13px;color:#CCFFCA;font-family:sans-serif}
@@ -31,7 +31,7 @@ th{color:#F5B82E;background:rgba(58,37,21,.65)}
 .foot{text-align:center;font-size:11.5px;color:#F5E3C6;text-shadow:0 2px 5px #000;line-height:1.35;flex-shrink:0;padding-top:4px}
 </style><script src="./sql-wasm.js"></script></head><body><div class="bg" id="bg">
 <div class="title">OLD NORSE DICTIONARY</div>
-<div class="srow"><button id="hb" class="hbtn" onclick="goHome()">← Home</button><input id="q" class="sbox" type="text" placeholder="Search Old Norse, inflected, or English..." disabled oninput="doSearch()"></div>
+<div class="srow"><button id="hb" class="hbtn" onclick="goHome()">Home</button><input id="q" class="sbox" type="text" placeholder="Search Old Norse, inflected, or English..." disabled oninput="doSearch()"></div>
 
 <div class="stat" id="st">Loading 111,488 entries...</div>
 <div class="agrid" id="ag"></div>
@@ -55,7 +55,7 @@ if(it.length<25&&low.length>=3)rows(db.exec("SELECT id,headword,pos,gender FROM 
 document.getElementById("st").textContent=`${it.length} matches for "${raw}"`;renderList(it)}
 function goBack(){renderList(lastList);document.getElementById("pnl").scrollTop=lastScroll}function renderList(it){lastList=it;document.getElementById("bg").classList.add("open");document.getElementById("ag").style.display="none";document.getElementById("hb").style.display="inline-block";const p=document.getElementById("pnl");p.style.display="block";p.scrollTop=0;p.innerHTML=it.length?"":"<div class='imeta'>No matching entries found.</div>";it.forEach(x=>{let d=document.createElement("div");d.className="item";let tag=(x.g||x.pos)?` (${x.g||x.pos})`:"";let via=x.inf?` ← ${x.inf}`:(x.eng?" [English match]":"");d.innerHTML=`<div class="ihw">${x.hw} <span class="imeta">${tag}${via}</span></div>`;d.onclick=()=>showDetail(x.id,x.inf);p.appendChild(d)})}
 function showDetail(id,inf){lastScroll=document.getElementById("pnl").scrollTop;document.getElementById("q").blur();const r=rows(db.exec("SELECT headword,pos,gender,zoega_def,cleasby_def,onp_def,wikt_def,prep_cases FROM lemmas WHERE id=?",[id]));if(!r.length)return;const[hw,pos,g,zg,cl,onp,wk,pc]=r.at(0);let gr={};rows(db.exec("SELECT case_name,number,definiteness,form FROM wordforms WHERE lemma_id=?",[id])).forEach(x=>gr[`${x.at(0)}_${x.at(1)}_${x.at(2)}`]=x.at(3));
-let h=`<div class="dhw"><span>${hw} <span class="imeta">${[pos,g].filter(Boolean).join(" • ")}</span></span><button class="rbtn" onclick="goBack()">← Results</button></div><div class="drune">Younger Futhark: ${toRunes(hw)}</div>`;
+let h=`<div class="dhw"><span>${hw} <span class="imeta">${[pos,g].filter(Boolean).join(" • ")}</span></span><button class="rbtn" onclick="goBack()" aria-label="Back to results">←</button></div><div class="drune">Younger Futhark: ${toRunes(hw)}</div>`;
 if(inf)h+=`<div class="imeta">Matched inflected form: <b>${inf}</b></div>`;
 if(pc)h+=`<div class="sec">PREPOSITION CASE GOVERNMENT (STJÓRN)</div><div class="prep">${pc}</div>`;
 if(gr.NOM_SG_INDEF){h+=`<div class="sec">4-CASE DECLENSION TABLE</div><div style="overflow-x:auto;width:100%"><table><tr><th>Case</th><th>Sg Indef</th><th>Sg Def</th><th>Pl Indef</th><th>Pl Def</th></tr>`;["NOM","ACC","DAT","GEN"].forEach(c=>h+=`<tr><th>${c}</th><td>${gr[c+"_SG_INDEF"]||"-"}</td><td>${gr[c+"_SG_DEF"]||"-"}</td><td>${gr[c+"_PL_INDEF"]||"-"}</td><td>${gr[c+"_PL_DEF"]||"-"}</td></tr>`);h+=`</table></div>`}
