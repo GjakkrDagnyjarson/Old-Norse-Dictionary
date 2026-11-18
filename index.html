@@ -17,7 +17,7 @@ html,body{width:100%;height:100%;background:#140D08;color:#F5E3C6;font-family:Ge
 .agrid{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;width:100%;margin-bottom:8px;flex-shrink:0}
 .abtn{width:calc(11.11% - 4px);background:rgba(28,17,10,.9);border:1.2px solid #6E4A26;border-radius:9px;padding:7px 0;color:#FFF4DC;font-size:13px;font-weight:bold;font-family:Georgia,serif;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.6)}
 .abtn:active,.cbtn:active,.hbtn:active{background:#633F22}
-.panel{flex:1;width:100%;background:rgba(18,11,6,.94);border:1.5px solid #7A542E;border-radius:12px;padding:12px;overflow-y:auto;display:none;margin-bottom:6px}
+.panel{flex:1;width:100%;background:rgba(18,11,6,.94);border:1.5px solid #7A542E;border-radius:12px;padding:12px;overflow-y:auto;overflow-x:hidden;display:none;margin-bottom:6px}
 .item{padding:9px 6px;border-bottom:1px solid rgba(138,98,54,.35);cursor:pointer}
 .ihw{font-size:17px;font-weight:bold;color:#F5B82E}
 .imeta{font-size:12px;color:#D8BE96;font-family:sans-serif}
@@ -59,8 +59,8 @@ function showDetail(id,inf){document.getElementById("q").blur();const r=rows(db.
 let h=`<div class="dhw">${hw} <span class="imeta">${[pos,g].filter(Boolean).join(" • ")}</span></div><div class="drune">Younger Futhark: ${toRunes(hw)}</div>`;
 if(inf)h+=`<div class="imeta">Matched inflected form: <b>${inf}</b></div>`;
 if(pc)h+=`<div class="sec">PREPOSITION CASE GOVERNMENT (STJÓRN)</div><div class="prep">${pc}</div>`;
-if(gr.NOM_SG_INDEF){h+=`<div class="sec">4-CASE DECLENSION TABLE</div><table><tr><th>Case</th><th>Sg Indef</th><th>Sg Def</th><th>Pl Indef</th><th>Pl Def</th></tr>`;["NOM","ACC","DAT","GEN"].forEach(c=>h+=`<tr><th>${c}</th><td>${gr[c+"_SG_INDEF"]||"-"}</td><td>${gr[c+"_SG_DEF"]||"-"}</td><td>${gr[c+"_PL_INDEF"]||"-"}</td><td>${gr[c+"_PL_DEF"]||"-"}</td></tr>`);h+=`</table>`}
-if(gr.PRES_1SG_VERB){h+=`<div class="sec">VERB CONJUGATION TABLE</div><table><tr><th>Person</th><th>Present</th><th>Past</th></tr>`;[["1sg (ek)","1SG"],["2sg (þú)","2SG"],["3sg (hann/hún)","3SG"],["1pl (vér)","1PL"],["2pl (þér)","2PL"],["3pl (þeir)","3PL"]].forEach(([l,k])=>h+=`<tr><th>${l}</th><td>${gr["PRES_"+k+"_VERB"]||"-"}</td><td>${gr["PAST_"+k+"_VERB"]||"-"}</td></tr>`);if(gr.PART_PP_VERB)h+=`<tr><th>Past Part.</th><td colspan="2">${gr.PART_PP_VERB}</td></tr>`;h+=`</table>`}
+if(gr.NOM_SG_INDEF){h+=`<div class="sec">4-CASE DECLENSION TABLE</div><div style="overflow-x:auto;width:100%"><table><tr><th>Case</th><th>Sg Indef</th><th>Sg Def</th><th>Pl Indef</th><th>Pl Def</th></tr>`;["NOM","ACC","DAT","GEN"].forEach(c=>h+=`<tr><th>${c}</th><td>${gr[c+"_SG_INDEF"]||"-"}</td><td>${gr[c+"_SG_DEF"]||"-"}</td><td>${gr[c+"_PL_INDEF"]||"-"}</td><td>${gr[c+"_PL_DEF"]||"-"}</td></tr>`);h+=`</table></div>`}
+if(gr.PRES_1SG_VERB){h+=`<div class="sec">VERB CONJUGATION TABLE</div><div style="overflow-x:auto;width:100%"><table><tr><th>Person</th><th>Present</th><th>Past</th></tr>`;[["1sg (ek)","1SG"],["2sg (þú)","2SG"],["3sg (hann/hún)","3SG"],["1pl (vér)","1PL"],["2pl (þér)","2PL"],["3pl (þeir)","3PL"]].forEach(([l,k])=>h+=`<tr><th>${l}</th><td>${gr["PRES_"+k+"_VERB"]||"-"}</td><td>${gr["PAST_"+k+"_VERB"]||"-"}</td></tr>`);if(gr.PART_PP_VERB)h+=`<tr><th>Past Part.</th><td colspan="2">${gr.PART_PP_VERB}</td></tr>`;h+=`</table></div>`}
 [["ZOËGA (1910)",zg],["CLEASBY & VIGFÚSSON (1874)",cl],["ONP — UNIV. OF COPENHAGEN (CC BY-SA 4.0)",onp],["WIKTIONARY (CC BY-SA 4.0)",wk]].forEach(([t,tx])=>{if(tx&&tx.trim())h+=`<div class="sec">${t}</div><div class="def">${tx.trim()}</div>`});
 const p=document.getElementById("pnl");p.innerHTML=h;p.scrollTop=0}
 </script></body></html>
