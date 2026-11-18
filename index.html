@@ -6,16 +6,16 @@
 <title>Old Norse Dictionary (ᚢ·ᚾ·ᛏ)</title><style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;background:#140D08;color:#F5E3C6;font-family:Georgia,serif;overflow:hidden}
-.bg{position:fixed;inset:0;width:100%;background:url('./bg_norse.jpg') no-repeat center center;background-size:100% 100%;display:flex;flex-direction:column;padding:108px 36px 54px}
-.title{text-align:center;font-size:21px;font-weight:bold;letter-spacing:1.2px;color:#FFF5E0;text-shadow:0 2px 6px #000;margin-bottom:8px;flex-shrink:0}
+.bg{position:fixed;inset:0;width:100%;background:url('./bg_norse.jpg') no-repeat center center;background-size:100% 100%;display:flex;flex-direction:column;padding:37vh 36px 46px}
+.bg.open{padding-top:11vh}.title{text-align:center;font-size:17px;font-weight:bold;letter-spacing:1.2px;color:#FFF5E0;text-shadow:0 2px 6px #000;margin-bottom:8px;flex-shrink:0}
 .srow{display:flex;gap:6px;margin-bottom:6px;flex-shrink:0}
 .sbox{flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid #8A6236;background:rgba(20,12,7,.92);color:#FFF8EA;font-size:15px;font-family:sans-serif;outline:none}
 .hbtn{padding:0 12px;border-radius:10px;border:1.5px solid #8A6236;background:#3A2515;color:#F5E3C6;font-weight:bold;font-size:13px;cursor:pointer;display:none}
 .cbar{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-bottom:6px;flex-shrink:0}
 .cbtn{background:rgba(48,30,17,.94);color:#F5E3C6;border:1px solid #7A542E;border-radius:6px;padding:4px 7px;font-size:13px;font-weight:bold;cursor:pointer}
 .stat{text-align:center;font-size:12px;color:#F5B82E;text-shadow:0 1px 4px #000;margin-bottom:6px;flex-shrink:0}
-.agrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:100%;margin:auto 0;flex-shrink:0}
-.abtn{background:rgba(28,17,10,.9);border:1.2px solid #6E4A26;border-radius:9px;padding:11px 0;color:#FFF4DC;font-size:16px;font-weight:bold;font-family:Georgia,serif;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.6)}
+.agrid{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;width:100%;margin-bottom:8px;flex-shrink:0}
+.abtn{width:calc(11.11% - 4px);background:rgba(28,17,10,.9);border:1.2px solid #6E4A26;border-radius:9px;padding:7px 0;color:#FFF4DC;font-size:13px;font-weight:bold;font-family:Georgia,serif;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.6)}
 .abtn:active,.cbtn:active,.hbtn:active{background:#633F22}
 .panel{flex:1;width:100%;background:rgba(18,11,6,.94);border:1.5px solid #7A542E;border-radius:12px;padding:12px;overflow-y:auto;display:none;margin-bottom:6px}
 .item{padding:9px 6px;border-bottom:1px solid rgba(138,98,54,.35);cursor:pointer}
@@ -30,10 +30,10 @@ th,td{border:1px solid rgba(138,98,54,.45);padding:4px;text-align:left}
 th{color:#F5B82E;background:rgba(58,37,21,.65)}
 .def{font-size:13.5px;line-height:1.45;color:#F5E8D0;white-space:pre-wrap}
 .foot{text-align:center;font-size:11.5px;color:#F5E3C6;text-shadow:0 2px 5px #000;line-height:1.35;flex-shrink:0;padding-top:4px}
-</style><script src="./sql-wasm.js"></script></head><body><div class="bg">
+</style><script src="./sql-wasm.js"></script></head><body><div class="bg" id="bg">
 <div class="title">OLD NORSE DICTIONARY</div>
 <div class="srow"><button id="hb" class="hbtn" onclick="goHome()">← Home</button><input id="q" class="sbox" type="text" placeholder="Search Old Norse, inflected, or English..." disabled oninput="doSearch()"></div>
-<div class="cbar" id="cb"></div>
+
 <div class="stat" id="st">Loading 111,488 entries...</div>
 <div class="agrid" id="ag"></div>
 <div class="panel" id="pnl"></div>
@@ -47,14 +47,14 @@ function rows(res){return(res&&res.length)?res.at(0).values:[]}
 ["á","ð","é","í","ó","ú","ý","þ","æ","ø","ǫ","œ"].forEach(c=>{let b=document.createElement("button");b.className="cbtn";b.textContent=c;b.onclick=()=>{let i=document.getElementById("q");i.value+=c;i.focus();doSearch()};document.getElementById("cb").appendChild(b)});
 [..."AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVYÝÞÆØǪŒ"].forEach(l=>{let b=document.createElement("button");b.className="abtn";b.textContent=l;b.onclick=()=>browseLetter(l);document.getElementById("ag").appendChild(b)});
 let db=null;(async()=>{try{const S=await initSqlJs({locateFile:f=>`./${f}`});const r=await fetch("./old_norse.db.gz");const buf=await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();db=new S.Database(new Uint8Array(buf));document.getElementById("st").textContent="111,488 Headwords Ready • 100% Offline";document.getElementById("q").disabled=false}catch(e){document.getElementById("st").textContent="Error: "+e.message}})();
-function goHome(){document.getElementById("pnl").style.display="none";document.getElementById("ag").style.display="grid";document.getElementById("hb").style.display="none";document.getElementById("q").value="";document.getElementById("st").textContent="111,488 Headwords Ready • 100% Offline"}
+function goHome(){document.getElementById("bg").classList.remove("open");document.getElementById("pnl").style.display="none";document.getElementById("ag").style.display="flex";document.getElementById("hb").style.display="none";document.getElementById("q").value="";document.getElementById("st").textContent="111,488 Headwords Ready • 100% Offline"}
 function browseLetter(l){if(!db)return;const w=l.toLowerCase(),it=rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE lower(headword) LIKE ? OR lower(headword) LIKE ? ORDER BY sort_key ASC LIMIT 300",[w+"%","-"+w+"%"])).map(x=>({id:x.at(0),hw:x.at(1),pos:x.at(2),g:x.at(3)}));document.getElementById("st").textContent=`Letter ${l} (${it.length} shown)`;renderList(it)}
 function doSearch(){if(!db)return;const raw=document.getElementById("q").value.trim();if(!raw){goHome();return}const n=norm(raw),low=raw.toLowerCase();let s=new Set(),it=[];
 rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE normalized_search LIKE ? ORDER BY length(headword) ASC,sort_key ASC LIMIT 80",[n+"%"])).forEach(x=>{if(!s.has(x.at(0))){s.add(x.at(0));it.push({id:x.at(0),hw:x.at(1),pos:x.at(2),g:x.at(3)})}});
 rows(db.exec("SELECT DISTINCT l.id,l.headword,l.pos,l.gender,w.form FROM wordforms w JOIN lemmas l ON l.id=w.lemma_id WHERE w.normalized_form LIKE ? LIMIT 50",[n+"%"])).forEach(x=>{if(!s.has(x.at(0))){s.add(x.at(0));it.push({id:x.at(0),hw:x.at(1),pos:x.at(2),g:x.at(3),inf:x.at(4)})}});
 if(it.length<25&&low.length>=3)rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE lower(zoega_def) LIKE ? OR lower(cleasby_def) LIKE ? OR lower(onp_def) LIKE ? OR lower(wikt_def) LIKE ? LIMIT 40",["%"+low+"%","%"+low+"%","%"+low+"%","%"+low+"%"])).forEach(x=>{if(!s.has(x.at(0))){s.add(x.at(0));it.push({id:x.at(0),hw:x.at(1),pos:x.at(2),g:x.at(3),eng:1})}});
 document.getElementById("st").textContent=`${it.length} matches for "${raw}"`;renderList(it)}
-function renderList(it){document.getElementById("ag").style.display="none";document.getElementById("hb").style.display="inline-block";const p=document.getElementById("pnl");p.style.display="block";p.scrollTop=0;p.innerHTML=it.length?"":"<div class='imeta'>No matching entries found.</div>";it.forEach(x=>{let d=document.createElement("div");d.className="item";let tag=(x.g||x.pos)?` (${x.g||x.pos})`:"";let via=x.inf?` ← ${x.inf}`:(x.eng?" [English match]":"");d.innerHTML=`<div class="ihw">${x.hw} <span class="imeta">${tag}${via}</span></div>`;d.onclick=()=>showDetail(x.id,x.inf);p.appendChild(d)})}
+function renderList(it){document.getElementById("bg").classList.add("open");document.getElementById("ag").style.display="none";document.getElementById("hb").style.display="inline-block";const p=document.getElementById("pnl");p.style.display="block";p.scrollTop=0;p.innerHTML=it.length?"":"<div class='imeta'>No matching entries found.</div>";it.forEach(x=>{let d=document.createElement("div");d.className="item";let tag=(x.g||x.pos)?` (${x.g||x.pos})`:"";let via=x.inf?` ← ${x.inf}`:(x.eng?" [English match]":"");d.innerHTML=`<div class="ihw">${x.hw} <span class="imeta">${tag}${via}</span></div>`;d.onclick=()=>showDetail(x.id,x.inf);p.appendChild(d)})}
 function showDetail(id,inf){document.getElementById("q").blur();const r=rows(db.exec("SELECT headword,pos,gender,zoega_def,cleasby_def,onp_def,wikt_def,prep_cases FROM lemmas WHERE id=?",[id]));if(!r.length)return;const[hw,pos,g,zg,cl,onp,wk,pc]=r.at(0);let gr={};rows(db.exec("SELECT case_name,number,definiteness,form FROM wordforms WHERE lemma_id=?",[id])).forEach(x=>gr[`${x.at(0)}_${x.at(1)}_${x.at(2)}`]=x.at(3));
 let h=`<div class="dhw">${hw} <span class="imeta">${[pos,g].filter(Boolean).join(" • ")}</span></div><div class="drune">Younger Futhark: ${toRunes(hw)}</div>`;
 if(inf)h+=`<div class="imeta">Matched inflected form: <b>${inf}</b></div>`;
