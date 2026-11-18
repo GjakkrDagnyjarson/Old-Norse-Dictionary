@@ -2,7 +2,7 @@
 
 An offline-first Progressive Web App (PWA) dictionary and grammar analyzer for Old Norse, styled in carved Viking-age oak knotwork.
 
-**Live App:** [https://github.io](https://github.io)
+**Live App:** [https://gjakkrdagnyjarson.github.io/Old-Norse-dictionary/](https://gjakkrdagnyjarson.github.io/Old-Norse-dictionary/)
 
 ## Installation (Offline PWA)
 
