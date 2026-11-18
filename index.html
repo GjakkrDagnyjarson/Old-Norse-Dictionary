@@ -78,7 +78,7 @@ if(!lm.length)lm=rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE l
 let enc="";
 if(!wf.length&&!lm.length){
 const rules=[[/mk$/,"","enclitic -mk (1sg 'me/myself')"],[/mk$/,"a","enclitic -mk (1sg 'me/myself')"],[/sk$/,"","mediopassive -sk ('-self')"],[/sk$/,"a","mediopassive -sk ('-self')"],[/st$/,"","mediopassive -st ('-self')"],[/st$/,"a","mediopassive -st ('-self')"],[/ðu$/,"","enclitic -ðu ('thou')"],[/tu$/,"","enclitic -tu ('thou')"],[/k$/,"","enclitic -k ('I')"]];
-for(const[rx,rep,lbl]of rules){if(rx.test(low)&&low.length>3){let st=low.replace(rx,rep),stAlt=st.replace(/ǫ/g,"ö");
+for(const[rx,rep,lbl]of rules){if(low==="óumk"){l2=rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE lower(headword) IN ('óask','óast','óa') LIMIT 4"));if(l2.length){lm=l2;enc="1sg mediopassive/enclitic -mk ('I fear')";break}}if(rx.test(low)&&low.length>3){let st=low.replace(rx,rep),stAlt=st.replace(/ǫ/g,"ö");
 let w2=rows(db.exec("SELECT l.id,l.headword,l.pos,l.gender,w.case_name,w.number,w.definiteness FROM wordforms w JOIN lemmas l ON l.id=w.lemma_id WHERE lower(w.form) IN (?,?) LIMIT 8",[st,stAlt]));
 let l2=rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE lower(headword) IN (?,?,?,?) LIMIT 4",[st,stAlt,st+"ask",st+"ast"]));
 if(w2.length||l2.length){wf=w2;lm=l2;enc=lbl;break}}}}
