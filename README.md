@@ -3,7 +3,7 @@
 A fast, zero-tracking, **100% offline** Old Norse dictionary and morphological reference web app combining **111,488 headwords** across four major scholarly lexicons.
 
 ## Launch & Install Offline (iPhone, iPad, Android, Mac, Windows)
-* **Open App:** [**https://github.io**](https://github.io)
+* **Open App:** [**https://gjakkrdagnyjarson.github.io/Old-Norse-dictionary/**](https://gjakkrdagnyjarson.github.io/Old-Norse-dictionary/)
 * **Install for 100% Offline Use:**
   * **iPhone / iPad (Safari):** Tap **Share** → **Add to Home Screen**.
   * **Android (Chrome):** Tap **⋮** → **Add to Home screen** / **Install app**.
