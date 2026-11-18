@@ -6,3 +6,8 @@ if(gr.PRES_1SG_VERB){h+=`<div class="sec">VERB CONJUGATION TABLE</div><table><tr
 [["ZOËGA (1910)",zg],["CLEASBY & VIGFÚSSON (1874)",cl],["ONP — UNIV. OF COPENHAGEN (CC BY-SA 4.0)",onp],["WIKTIONARY (CC BY-SA 4.0)",wk]].forEach(([t,tx])=>{if(tx&&tx.trim())h+=`<div class="sec">${t}</div><div class="def">${tx.trim()}</div>`});
 const p=document.getElementById("pnl");p.innerHTML=h;p.scrollTop=0}
 </script></body></html>
+if(gr.NOM_SG_INDEF){h+=`<div class="sec">4-CASE DECLENSION TABLE</div><table><tr><th>Case</th><th>Sg Indef</th><th>Sg Def</th><th>Pl Indef</th><th>Pl Def</th></tr>`;["NOM","ACC","DAT","GEN"].forEach(c=>h+=`<tr><th>${c}</th><td>${gr[c+"_SG_INDEF"]||"-"}</td><td>${gr[c+"_SG_DEF"]||"-"}</td><td>${gr[c+"_PL_INDEF"]||"-"}</td><td>${gr[c+"_PL_DEF"]||"-"}</td></tr>`);h+=`</table>`}
+if(gr.PRES_1SG_VERB){h+=`<div class="sec">VERB CONJUGATION TABLE</div><table><tr><th>Person</th><th>Present</th><th>Past</th></tr>`;[["1sg (ek)","1SG"],["2sg (þú)","2SG"],["3sg (hann/hún)","3SG"],["1pl (vér)","1PL"],["2pl (þér)","2PL"],["3pl (þeir)","3PL"]].forEach(([l,k])=>h+=`<tr><th>${l}</th><td>${gr["PRES_"+k+"_VERB"]||"-"}</td><td>${gr["PAST_"+k+"_VERB"]||"-"}</td></tr>`);if(gr.PART_PP_VERB)h+=`<tr><th>Past Part.</th><td colspan="2">${gr.PART_PP_VERB}</td></tr>`;h+=`</table>`}
+[["ZOËGA (1910)",zg],["CLEASBY & VIGFÚSSON (1874)",cl],["ONP — UNIV. OF COPENHAGEN (CC BY-SA 4.0)",onp],["WIKTIONARY (CC BY-SA 4.0)",wk]].forEach(([t,tx])=>{if(tx&&tx.trim())h+=`<div class="sec">${t}</div><div class="def">${tx.trim()}</div>`});
+const p=document.getElementById("pnl");p.innerHTML=h;p.scrollTop=0}
+</script></body></html>
