@@ -82,6 +82,36 @@ for(const[rx,rep,lbl]of rules){if(low==="óumk"){l2=rows(db.exec("SELECT id,head
 let w2=rows(db.exec("SELECT l.id,l.headword,l.pos,l.gender,w.case_name,w.number,w.definiteness FROM wordforms w JOIN lemmas l ON l.id=w.lemma_id WHERE lower(w.form) IN (?,?) LIMIT 8",[st,stAlt]));
 let l2=rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE lower(headword) IN (?,?,?,?) LIMIT 4",[st,stAlt,st+"ask",st+"ast"]));
 if(w2.length||l2.length){wf=w2;lm=l2;enc=lbl;break}}}}
+if(!wf.length && !lm.length && l.length>3){
+  const irules=[
+    [/rum$/,"r","DAT PL (syncopated)"],[/ra$/,"r","GEN PL (syncopated)"],[/ri$/,"r","DAT SG (syncopated)"],
+    [/num$/,"inn","DAT PL / DAT SG M (syncopated)"],[/nir$/,"inn","NOM PL M (syncopated)"],[/na$/,"inn","ACC PL M / FEM (syncopated)"],
+    [/nt$/,"nn","NOM/ACC SG NEUT"],
+    [/uðum$/,"a","PAST PART DAT PL"],[/uðum$/,"aðr","PAST PART DAT PL"],
+    [/aðan$/,"a","PAST PART ACC SG M"],[/aða$/,"a","PAST PART FEM/PL"],[/aðir$/,"a","PAST PART NOM PL M"],
+    [/ir$/,"ja","PRES 2/3SG"],[/ir$/,"a","PRES 2/3SG"],[/i$/,"ja","PAST / SUBJ"],[/i$/,"a","PAST / SUBJ"],
+    [/ði$/,"ja","PAST 1/3SG"],[/ði$/,"a","PAST 1/3SG"],[/ðu$/,"ja","PAST 3PL"],[/ðu$/,"a","PAST 3PL"],
+    [/ti$/,"ta","PAST 1/3SG"],[/tu$/,"ta","PAST 3PL"],
+    [/ar$/,"a","NOM/ACC PL"],[/ur$/,"a","NOM/ACC PL"],[/u$/,"a","OBL SG"],
+    [/um$/,"r","DAT PL"],[/um$/,"a","DAT PL"],[/um$/,"i","DAT PL"],[/um$/,"","DAT PL"],
+    [/ar$/,"r","GEN SG / NOM PL"],[/ar$/,"","GEN SG / NOM PL"],
+    [/ir$/,"r","NOM/ACC PL"],[/ir$/,"","NOM/ACC PL"],
+    [/a$/,"i","OBL SG / GEN PL"],[/a$/,"","GEN PL"],[/i$/,"r","DAT SG"],[/i$/,"","DAT SG"],[/s$/,"r","GEN SG"],[/s$/,"","GEN SG"]
+  ];
+  for(const [rx,rep,tag] of irules){
+    if(rx.test(l)){
+      const cand=l.replace(rx,rep);
+      if(cand.length>=2){
+        let res=db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE lower(headword)=? LIMIT 4",[cand]);
+        if(res.length){
+          lm=res.at(0).values;
+          enc=enc?enc+" • "+tag:tag;
+          break;
+        }
+      }
+    }
+  }
+}
 return{word:w,low,wf,lm,enc}}
 
 function runGrammar(){if(!db)return;const raw=document.getElementById("gs").value.trim();lastSent=raw;const out=document.getElementById("gout");if(!raw){out.innerHTML="";return}const toks=raw.replace(/[.,!?;:"'()]/g,"").split(/\s+/).filter(Boolean);
