@@ -1,4 +1,4 @@
-# ᚢ·ᚾ·ᛏ Old Norse Dictionary (v1.2) — By Gjakkr Dagnýjarson
+# ᚢ·ᚾ·ᛏ Old Norse Dictionary (v1.5) — By Gjakkr Dagnýjarson
 
 A fast, zero-tracking, **100% offline** Old Norse dictionary and morphological reference web app combining **111,488 headwords** across four major scholarly lexicons.
 
