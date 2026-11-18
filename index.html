@@ -41,7 +41,7 @@ th{color:#F5B82E;background:rgba(58,37,21,.65)}
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
 const YF={a:'ᛅ',á:'ᛅ',b:'ᛒ',c:'ᚴ',d:'ᛏ',ð:'ᚦ',e:'ᛁ',é:'ᛁ',f:'ᚠ',g:'ᚴ',h:'ᚼ',i:'ᛁ',í:'ᛁ',j:'ᛁ',k:'ᚴ',l:'ᛚ',m:'ᛘ',n:'ᚾ',o:'ᚢ',ó:'ᚢ',p:'ᛒ',q:'ᚴ',r:'ᚱ',s:'ᛋ',t:'ᛏ',u:'ᚢ',ú:'ᚢ',v:'ᚢ',w:'ᚢ',x:'ᚴᛋ',y:'ᚢ',ý:'ᚢ',z:'ᛋ',þ:'ᚦ',æ:'ᛅ',ǽ:'ᛅ',ø:'ᚢ',ǫ:'ᚢ',œ:'ᚢ',ö:'ᚢ'};
 function toRunes(s){let o=[];for(let c of s.toLowerCase()){if(YF[c]){let r=YF[c];if(o[o.length-1]!==r)o.push(r)}else if(c===' '||c==='-')o.push('·')}return o.join('')}
-function norm(t){t=t.toLowerCase().trim();const m={ð:'d',þ:'th',æ:'ae',ǽ:'ae',œ:'oe',ø:'o',ǫ:'o',ö:'o',á:'a',é:'e',í:'i',ó:'o',ú:'u',ý:'y'};return t.replace(/[ðþæǽœøǫöáéíóúý]/g,c=>m[c]||c).normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+function norm(t){t=t.toLowerCase().trim();const m={ð:'d',þ:'th',æ:'ae',ǽ:'aee',œ:'oe',ø:'o',ǫ:'o',ö:'o',á:'a',é:'e',í:'i',ó:'o',ú:'u',ý:'y'};return t.replace(/[ðþæǽœøǫöáéíóúý]/g,c=>m[c]||c).normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
 function rows(res){return(res&&res.length)?res.at(0).values:[]}
 ["á","ð","é","í","ó","ú","ý","þ","æ","ø","ǫ","œ"].forEach(c=>{let b=document.createElement("button");b.className="cbtn";b.textContent=c;b.onclick=()=>{let i=document.getElementById("q");i.value+=c;i.focus();doSearch()};void 0});
 [..."AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVYÝÞÆǼØǪŒ"].forEach(l=>{let b=document.createElement("button");b.className="abtn";b.textContent=l;b.onclick=()=>browseLetter(l);document.getElementById("ag").appendChild(b)});
