@@ -1,219 +1,32 @@
-<!DOCTYPE html><html lang="en"><head>
-<link rel="preload" href="./sql-wasm.wasm" as="fetch" crossorigin>
-<link rel="preload" href="./old_norse.db.gz" as="fetch" crossorigin>
-
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0"><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#140D08">
-<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon.png">
-<title>Old Norse Dictionary (ᚢ·ᚾ·ᛏ) v2.1</title><style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;background:#140D08;color:#F5E3C6;font-family:Georgia,serif;overflow:hidden}
-.bg{position:fixed;inset:0;width:100%;background:url('./bg_norse.jpg') no-repeat center center;background-size:100% 100%;display:flex;flex-direction:column;padding:37vh 36px 46px}
-.bg.open{padding-top:11vh}.title{text-align:center;font-size:17px;font-weight:bold;letter-spacing:1.2px;color:#FFF5E0;text-shadow:0 2px 6px #000;margin-bottom:8px;flex-shrink:0}
-.srow{display:flex;gap:6px;margin-bottom:6px;flex-shrink:0}
-.sbox{flex:1;min-width:0;padding:10px 12px;border-radius:10px;border:1.5px solid #8A6236;background:rgba(20,12,7,.92);color:#FFF8EA;font-size:15px;font-family:sans-serif;outline:none}
-.hbtn{flex-shrink:0;padding:0 12px;border-radius:10px;border:1.5px solid #8A6236;background:#3A2515;color:#F5E3C6;font-weight:bold;font-size:13px;cursor:pointer;display:none}
-.cbar{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-bottom:6px;flex-shrink:0}
-.cbtn{background:rgba(48,30,17,.94);color:#F5E3C6;border:1px solid #7A542E;border-radius:6px;padding:4px 7px;font-size:13px;font-weight:bold;cursor:pointer}
-.stat{text-align:center;font-size:12px;color:#F5B82E;text-shadow:0 1px 4px #000;margin-bottom:6px;flex-shrink:0}
-.agrid{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;width:100%;margin-bottom:8px;flex-shrink:0}
-.abtn{width:calc(11.11% - 4px);background:rgba(28,17,10,.9);border:1.2px solid #6E4A26;border-radius:9px;padding:7px 0;color:#FFF4DC;font-size:13px;font-weight:bold;font-family:Georgia,serif;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.6)}
-.abtn:active,.cbtn:active,.hbtn:active{background:#633F22}
-.panel{flex:1;width:100%;background:rgba(18,11,6,.94);border:1.5px solid #7A542E;border-radius:12px;padding:12px;overflow-y:auto;overflow-x:hidden;display:none;margin-bottom:6px}
-.item{padding:9px 6px;border-bottom:1px solid rgba(138,98,54,.35);cursor:pointer}
-.ihw{font-size:17px;font-weight:bold;color:#F5B82E}
-.imeta{font-size:12px;color:#D8BE96;font-family:sans-serif}
-.dhw{font-size:23px;font-weight:bold;color:#F5B82E;display:flex;justify-content:space-between;align-items:center;gap:8px}.rbtn{padding:4px 12px;font-size:16px;line-height:1;border-radius:8px;border:1.2px solid #8A6236;background:#3A2515;color:#F5E3C6;font-weight:bold;font-size:12px;font-family:sans-serif;cursor:pointer;flex-shrink:0}.rbtn:active{background:#633F22}
-.drune{font-size:17px;color:#E0B256;margin:3px 0 6px}
-.sec{font-size:11px;font-weight:bold;letter-spacing:.7px;color:#F5B82E;font-family:sans-serif;margin:11px 0 4px;border-bottom:1px solid rgba(245,184,46,.3);padding-bottom:2px}
-.prep{background:rgba(42,72,38,.5);border:1px solid #6DA865;border-radius:8px;padding:8px 10px;font-size:13px;color:#CCFFCA;font-family:sans-serif}
-table{width:100%;border-collapse:collapse;font-size:9px;margin-top:4px;font-family:sans-serif}th,td{border:1px solid rgba(138,98,54,.45);padding:2.5px 1.5px;text-align:left}
-th{color:#F5B82E;background:rgba(58,37,21,.65)}
-.def{font-size:13.5px;line-height:1.45;color:#F5E8D0;white-space:pre-wrap}
-.foot{text-align:center;font-size:11.5px;color:#F5E3C6;text-shadow:0 2px 5px #000;line-height:1.35;flex-shrink:0;padding-top:4px}
-.gbtn{color:#F5B82E;border-color:#A8793E}.warn{background:rgba(92,38,24,.6);border:1px solid #D97459;border-radius:8px;padding:8px 10px;font-size:13px;color:#FFD6CC;font-family:sans-serif;margin-bottom:5px}.garea{width:100%;min-height:74px;padding:9px;border-radius:8px;border:1.2px solid #8A6236;background:rgba(28,17,10,.95);color:#FFF8EA;font-size:14.5px;font-family:Georgia,serif;outline:none;resize:vertical;margin-bottom:6px}.gact{width:100%;padding:9px;border-radius:8px;border:1.2px solid #A8793E;background:#4A2F19;color:#F5B82E;font-weight:bold;font-size:13.5px;font-family:sans-serif;cursor:pointer;margin-bottom:8px}.wcard{padding:7px 8px;border:1px solid rgba(138,98,54,.4);border-radius:8px;margin-bottom:5px;background:rgba(28,17,10,.7);cursor:pointer}</style><script src="./sql-wasm.js"></script></head><body><div class="bg" id="bg">
-<div class="title">OLD NORSE DICTIONARY</div>
-<div class="srow"><button id="hb" class="hbtn" onclick="goHome()">Home</button><input id="q" class="sbox" type="text" placeholder="Search Old Norse, inflected, or English..." disabled oninput="doSearch()"></div>
-
-<div class="stat" id="st">Loading 111,488 entries...</div>
-<div class="agrid" id="ag"></div>
-<div class="panel" id="pnl"></div>
-<div class="foot">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary<br>(CC BY-SA 4.0)<br>Version 2.4</div>
-</div><script>
-if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
-const YF={a:'ᛅ',á:'ᛅ',b:'ᛒ',c:'ᚴ',d:'ᛏ',ð:'ᚦ',e:'ᛁ',é:'ᛁ',f:'ᚠ',g:'ᚴ',h:'ᚼ',i:'ᛁ',í:'ᛁ',j:'ᛁ',k:'ᚴ',l:'ᛚ',m:'ᛘ',n:'ᚾ',o:'ᚢ',ó:'ᚢ',p:'ᛒ',q:'ᚴ',r:'ᚱ',s:'ᛋ',t:'ᛏ',u:'ᚢ',ú:'ᚢ',v:'ᚢ',w:'ᚢ',x:'ᚴᛋ',y:'ᚢ',ý:'ᚢ',z:'ᛋ',þ:'ᚦ',æ:'ᛅ',ǽ:'ᛅ',ø:'ᚢ',ǫ:'ᚢ',œ:'ᚢ',ö:'ᚢ'};
-function toRunes(s){let o=[];for(let c of s.toLowerCase()){if(YF[c]){let r=YF[c];if(o[o.length-1]!==r)o.push(r)}else if(c===' '||c==='-')o.push('·')}return o.join('')}
-function norm(t){t=t.toLowerCase().trim();const m={ð:'d',þ:'th',æ:'ae',ǽ:'aee',œ:'oe',ø:'o',ǫ:'o',ö:'o',á:'a',é:'e',í:'i',ó:'o',ú:'u',ý:'y'};return t.replace(/[ðþæǽœøǫöáéíóúý]/g,c=>m[c]||c).normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
-function rows(res){return(res&&res.length)?res.at(0).values:[]}
-["á","ð","é","í","ó","ú","ý","þ","æ","ø","ǫ","œ"].forEach(c=>{let b=document.createElement("button");b.className="cbtn";b.textContent=c;b.onclick=()=>{let i=document.getElementById("q");i.value+=c;i.focus();doSearch()};void 0});
-[..."AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVYÝÞÆǼØǪŒ"].forEach(l=>{let b=document.createElement("button");b.className="abtn";b.textContent=l;b.onclick=()=>browseLetter(l);document.getElementById("ag").appendChild(b)});
-let db=null,lastMode="list",lastList=[],lastScroll=0,lastSent="";
-function loadCachedDb(){
-  return new Promise(resolve=>{
-    try{
-      const req=indexedDB.open("OldNorseCache",1);
-      req.onupgradeneeded=()=>req.result.createObjectStore("files");
-      req.onsuccess=()=>{
-        const tx=req.result.transaction("files","readonly");
-        const g=tx.objectStore("files").get("old_norse_db_v3");
-        g.onsuccess=()=>resolve(g.result||null);
-        g.onerror=()=>resolve(null);
-      };
-      req.onerror=()=>resolve(null);
-    }catch(_){resolve(null);}
-  });
-}
-function saveCachedDb(bytes){
-  try{
-    const req=indexedDB.open("OldNorseCache",1);
-    req.onupgradeneeded=()=>req.result.createObjectStore("files");
-    req.onsuccess=()=>{
-      const tx=req.result.transaction("files","readwrite");
-      tx.objectStore("files").put(bytes,"old_norse_db_v3");
-    };
-  }catch(_){}
-}
-(async()=>{
-  try{
-    const st=document.getElementById("st");
-    const [S,cached]=await Promise.all([
-      initSqlJs({locateFile:f=>`./${f}`}),
-      loadCachedDb()
-    ]);
-    let bytes=cached;
-    if(!bytes){
-      st.textContent="Downloading dictionary (first time only)...";
-      const r=await fetch("./old_norse.db.gz");
-      const buf=await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
-      bytes=new Uint8Array(buf);
-      saveCachedDb(bytes);
-    }
-    db=new S.Database(bytes);
-    st.textContent="111,488 Headwords Ready • 100% Offline";
-    document.getElementById("q").disabled=false;
-  }catch(e){
-    document.getElementById("st").textContent="Error: "+e.message;
-  }
-})();
-function goHome(){document.getElementById("bg").classList.remove("open");document.getElementById("pnl").style.display="none";document.getElementById("ag").style.display="flex";document.getElementById("hb").style.display="none";document.getElementById("q").value="";document.getElementById("st").textContent="111,488 Headwords Ready • 100% Offline"}
-function browseLetter(l){if(!db)return;const w=l.toLowerCase(),u=l.toUpperCase(),it=rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE headword LIKE ? OR headword LIKE ? OR headword LIKE ? OR headword LIKE ? ORDER BY sort_key ASC",[w+"%",u+"%","-"+w+"%","-"+u+"%"])).map(x=>({id:x.at(0),hw:x.at(1),pos:x.at(2),g:x.at(3)}));document.getElementById("st").textContent=`Letter ${l} (${Math.min(200, it.length)} of ${it.length} shown)`;renderList(it)}
-function doSearch(){if(!db)return;const raw=document.getElementById("q").value.trim();if(!raw){goHome();return}const low=raw.toLowerCase(),up=raw.toUpperCase();let s=new Set(),it=[];
-rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE headword LIKE ? OR headword LIKE ? ORDER BY length(headword) ASC,sort_key ASC LIMIT 80",[low+"%",up+"%"])).forEach(x=>{if(!s.has(x.at(0))){s.add(x.at(0));it.push({id:x.at(0),hw:x.at(1),pos:x.at(2),g:x.at(3)})}});
-rows(db.exec("SELECT DISTINCT l.id,l.headword,l.pos,l.gender,w.form FROM wordforms w JOIN lemmas l ON l.id=w.lemma_id WHERE w.form LIKE ? OR w.form LIKE ? LIMIT 50",[low+"%",up+"%"])).forEach(x=>{if(!s.has(x.at(0))){s.add(x.at(0));it.push({id:x.at(0),hw:x.at(1),pos:x.at(2),g:x.at(3),inf:x.at(4)})}});
-if(it.length<5&&low.length>=3&&!/[áéíóúýæǽøǫœðþ]/i.test(low)){const rx=new RegExp("\\b"+low.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","i");rows(db.exec("SELECT id,headword,pos,gender,zoega_def,cleasby_def,wikt_def FROM lemmas WHERE lower(zoega_def) LIKE ? OR lower(cleasby_def) LIKE ? OR lower(wikt_def) LIKE ? LIMIT 80",["%"+low+"%","%"+low+"%","%"+low+"%"])).forEach(x=>{if(!s.has(x.at(0))&&rx.test((x.at(4)||"")+" "+(x.at(5)||"")+" "+(x.at(6)||""))){s.add(x.at(0));it.push({id:x.at(0),hw:x.at(1),pos:x.at(2),g:x.at(3),eng:1})}})}
-document.getElementById("st").textContent=`${it.length} matches for "${raw}"`;renderList(it)}
-function goBack(){if(lastMode==="grammar"){openGrammar(lastSent,true)}else{renderList(lastList);document.getElementById("pnl").scrollTop=lastScroll}}function renderList(it){lastMode="list";lastList=it;document.getElementById("bg").classList.add("open");document.getElementById("ag").style.display="none";document.getElementById("hb").style.display="inline-block";const p=document.getElementById("pnl");p.style.display="block";p.scrollTop=0;p.innerHTML=it.length?"":'<div class="eta">No matching entries found.</div>';let idx=0;function addChunk(){const frag=document.createDocumentFragment();it.slice(idx,idx+200).forEach(x=>{let d=document.createElement("div");d.className="item";let tag=(x.g||x.pos)?`(${x.g||x.pos})`:"";let via=x.inf?` - ${x.inf}`:(x.eng?" [English match]":"");d.innerHTML=`<div class="ihw">${x.hw} <span class="imeta">${tag}${via}</span></div>`;d.onclick=()=>showDetail(x.id,x.inf);frag.appendChild(d)});p.appendChild(frag);idx+=200;const st=document.getElementById("st");if(st&&st.textContent.startsWith("Letter "))st.textContent=st.textContent.replace(/\(\d+ of \d+ shown\)/,`(${Math.min(idx,it.length)} of ${it.length} shown)`)}addChunk();p.onscroll=()=>{if(idx<it.length&&p.scrollTop+p.clientHeight>=p.scrollHeight-200)addChunk()}}
-function showDetail(id,inf){if(lastMode==="list")lastScroll=document.getElementById("pnl").scrollTop;document.getElementById("q").blur();const r=rows(db.exec("SELECT headword,pos,gender,zoega_def,cleasby_def,onp_def,wikt_def,prep_cases FROM lemmas WHERE id=?",[id]));if(!r.length)return;const[hw,pos,g,zg,cl,onp,wk,pc]=r.at(0);let gr={};rows(db.exec("SELECT case_name,number,definiteness,form FROM wordforms WHERE lemma_id=?",[id])).forEach(x=>gr[`${x.at(0)}_${x.at(1)}_${x.at(2)}`]=x.at(3));
-let h=`<div class="dhw"><span>${hw} <span class="imeta">${[pos,g].filter(Boolean).join(" • ")}</span></span><button class="rbtn" onclick="goBack()" aria-label="Back to results">←</button></div><div class="drune">Younger Futhark: ${toRunes(hw)}</div>`;
-if(inf)h+=`<div class="imeta">Matched inflected form: <b>${inf}</b></div>`;
-if(pc)h+=`<div class="sec">PREPOSITION CASE GOVERNMENT (STJÓRN)</div><div class="prep">${pc}</div>`;
-if(gr.NOM_SG_INDEF){h+=`<div class="sec">4-CASE DECLENSION TABLE</div><div style="overflow-x:auto;width:100%"><table><tr><th>Case</th><th>Sg Indef</th><th>Sg Def</th><th>Pl Indef</th><th>Pl Def</th></tr>`;["NOM","ACC","DAT","GEN"].forEach(c=>h+=`<tr><th>${c}</th><td>${gr[c+"_SG_INDEF"]||"-"}</td><td>${gr[c+"_SG_DEF"]||"-"}</td><td>${gr[c+"_PL_INDEF"]||"-"}</td><td>${gr[c+"_PL_DEF"]||"-"}</td></tr>`);h+=`</table></div>`}
-if(gr.PRES_1SG_VERB){h+=`<div class="sec">VERB CONJUGATION TABLE</div><div style="overflow-x:auto;width:100%"><table><tr><th>Person</th><th>Present</th><th>Past</th></tr>`;[["1sg (ek)","1SG"],["2sg (þú)","2SG"],["3sg (hann/hún)","3SG"],["1pl (vér)","1PL"],["2pl (þér)","2PL"],["3pl (þeir)","3PL"]].forEach(([l,k])=>h+=`<tr><th>${l}</th><td>${gr["PRES_"+k+"_VERB"]||"-"}</td><td>${gr["PAST_"+k+"_VERB"]||"-"}</td></tr>`);if(gr.PART_PP_VERB)h+=`<tr><th>Past Part.</th><td colspan="2">${gr.PART_PP_VERB}</td></tr>`;h+=`</table></div>`}
-[["ZOËGA (1910)",zg],["CLEASBY & VIGFÚSSON (1874)",cl],["ONP — UNIV. OF COPENHAGEN (CC BY-SA 4.0)",onp],["WIKTIONARY (CC BY-SA 4.0)",wk]].forEach(([t,tx])=>{if(tx&&tx.trim())h+=`<div class="sec">${t}</div><div class="def">${tx.trim()}</div>`});
-const p=document.getElementById("pnl");p.innerHTML=h;p.scrollTop=0}
-
-const PREPS={til:["GEN"],frá:["DAT"],af:["DAT"],at:["DAT"],ór:["DAT"],úr:["DAT"],hjá:["DAT"],mót:["DAT"],móti:["DAT"],um:["ACC"],gegnum:["ACC"],umhverfis:["ACC"],án:["GEN"],auk:["GEN"],milli:["GEN"],millum:["GEN"],á:["ACC","DAT"],í:["ACC","DAT"],með:["ACC","DAT"],við:["ACC","DAT"],fyrir:["ACC","DAT"],undir:["ACC","DAT"],yfir:["ACC","DAT"],eptir:["ACC","DAT"],eftir:["ACC","DAT"]};
-const PRON={ek:"1SG",eg:"1SG",þú:"2SG",hann:"3SG",hún:"3SG",þat:"3SG",vér:"1PL",þér:"2PL",þeir:"3PL",þær:"3PL",þau:"3PL"};
-function openGrammar(prefill,auto){lastMode="grammar";document.getElementById("bg").classList.add("open");document.getElementById("ag").style.display="none";document.getElementById("hb").style.display="inline-block";document.getElementById("st").textContent="Sentence & Grammar Analyzer (100% Offline)";const p=document.getElementById("pnl");p.style.display="block";p.innerHTML=`<div class="sec" style="margin-top:0">OLD NORSE GRAMMAR &amp; Case Government</button><div id="gout"></div>`;
-function lookupWord(w){
-const low=w.toLowerCase(),alt=low.replace(/ǫ/g,"ö"),vars=[...new Set([low,alt,w])];
-const IRR_FORMS={
-  "æsir":[[0,"áss","noun","m","NOM","PL","INDEF"]],
-  "æsi":[[0,"áss","noun","m","ACC","PL","INDEF"]],
-  "ása":[[0,"áss","noun","m","GEN","PL","INDEF"]],
-  "ásum":[[0,"áss","noun","m","DAT","PL","INDEF"]],
-  "megi":[[0,"mega","verb","","","3SG/3PL","PRES SUBJ"]],
-  "má":[[0,"mega","verb","","","1SG/3SG","PRES IND"]],
-  "mátt":[[0,"mega","verb","","","2SG","PRES IND"]],
-  "megum":[[0,"mega","verb","","","1PL","PRES IND"]],
-  "meguð":[[0,"mega","verb","","","2PL","PRES IND"]],
-  "megu":[[0,"mega","verb","","","3PL","PRES IND"]],
-  "mátti":[[0,"mega","verb","","","1SG/3SG","PAST IND"]],
-  "máttu":[[0,"mega","verb","","","3PL","PAST IND"]],
-  "vera":[[0,"vera","verb","","","INF","PRES INF"]],
-  "er":[[0,"vera","verb","","","1SG/3SG","PRES IND"]],
-  "ert":[[0,"vera","verb","","","2SG","PRES IND"]],
-  "erum":[[0,"vera","verb","","","1PL","PRES IND"]],
-  "eruð":[[0,"vera","verb","","","2PL","PRES IND"]],
-  "eru":[[0,"vera","verb","","","3PL","PRES IND"]],
-  "sé":[[0,"vera","verb","","","1SG/3SG","PRES SUBJ"]],
-  "sér":[[0,"vera","verb","","","2SG","PRES SUBJ"]],
-  "sém":[[0,"vera","verb","","","1PL","PRES SUBJ"]],
-  "séð":[[0,"vera","verb","","","2PL","PRES SUBJ"]],
-  "séu":[[0,"vera","verb","","","3PL","PRES SUBJ"]],
-  "var":[[0,"vera","verb","","","1SG/3SG","PAST IND"]],
-  "váru":[[0,"vera","verb","","","3PL","PAST IND"]],
-  "menn":[[0,"maðr","noun","m","NOM/ACC","PL","INDEF"]],
-  "manna":[[0,"maðr","noun","m","GEN","PL","INDEF"]],
-  "mönnum":[[0,"maðr","noun","m","DAT","PL","INDEF"]],
-  "bækr":[[0,"bók","noun","f","NOM/ACC","PL","INDEF"]],
-  "hendr":[[0,"hönd","noun","f","NOM/ACC","PL","INDEF"]],
-  "fætr":[[0,"fótr","noun","m","NOM/ACC","PL","INDEF"]],
-  "feðr":[[0,"faðir","noun","m","NOM/ACC/GEN/DAT","SG/PL","INDEF"]],
-  "bræðr":[[0,"bróðir","noun","m","NOM/ACC/GEN/DAT","SG/PL","INDEF"]]
-};
-if(Object.prototype.hasOwnProperty.call(IRR_FORMS,low)){
-  const entries=Reflect.get(IRR_FORMS,low);
-  const hits=entries.map(r=>{
-    const hw=r.at(1);
-    const l=db.exec("SELECT id FROM lemmas WHERE lower(headword)=? LIMIT 1",[hw]);
-    const lid=l.length&&l.at(0).values.length?l.at(0).values.at(0).at(0):0;
-    return [lid,r.at(1),r.at(2),r.at(3),r.at(4),r.at(5),r.at(6)];
-  });
-  return {word:w,low,mf:hits,enc:""};
-};
-};
-}
-let wf=[],lm=[];
-vars.forEach(v=>{
-if(!wf.length)wf=rows(db.exec("SELECT l.id,l.headword,l.pos,l.gender,w.case_name,w.number,w.definiteness FROM wordforms w JOIN lemmas l ON l.id=w.lemma_id WHERE lower(w.form)=? OR w.form=? LIMIT 60",[v,v]));
-});
-vars.forEach(v=>{
-if(!lm.length)lm=rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE lower(headword)=? OR headword=? LIMIT 4",[v,v]));
-});
-let enc="";
-if(!wf.length&&!lm.length){
-const rules=[[/mk$/,"","enclitic -mk (1sg 'me/myself')"],[/mk$/,"a","enclitic -mk (1sg 'me/myself')"],[/sk$/,"","mediopassive -sk ('-self')"],[/sk$/,"a","mediopassive -sk ('-self')"],[/st$/,"","mediopassive -st ('-self')"],[/st$/,"a","mediopassive -st ('-self')"],[/ðu$/,"","enclitic -ðu ('thou')"],[/tu$/,"","enclitic -tu ('thou')"],[/k$/,"","enclitic -k ('I')"]];
-for(const[rx,rep,lbl]of rules){if(low==="óumk"){l2=rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE lower(headword) IN ('óask','óast','óa') LIMIT 4"));if(l2.length){lm=l2;enc="1sg mediopassive/enclitic -mk ('I fear')";break}}if(rx.test(low)&&low.length>3){let st=low.replace(rx,rep),stAlt=st.replace(/ǫ/g,"ö");
-let w2=rows(db.exec("SELECT l.id,l.headword,l.pos,l.gender,w.case_name,w.number,w.definiteness FROM wordforms w JOIN lemmas l ON l.id=w.lemma_id WHERE lower(w.form) IN (?,?) LIMIT 8",[st,stAlt]));
-let l2=rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE lower(headword) IN (?,?,?,?) LIMIT 4",[st,stAlt,st+"ask",st+"ast"]));
-if(w2.length||l2.length){wf=w2;lm=l2;enc=lbl;break}}}}
-if(!wf.length && !lm.length && l.length>3){
-  const irules=[
-    [/rum$/,"r","DAT PL (syncopated)"],[/ra$/,"r","GEN PL (syncopated)"],[/ri$/,"r","DAT SG (syncopated)"],
-    [/num$/,"inn","DAT PL / DAT SG M (syncopated)"],[/nir$/,"inn","NOM PL M (syncopated)"],[/na$/,"inn","ACC PL M / FEM (syncopated)"],
-    [/nt$/,"nn","NOM/ACC SG NEUT"],
-    [/uðum$/,"a","PAST PART DAT PL"],[/uðum$/,"aðr","PAST PART DAT PL"],
-    [/aðan$/,"a","PAST PART ACC SG M"],[/aða$/,"a","PAST PART FEM/PL"],[/aðir$/,"a","PAST PART NOM PL M"],
-    [/ir$/,"ja","PRES 2/3SG"],[/ir$/,"a","PRES 2/3SG"],[/i$/,"ja","PAST / SUBJ"],[/i$/,"a","PAST / SUBJ"],
-    [/ði$/,"ja","PAST 1/3SG"],[/ði$/,"a","PAST 1/3SG"],[/ðu$/,"ja","PAST 3PL"],[/ðu$/,"a","PAST 3PL"],
-    [/ti$/,"ta","PAST 1/3SG"],[/tu$/,"ta","PAST 3PL"],
-    [/ar$/,"a","NOM/ACC PL"],[/ur$/,"a","NOM/ACC PL"],[/u$/,"a","OBL SG"],
-    [/um$/,"r","DAT PL"],[/um$/,"a","DAT PL"],[/um$/,"i","DAT PL"],[/um$/,"","DAT PL"],
-    [/ar$/,"r","GEN SG / NOM PL"],[/ar$/,"","GEN SG / NOM PL"],
-    [/ir$/,"r","NOM/ACC PL"],[/ir$/,"","NOM/ACC PL"],
-    [/a$/,"i","OBL SG / GEN PL"],[/a$/,"","GEN PL"],[/i$/,"r","DAT SG"],[/i$/,"","DAT SG"],[/s$/,"r","GEN SG"],[/s$/,"","GEN SG"]
-  ];
-  for(const [rx,rep,tag] of irules){
-    if(rx.test(l)){
-      const cand=l.replace(rx,rep);
-      if(cand.length>=2){
-        let res=db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE lower(headword)=? LIMIT 4",[cand]);
-        if(res.length){
-          lm=res.at(0).values;
-          enc=enc?enc+" • "+tag:tag;
-          break;
-        }
-      }
-    }
-  }
-}
-return{word:w,low,wf,lm,enc}}
-
-
-</script><script>if("serviceWorker"in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));}</script>
-</body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>Old Norse Dictionary</title>
+  <link rel="icon" href="./icon.png" />
+  <link rel="preload" href="./sql-wasm.wasm" as="fetch" crossorigin />
+  <link rel="preload" href="./old_norse.db.gz" as="fetch" crossorigin />
+  <link rel="stylesheet" href="./style.css?v=3.0" />
+  <script src="./sql-wasm.js"></script>
+</head>
+<body>
+  <div class="bg" id="bg">
+    <div class="title">OLD NORSE DICTIONARY</div>
+    <div class="srow">
+      <button id="hb" class="hbtn">Home</button>
+      <input id="q" class="sbox" type="text" placeholder="Search Old Norse, inflected, or English..." disabled />
+    </div>
+    <div class="cbar" id="cbar"></div>
+    <div class="stat" id="st">Loading 111,488 entries...</div>
+    <div class="agrid" id="ag"></div>
+    <div class="panel" id="pnl"></div>
+    <div class="foot">
+      Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary<br />
+      (CC BY-SA 4.0) • Version 3.0
+    </div>
+  </div>
+  <script type="module" src="./app.js?v=3.0"></script>
+</body>
+</html>
