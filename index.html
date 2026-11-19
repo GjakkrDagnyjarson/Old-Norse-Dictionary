@@ -1,4 +1,7 @@
 <!DOCTYPE html><html lang="en"><head>
+<link rel="preload" href="./sql-wasm.wasm" as="fetch" crossorigin>
+<link rel="preload" href="./old_norse.db.gz" as="fetch" crossorigin>
+
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0"><meta charset="UTF-8">
@@ -39,7 +42,7 @@ th{color:#F5B82E;background:rgba(58,37,21,.65)}
 <div class="stat" id="st">Loading 111,488 entries...</div>
 <div class="agrid" id="ag"></div>
 <div class="panel" id="pnl"></div>
-<div class="foot">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary<br>(CC BY-SA 4.0)<br>Version 2.2</div>
+<div class="foot">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary<br>(CC BY-SA 4.0)<br>Version 2.3</div>
 </div><script>
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
 const YF={a:'ᛅ',á:'ᛅ',b:'ᛒ',c:'ᚴ',d:'ᛏ',ð:'ᚦ',e:'ᛁ',é:'ᛁ',f:'ᚠ',g:'ᚴ',h:'ᚼ',i:'ᛁ',í:'ᛁ',j:'ᛁ',k:'ᚴ',l:'ᛚ',m:'ᛘ',n:'ᚾ',o:'ᚢ',ó:'ᚢ',p:'ᛒ',q:'ᚴ',r:'ᚱ',s:'ᛋ',t:'ᛏ',u:'ᚢ',ú:'ᚢ',v:'ᚢ',w:'ᚢ',x:'ᚴᛋ',y:'ᚢ',ý:'ᚢ',z:'ᛋ',þ:'ᚦ',æ:'ᛅ',ǽ:'ᛅ',ø:'ᚢ',ǫ:'ᚢ',œ:'ᚢ',ö:'ᚢ'};
@@ -48,7 +51,54 @@ function norm(t){t=t.toLowerCase().trim();const m={ð:'d',þ:'th',æ:'ae',ǽ:'ae
 function rows(res){return(res&&res.length)?res.at(0).values:[]}
 ["á","ð","é","í","ó","ú","ý","þ","æ","ø","ǫ","œ"].forEach(c=>{let b=document.createElement("button");b.className="cbtn";b.textContent=c;b.onclick=()=>{let i=document.getElementById("q");i.value+=c;i.focus();doSearch()};void 0});
 [..."AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVYÝÞÆǼØǪŒ"].forEach(l=>{let b=document.createElement("button");b.className="abtn";b.textContent=l;b.onclick=()=>browseLetter(l);document.getElementById("ag").appendChild(b)});
-let db=null,lastMode="list",lastList=[],lastScroll=0,lastSent="";(async()=>{try{const S=await initSqlJs({locateFile:f=>`./${f}`});const r=await fetch("./old_norse.db.gz");const buf=await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();db=new S.Database(new Uint8Array(buf));document.getElementById("st").textContent="111,488 Headwords Ready • 100% Offline";document.getElementById("q").disabled=false;document.getElementById("gb").disabled=false}catch(e){document.getElementById("st").textContent="Error: "+e.message}})();
+let db=null,lastMode="list",lastList=[],lastScroll=0,lastSent="";
+function loadCachedDb(){
+  return new Promise(resolve=>{
+    try{
+      const req=indexedDB.open("OldNorseCache",1);
+      req.onupgradeneeded=()=>req.result.createObjectStore("files");
+      req.onsuccess=()=>{
+        const tx=req.result.transaction("files","readonly");
+        const g=tx.objectStore("files").get("old_norse_db_v2");
+        g.onsuccess=()=>resolve(g.result||null);
+        g.onerror=()=>resolve(null);
+      };
+      req.onerror=()=>resolve(null);
+    }catch(_){resolve(null);}
+  });
+}
+function saveCachedDb(bytes){
+  try{
+    const req=indexedDB.open("OldNorseCache",1);
+    req.onupgradeneeded=()=>req.result.createObjectStore("files");
+    req.onsuccess=()=>{
+      const tx=req.result.transaction("files","readwrite");
+      tx.objectStore("files").put(bytes,"old_norse_db_v2");
+    };
+  }catch(_){}
+}
+(async()=>{
+  try{
+    const st=document.getElementById("st");
+    const [S,cached]=await Promise.all([
+      initSqlJs({locateFile:f=>`./${f}`}),
+      loadCachedDb()
+    ]);
+    let bytes=cached;
+    if(!bytes){
+      st.textContent="Downloading dictionary (first time only)...";
+      const r=await fetch("./old_norse.db.gz");
+      const buf=await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
+      bytes=new Uint8Array(buf);
+      saveCachedDb(bytes);
+    }
+    db=new S.Database(bytes);
+    st.textContent="111,488 Headwords Ready • 100% Offline";
+    document.getElementById("q").disabled=false;
+  }catch(e){
+    document.getElementById("st").textContent="Error: "+e.message;
+  }
+})();
 function goHome(){document.getElementById("bg").classList.remove("open");document.getElementById("pnl").style.display="none";document.getElementById("ag").style.display="flex";document.getElementById("hb").style.display="none";document.getElementById("q").value="";document.getElementById("st").textContent="111,488 Headwords Ready • 100% Offline"}
 function browseLetter(l){if(!db)return;const w=l.toLowerCase(),u=l.toUpperCase(),it=rows(db.exec("SELECT id,headword,pos,gender FROM lemmas WHERE headword LIKE ? OR headword LIKE ? OR headword LIKE ? OR headword LIKE ? ORDER BY sort_key ASC",[w+"%",u+"%","-"+w+"%","-"+u+"%"])).map(x=>({id:x.at(0),hw:x.at(1),pos:x.at(2),g:x.at(3)}));document.getElementById("st").textContent=`Letter ${l} (${Math.min(200, it.length)} of ${it.length} shown)`;renderList(it)}
 function doSearch(){if(!db)return;const raw=document.getElementById("q").value.trim();if(!raw){goHome();return}const low=raw.toLowerCase(),up=raw.toUpperCase();let s=new Set(),it=[];
