@@ -81,6 +81,19 @@ const IRR_FORMS={
   "megu":[[0,"mega","verb","","","3PL","PRES IND"]],
   "mátti":[[0,"mega","verb","","","1SG/3SG","PAST IND"]],
   "máttu":[[0,"mega","verb","","","3PL","PAST IND"]],
+  "vera":[[0,"vera","verb","","","INF","PRES INF"]],
+  "er":[[0,"vera","verb","","","1SG/3SG","PRES IND"]],
+  "ert":[[0,"vera","verb","","","2SG","PRES IND"]],
+  "erum":[[0,"vera","verb","","","1PL","PRES IND"]],
+  "eruð":[[0,"vera","verb","","","2PL","PRES IND"]],
+  "eru":[[0,"vera","verb","","","3PL","PRES IND"]],
+  "sé":[[0,"vera","verb","","","1SG/3SG","PRES SUBJ"]],
+  "sér":[[0,"vera","verb","","","2SG","PRES SUBJ"]],
+  "sém":[[0,"vera","verb","","","1PL","PRES SUBJ"]],
+  "séð":[[0,"vera","verb","","","2PL","PRES SUBJ"]],
+  "séu":[[0,"vera","verb","","","3PL","PRES SUBJ"]],
+  "var":[[0,"vera","verb","","","1SG/3SG","PAST IND"]],
+  "váru":[[0,"vera","verb","","","3PL","PAST IND"]],
   "menn":[[0,"maðr","noun","m","NOM/ACC","PL","INDEF"]],
   "manna":[[0,"maðr","noun","m","GEN","PL","INDEF"]],
   "mönnum":[[0,"maðr","noun","m","DAT","PL","INDEF"]],
@@ -92,9 +105,9 @@ const IRR_FORMS={
 };
 if(IRR_FORMS[low]){
   const hits=IRR_FORMS[low].map(r=>{
-    const l=db.exec("SELECT id FROM lemmas WHERE lower(headword)=? LIMIT 1",[r]);
-    const lid=l.length?l.values:0;
-    return [lid,r,r,r,r,r,r];
+    const l=db.exec("SELECT id FROM lemmas WHERE lower(headword)=? LIMIT 1",[r[1]]);
+    const lid=l.length?l[0].values[0][0]:0;
+    return [lid,r[1],r[2],r[3],r[4],r[5],r[6]];
   });
   return {word:w,low,mf:hits,enc:""};
 }
