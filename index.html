@@ -39,7 +39,7 @@ th{color:#F5B82E;background:rgba(58,37,21,.65)}
 <div class="stat" id="st">Loading 111,488 entries...</div>
 <div class="agrid" id="ag"></div>
 <div class="panel" id="pnl"></div>
-<div class="foot">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary<br>(CC BY-SA 4.0)<br>Version 2.0</div>
+<div class="foot">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary<br>(CC BY-SA 4.0)<br>Version 2.1</div>
 </div><script>
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
 const YF={a:'ᛅ',á:'ᛅ',b:'ᛒ',c:'ᚴ',d:'ᛏ',ð:'ᚦ',e:'ᛁ',é:'ᛁ',f:'ᚠ',g:'ᚴ',h:'ᚼ',i:'ᛁ',í:'ᛁ',j:'ᛁ',k:'ᚴ',l:'ᛚ',m:'ᛘ',n:'ᚾ',o:'ᚢ',ó:'ᚢ',p:'ᛒ',q:'ᚴ',r:'ᚱ',s:'ᛋ',t:'ᛏ',u:'ᚢ',ú:'ᚢ',v:'ᚢ',w:'ᚢ',x:'ᚴᛋ',y:'ᚢ',ý:'ᚢ',z:'ᛋ',þ:'ᚦ',æ:'ᛅ',ǽ:'ᛅ',ø:'ᚢ',ǫ:'ᚢ',œ:'ᚢ',ö:'ᚢ'};
@@ -106,14 +106,16 @@ const IRR_FORMS={
   "feðr":[[0,"faðir","noun","m","NOM/ACC/GEN/DAT","SG/PL","INDEF"]],
   "bræðr":[[0,"bróðir","noun","m","NOM/ACC/GEN/DAT","SG/PL","INDEF"]]
 };
-if(IRR_FORMS.hasOwnProperty(low)){
-  const hits=IRR_FORMS[low].map(r=>{
+if(Object.prototype.hasOwnProperty.call(IRR_FORMS,low)){
+  const entries=Reflect.get(IRR_FORMS,low);
+  const hits=entries.map(r=>{
     const hw=r.at(1);
     const l=db.exec("SELECT id FROM lemmas WHERE lower(headword)=? LIMIT 1",[hw]);
     const lid=l.length&&l.at(0).values.length?l.at(0).values.at(0).at(0):0;
     return [lid,r.at(1),r.at(2),r.at(3),r.at(4),r.at(5),r.at(6)];
   });
   return {word:w,low,mf:hits,enc:""};
+};
 };
 }
 let wf=[],lm=[];
