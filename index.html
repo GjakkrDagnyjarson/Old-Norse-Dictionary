@@ -42,7 +42,7 @@ th{color:#F5B82E;background:rgba(58,37,21,.65)}
 <div class="stat" id="st">Loading 111,488 entries...</div>
 <div class="agrid" id="ag"></div>
 <div class="panel" id="pnl"></div>
-<div class="foot">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary<br>(CC BY-SA 4.0)<br>Version 2.3</div>
+<div class="foot">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary<br>(CC BY-SA 4.0)<br>Version 2.4</div>
 </div><script>
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
 const YF={a:'ᛅ',á:'ᛅ',b:'ᛒ',c:'ᚴ',d:'ᛏ',ð:'ᚦ',e:'ᛁ',é:'ᛁ',f:'ᚠ',g:'ᚴ',h:'ᚼ',i:'ᛁ',í:'ᛁ',j:'ᛁ',k:'ᚴ',l:'ᛚ',m:'ᛘ',n:'ᚾ',o:'ᚢ',ó:'ᚢ',p:'ᛒ',q:'ᚴ',r:'ᚱ',s:'ᛋ',t:'ᛏ',u:'ᚢ',ú:'ᚢ',v:'ᚢ',w:'ᚢ',x:'ᚴᛋ',y:'ᚢ',ý:'ᚢ',z:'ᛋ',þ:'ᚦ',æ:'ᛅ',ǽ:'ᛅ',ø:'ᚢ',ǫ:'ᚢ',œ:'ᚢ',ö:'ᚢ'};
@@ -59,7 +59,7 @@ function loadCachedDb(){
       req.onupgradeneeded=()=>req.result.createObjectStore("files");
       req.onsuccess=()=>{
         const tx=req.result.transaction("files","readonly");
-        const g=tx.objectStore("files").get("old_norse_db_v2");
+        const g=tx.objectStore("files").get("old_norse_db_v3");
         g.onsuccess=()=>resolve(g.result||null);
         g.onerror=()=>resolve(null);
       };
@@ -73,7 +73,7 @@ function saveCachedDb(bytes){
     req.onupgradeneeded=()=>req.result.createObjectStore("files");
     req.onsuccess=()=>{
       const tx=req.result.transaction("files","readwrite");
-      tx.objectStore("files").put(bytes,"old_norse_db_v2");
+      tx.objectStore("files").put(bytes,"old_norse_db_v3");
     };
   }catch(_){}
 }
