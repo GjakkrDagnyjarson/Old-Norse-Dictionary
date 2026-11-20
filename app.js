@@ -345,6 +345,30 @@ function lookupGrammarToken(raw) {
     sj.free();
   }
 
+  // 4c. 2sg Imperatives & enclitic -ðu / -du / -tu pronouns (e.g., seg -> segja, segðu -> seg + þú)
+  if (!hits.length && clean.length >= 2) {
+    const encliticRe = /(ðu|du|tu)$/;
+    const hasEnclitic = encliticRe.test(clean) && clean.length >= 4;
+    const impStem = hasEnclitic ? clean.replace(encliticRe, '') : clean;
+    const candInfs = [...new Set([impStem + 'a', impStem + 'ja', impStem + 'va', impStem])];
+    for (const inf of candInfs) {
+      const si = db.prepare("SELECT id, headword, pos, gender, prep_cases, zoega_def FROM lemmas WHERE LOWER(headword) = ? AND LOWER(pos) LIKE '%verb%' LIMIT 1");
+      si.bind([inf]);
+      if (si.step()) {
+        hits.push({
+          source: 'derived',
+          case_name: 'IMP',
+          number: '2SG',
+          definiteness: hasEnclitic ? 'VERB (+ enclitic þú)' : 'VERB',
+          ...si.getAsObject()
+        });
+        si.free();
+        break;
+      }
+      si.free();
+    }
+  }
+
   // 5. Compound-word decomposition (e.g., norðrskýjum -> norðr + skýjum)
   if (!hits.length && clean.length >= 6) {
     for (let split = 3; split <= clean.length - 3; split++) {
@@ -469,20 +493,51 @@ function runGrammarAnalysis() {
   const allParsed = clauses.flatMap(c => analyzeGrammarClause(c.split(/\s+/).filter(Boolean)));
 
   $('gramResults').innerHTML = allParsed.map(item => {
-    const seen = new Set();
-    const lines = item.hits.filter(h => {
-      const key = `${(h.headword||'').toLowerCase()}|${h.case_name||''}|${h.number||''}|${h.definiteness||''}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    }).slice(0, 5).map(h => {
-      const morph = [h.case_name, h.number, h.definiteness].filter(Boolean).join(' • ');
+    const resolved = item.hits.map(h => {
+      const copy = { ...h };
+      const tagPos = /VERB/i.test(copy.definiteness || '') ? 'verb'
+                   : /NOUN/i.test(copy.definiteness || '') ? 'noun'
+                   : /ADJ/i.test(copy.definiteness || '') ? 'adjective' : '';
+      if (tagPos && copy.pos && !copy.pos.toLowerCase().includes(tagPos)) {
+        const sp = db.prepare("SELECT id, pos, gender, zoega_def FROM lemmas WHERE LOWER(headword) = ? AND LOWER(pos) LIKE ? LIMIT 1");
+        sp.bind([(copy.headword || '').toLowerCase(), `%${tagPos}%`]);
+        if (sp.step()) {
+          const alt = sp.getAsObject();
+          copy.id = alt.id; copy.pos = alt.pos; copy.gender = alt.gender;
+          if (alt.zoega_def) copy.zoega_def = alt.zoega_def;
+        } else {
+          copy.pos = tagPos; copy.gender = '';
+        }
+        sp.free();
+      }
+      if (tagPos === 'verb' && copy.zoega_def && /\bII\)/.test(copy.zoega_def)) {
+        const part2 = copy.zoega_def.split(/\bII\)/)[1] || '';
+        copy.zoega_def = part2.replace(/^\s*\([^)]+\),\s*v\.\s*/i, '').trim();
+      }
+      return copy;
+    });
+
+    const grouped = [];
+    const gMap = new Map();
+    for (const h of resolved) {
+      const morph = [h.case_name, h.number, h.definiteness].filter(Boolean).join(' • ') || 'base lemma';
+      const gKey = `${(h.headword||'').toLowerCase()}|${h.pos||''}|${(h.zoega_def||'').slice(0, 80)}`;
+      if (!gMap.has(gKey)) {
+        const entry = { h, morphs: [morph] };
+        gMap.set(gKey, entry);
+        grouped.push(entry);
+      } else if (!gMap.get(gKey).morphs.includes(morph)) {
+        gMap.get(gKey).morphs.push(morph);
+      }
+    }
+
+    const lines = grouped.slice(0, 5).map(({ h, morphs }) => {
       const meta = [h.pos, h.gender].filter(Boolean).join(' ');
-      const gloss = (h.zoega_def || '').slice(0, 80);
+      const gloss = (h.zoega_def || '').replace(/\s+/g, ' ').slice(0, 95);
       const mf = h.form ? h.form.replace(/'/g, "\\'") : '';
       return `<div class="g-parse">
         <span class="g-link" onclick="RETURN_TO_GRAMMAR=true; openEntry(${h.id}, '${mf}')">${esc(h.headword)}</span> ${meta ? `<em>(${esc(meta)})</em>` : ''}
-        ${morph ? ` — <span style="color:#E8C988">${esc(morph)}</span>` : ' — <em>base lemma</em>'}
+        — <span style="color:#E8C988">${esc(morphs.join(' / '))}</span>
         ${gloss ? `<div style="opacity:.8">${esc(gloss)}</div>` : ''}
       </div>`;
     }).join('');
