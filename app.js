@@ -562,21 +562,16 @@ break;
 }
 }
 }
-// 4b. Short negative/intensive prefixes (ó-, ú-, á-, ør-)
+// 4b. Short negative/intensive prefixes (ó-, ú-, á-, ør-) with full rule recursion
 if (!hits.length && clean.length >= 5) {
   for (const pfx of ['ó', 'ú', 'á', 'ør']) {
     if (clean.startsWith(pfx)) {
       const rest = clean.slice(pfx.length);
-      const rHits = fastInflected(rest, true);
+      const rHits = lookupGrammarToken(rest);
       if (rHits.length) {
         for (const rHit of rHits.slice(0, 3)) {
           hits.push({ ...rHit, source: 'compound', headword: pfx + '- + ' + rHit.headword });
         }
-        break;
-      }
-      const rLem = fastLemmas(rest, '', true).shift();
-      if (rLem) {
-        hits.push({ ...rLem, source: 'compound', headword: pfx + '- + ' + rLem.headword });
         break;
       }
     }
