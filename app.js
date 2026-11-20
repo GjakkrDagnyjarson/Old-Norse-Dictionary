@@ -252,42 +252,13 @@ $('searchBox').addEventListener('input', e => {
   renderList(results);
 });
 
-  // 3. English whole-word definition matches (no LIMIT so U/Ú/V words like úlfr & vargr are never cut off)
-  if (q.length >= 3) {
-    const escQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const wordRe = new RegExp(`(^|[^a-z])${escQ}(s|es|ed|ing)?([^a-z]|$)`, 'i');
-    const primaryRe = new RegExp(`(\]\s*|\b(m|f|n|a|v|adv|prep)\.\s*|^|[,;]\s*)(a\s+|an\s+|the\s+|to\s+)?${escQ}(s|es)?([,;.]|\s*\(|$)`, 'i');
-    let s3 = db.prepare("SELECT id, headword, pos, gender, sort_key, zoega_def, wikt_def, cleasby_def FROM lemmas WHERE LOWER(zoega_def) LIKE ? OR LOWER(wikt_def) LIKE ? OR LOWER(cleasby_def) LIKE ?");
-    const pat = '%' + q + '%';
-    s3.bind([pat, pat, pat]);
-    while (s3.step()) {
-      const r = s3.getAsObject();
-      if (seen.has(r.id)) continue;
-      const defs = `${r.wikt_def || ''} | ${r.zoega_def || ''} | ${r.cleasby_def || ''}`;
-      if (wordRe.test(defs)) {
-        seen.add(r.id);
-        const isPrimary = primaryRe.test(defs) ? 0 : 1;
-        const idx = defs.toLowerCase().indexOf(q);
-        r._engScore = isPrimary * 10000 + (idx >= 0 ? idx : 9999);
-        engResults.push(r);
-      }
-    }
-    s3.free();
-    engResults.sort((x, y) => x._engScore - y._engScore || (x.sort_key || x.headword).localeCompare(y.sort_key || y.headword));
-  }
-
-  const results = [...onResults, ...engResults];
-  const st = `${results.length} matches for "${q}"`;
-  if (typeof LAST_VIEW !== 'undefined') LAST_VIEW = { type: 'list', rows: results, status: st };
-  $('subStatus').style.display = 'block';
-  $('subStatus').textContent = st;
-  renderList(results);
-
 $('homeBtn').onclick = () => { $('searchBox').value = ''; renderAlphaGrid(); };
 $('cred').onclick = () => { $('modalOverlay').style.display = 'flex'; };
 $('modalClose').onclick = () => { $('modalOverlay').style.display = 'none'; };
 
+window.onerror = (m, u, l) => { const st = $("subStatus"); if (st) { st.style.display = "block"; st.textContent = "JS ERR L" + l + ": " + m; } };
 (async function init() {
+  const st = $("subStatus"); st.style.display = "block"; st.textContent = "1/3 Loading DB...";
   try {
     const SQL = await initSqlJs({ locateFile: f => f });
     const res = await fetch('old_norse.db.gz');
