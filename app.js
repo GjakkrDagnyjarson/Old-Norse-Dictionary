@@ -282,14 +282,6 @@ $('searchBox').addEventListener('input', e => {
   $('subStatus').style.display = 'block';
   $('subStatus').textContent = st;
   renderList(results);
-});
-
-  const st = `${results.length} matches for "${q}"`;
-  if (typeof LAST_VIEW !== 'undefined') LAST_VIEW = { type: 'list', rows: results, status: st };
-  $('subStatus').style.display = 'block';
-  $('subStatus').textContent = st;
-  renderList(results);
-});
 
 $('homeBtn').onclick = () => { $('searchBox').value = ''; renderAlphaGrid(); };
 $('cred').onclick = () => { $('modalOverlay').style.display = 'flex'; };
