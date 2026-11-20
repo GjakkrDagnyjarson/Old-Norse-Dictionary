@@ -606,12 +606,64 @@ function getPronPerson(word) {
   return null;
 }
 
+function detectModernScandinavian(raw) {
+  const w = raw.toLowerCase().replace(/^[^a-záéíóúýæøœǫþðä]+|[^a-záéíóúýæøœǫþðä]+$/gi, '');
+  if (!w) return null;
+
+  const isDirect = {
+    'ég': 'ek', 'það': 'þat', 'hvað': 'hvat', 'éta': 'eta', 'féll': 'fell',
+    'maður': 'maðr', 'dagur': 'dagr', 'vetur': 'vetr', 'kunngt': 'kunnt'
+  };
+  if (isDirect[w]) return { lang: 'Modern Icelandic', suggestion: isDirect[w] };
+
+  const scandDirect = {
+    'jeg': 'ek', 'jag': 'ek', 'mig': 'mik', 'meg': 'mik',
+    'dig': 'þik', 'deg': 'þik', 'sig': 'sik', 'seg': 'sik',
+    'vi': 'vér', 'de': 'þeir', 'dem': 'þá', 'det': 'þat',
+    'og': 'ok', 'och': 'ok', 'ikke': 'eigi', 'inte': 'eigi', 'ikkje': 'eigi',
+    'fra': 'frá', 'från': 'frá', 'till': 'til', 'med': 'með', 'av': 'af',
+    'blod': 'blóð', 'sverd': 'sverð', 'svärd': 'sverð', 'skib': 'skip', 'skepp': 'skip'
+  };
+  if (scandDirect[w]) return { lang: 'Modern Scandinavian', suggestion: scandDirect[w] };
+
+  const isCands = [];
+  if (/(að|ið|uð)$/.test(w)) isCands.push(w.slice(0, -1) + 't');
+  if (w.endsWith('ur') && w.length > 3) isCands.push(w.slice(0, -2) + 'r');
+  if (w.includes('nngt')) isCands.push(w.replace('nngt', 'nt'));
+  if (w.includes('é')) isCands.push(w.replace(/é/g, 'e'), w.replace(/é/g, 'já'));
+
+  for (const c of isCands) {
+    if (c !== w && lookupGrammarToken(c).length > 0) {
+      return { lang: 'Modern Icelandic', suggestion: c };
+    }
+  }
+
+  const scCands = [];
+  let normSc = w.replace(/aa/g, 'á').replace(/ae/g, 'æ').replace(/oe/g, 'ø').replace(/ä/g, 'æ');
+  if (normSc !== w) scCands.push(normSc);
+  if (normSc.endsWith('et') && normSc.length > 3) scCands.push(normSc.slice(0, -2) + 'it');
+  if (normSc.endsWith('d')) scCands.push(normSc.slice(0, -1) + 'ð', normSc.slice(0, -1) + 't');
+  if (normSc.endsWith('b')) scCands.push(normSc.slice(0, -1) + 'p');
+
+  for (const c of scCands) {
+    if (c !== w && lookupGrammarToken(c).length > 0) {
+      return { lang: 'Modern Scandinavian', suggestion: c };
+    }
+  }
+  return null;
+}
+
 function analyzeGrammarClause(words) {
   const parsed = words.map(t => ({ raw: t, hits: lookupGrammarToken(t), notes: [] }));
   for (let i = 0; i < parsed.length; i++) {
     const cur = parsed[i];
     if (!cur.hits.length) {
-      cur.notes.push({ ok: false, text: '⚠ Unrecognized wordform — check spelling or diacritics' });
+      const mod = detectModernScandinavian(cur.raw);
+      if (mod) {
+        cur.notes.push({ ok: false, text: `⚠ ${mod.lang} spelling detected — in Old Norse use "${mod.suggestion}"` });
+      } else {
+        cur.notes.push({ ok: false, text: '⚠ Unrecognized wordform — check spelling or diacritics' });
+      }
       continue;
     }
     const subjP = getPronPerson(cur.raw);
