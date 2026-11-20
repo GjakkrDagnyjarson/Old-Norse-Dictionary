@@ -222,6 +222,36 @@ $('searchBox').addEventListener('input', e => {
     return (x.sort_key || x.headword).localeCompare(y.sort_key || y.headword);
   });
 
+  // 3. English whole-word definition matches (for queries >= 3 chars)
+  if (q.length >= 3) {
+    const wordRe = new RegExp(`(^|[^a-z])${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(s|es|ed|ing)?([^a-z]|$)`, 'i');
+    let s3 = db.prepare("SELECT id, headword, pos, gender, sort_key, zoega_def, wikt_def, cleasby_def FROM lemmas WHERE LOWER(zoega_def) LIKE ? OR LOWER(wikt_def) LIKE ? OR LOWER(cleasby_def) LIKE ? LIMIT 400");
+    const pat = '%' + q + '%';
+    s3.bind([pat, pat, pat]);
+    while (s3.step()) {
+      const r = s3.getAsObject();
+      if (seen.has(r.id)) continue;
+      const defs = `${r.zoega_def || ''} ${r.wikt_def || ''} ${r.cleasby_def || ''}`;
+      if (wordRe.test(defs)) {
+        seen.add(r.id);
+        // Rank entries where the English word appears early in the definition higher
+        const idx = defs.toLowerCase().indexOf(q);
+        r._engScore = idx >= 0 ? idx : 9999;
+        engResults.push(r);
+      }
+    }
+    s3.free();
+    engResults.sort((x, y) => x._engScore - y._engScore || (x.sort_key || x.headword).localeCompare(y.sort_key || y.headword));
+  }
+
+  const results = [...onResults, ...engResults];
+  const st = `${results.length} matches for "${q}"`;
+  if (typeof LAST_VIEW !== 'undefined') LAST_VIEW = { type: 'list', rows: results, status: st };
+  $('subStatus').style.display = 'block';
+  $('subStatus').textContent = st;
+  renderList(results);
+});
+
   // 3. English whole-word definition matches (no LIMIT so U/Ú/V words like úlfr & vargr are never cut off)
   if (q.length >= 3) {
     const escQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
