@@ -291,12 +291,18 @@ $('modalClose').onclick = () => { $('modalOverlay').style.display = 'none'; };
   try {
     const SQL = await initSqlJs({ locateFile: f => f });
     const res = await fetch('old_norse.db.gz');
-    const ds = new DecompressionStream('gzip');
-    const buf = await new Response(res.body.pipeThrough(ds)).arrayBuffer();
+    const raw = new Uint8Array(await res.arrayBuffer());
+    let buf;
+    if (raw[0] === 0x1f && raw[1] === 0x8b) {
+      const ds = new DecompressionStream('gzip');
+      buf = await new Response(new Blob([raw]).stream().pipeThrough(ds)).arrayBuffer();
+    } else {
+      buf = raw.buffer;
+    }
     db = new SQL.Database(new Uint8Array(buf));
     renderAlphaGrid();
   } catch (err) {
-    $('subStatus').textContent = 'Error loading database: ' + err.message;
+    $('subStatus').style.display = 'block'; $('subStatus').textContent = 'Error loading database: ' + err.message;
   }
 })();
 
