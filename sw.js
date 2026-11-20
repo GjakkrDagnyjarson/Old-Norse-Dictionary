@@ -1,7 +1,8 @@
-const CACHE_NAME = "old-norse-v3.8";
+const CACHE_NAME = 'old-norse-v4.0';
 const ASSETS = [
   './',
   './index.html',
+  './app.js',
   './manifest.json',
   './ic_launcher.png',
   './bg_norse.jpg',
@@ -25,7 +26,18 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request, { ignoreSearch: true }).then((cached) => cached || fetch(e.request))
-  );
+  const url = new URL(e.request.url);
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.html') || url.pathname.endsWith('/')) {
+    e.respondWith(
+      fetch(e.request).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then((c) => c.put(e.request, copy));
+        return res;
+      }).catch(() => caches.match(e.request, { ignoreSearch: true }))
+    );
+  } else {
+    e.respondWith(
+      caches.match(e.request, { ignoreSearch: true }).then((cached) => cached || fetch(e.request))
+    );
+  }
 });
