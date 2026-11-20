@@ -306,6 +306,22 @@ function foldON(str) {
   return str.toLowerCase().replace(/[áéíóúýǫöøœæðþ]/g, ch => NORM_CHAR_MAP[ch] || ch);
 }
 
+const STRONG_2SG_PAST = {
+  'sátt': ['sjá', 'PAST • 2SG'],
+  'vart': ['vera', 'PAST • 2SG'],
+  'fórt': ['fara', 'PAST • 2SG'],
+  'komt': ['koma', 'PAST • 2SG'],
+  'gafst': ['gefa', 'PAST • 2SG'],
+  'gaft': ['gefa', 'PAST • 2SG'],
+  'tókt': ['taka', 'PAST • 2SG'],
+  'kvazt': ['kveða', 'PAST • 2SG (MEDIOPASSIVE)'],
+  'skalt': ['skulu', 'PRES • 2SG'],
+  'munt': ['munu', 'PRES • 2SG'],
+  'veizt': ['vita', 'PRES • 2SG'],
+  'kant': ['kunna', 'PRES • 2SG'],
+  'vill': ['vilja', 'PRES • 2SG']
+};
+
 function fastInflected(word, exactOnly = true) {
   const nf = foldON(word);
   const st = db.prepare(`
@@ -346,7 +362,7 @@ function lookupGrammarToken(raw) {
 
   let hits = [];
 
-  // 1. Indexed wordform lookup (exact first, folded fallback if needed)
+  // 1. Indexed wordform lookup
   hits.push(...fastInflected(clean, false));
 
   // 2. Indexed base lemma lookup
@@ -368,25 +384,36 @@ function lookupGrammarToken(raw) {
     }
   }
 
-  // 4b. -ja verb stem rule (sverið -> sverja, berið -> berja)
-  if (!hits.length && /(ið|ir|i)$/.test(clean) && clean.length > 3) {
-    const jinf = clean.replace(/(ið|ir|i)$/, 'ja');
-    const tag = clean.endsWith('ið') ? 'PRES/IMP • 2PL' : clean.endsWith('ir') ? 'PRES • 2SG/3SG' : 'SUBJ/IMP';
-    for (const r of fastLemmas(jinf, 'verb')) {
-      hits.push({ ...r, source: 'derived', case_name: tag });
+  // 4b. Weak & -ja verb present endings (-ir, -ið -> -a or -ja infinitive, e.g., lyftir -> lyfta, berið -> berja)
+  if (!hits.length && /(ið|ir)$/.test(clean) && clean.length > 3) {
+    const tag = clean.endsWith('ið') ? 'PRES/IMP • 2PL' : 'PRES • 2SG/3SG';
+    for (const inf of [clean.replace(/(ið|ir)$/, 'a'), clean.replace(/(ið|ir)$/, 'ja')]) {
+      for (const r of fastLemmas(inf, 'verb', true)) {
+        hits.push({ ...r, source: 'derived', case_name: tag, definiteness: 'VERB' });
+      }
+      if (hits.length) break;
     }
   }
 
-  // 4c. Enclitic þú (-ðu / -du / -tu) on inflected verbs (sáttu -> sátt + þú) OR 2sg imperatives (segðu -> seg + þú)
+  // 4c. Enclitic þú (-ðu / -du / -tu) on VERBS only (sáttu -> sátt + þú, segðu -> seg + þú) & standalone 2sg imperatives
   if (!hits.length && clean.length >= 2) {
     const encliticRe = /(ðu|du|tu)$/;
     const hasEnclitic = encliticRe.test(clean) && clean.length >= 4;
     const stem = hasEnclitic ? clean.replace(encliticRe, '') : clean;
 
     if (hasEnclitic) {
-      for (const r of fastInflected(stem, true)) {
-        if (/verb/i.test(r.pos || '') || /VERB/i.test(r.definiteness || '')) {
-          hits.push({ ...r, source: 'derived', definiteness: `${r.definiteness || 'VERB'} (+ enclitic þú)` });
+      if (STRONG_2SG_PAST[stem]) {
+        const pair = STRONG_2SG_PAST[stem];
+        const vHit = fastLemmas(pair.at(0), 'verb', true).shift();
+        if (vHit) {
+          hits.push({ ...vHit, source: 'derived', case_name: pair.at(1), definiteness: 'VERB (+ enclitic þú)' });
+        }
+      }
+      if (!hits.length) {
+        for (const r of fastInflected(stem, true)) {
+          if (/verb/i.test(r.pos || '') || /VERB/i.test(r.definiteness || '')) {
+            hits.push({ ...r, source: 'derived', definiteness: `${r.definiteness || 'VERB'} (+ enclitic þú)` });
+          }
         }
       }
     }
@@ -430,42 +457,144 @@ function lookupGrammarToken(raw) {
     }
   }
 
-  // 5. Fast indexed compound-word decomposition (vetrveðri -> vetr + veðri, snjófǫllum -> snjór + fǫllum)
-  if (!hits.length && clean.length >= 6) {
-    for (let split = 3; split <= clean.length - 3; split++) {
-      const left = clean.slice(0, split);
-      const right = clean.slice(split);
-      const lHit = fastLemmas(left, '', true).shift() || fastLemmas(left + 'r', '', true).shift() || fastInflected(left, true).shift();
-      if (!lHit) continue;
-      const rHits = fastInflected(right, true);
-      if (rHits.length) {
-        for (const rHit of rHits.slice(0, 3)) {
-          hits.push({ ...rHit, source: 'compound', headword: `${lHit.headword} + ${rHit.headword}` });
+  // 4e. Enclitic definite article on nouns (laufunum -> laufum -> lauf DAT • PL • DEF)
+  if (!hits.length && clean.length >= 5) {
+    const defRules = [
+      ['unum', 'um', 'DAT', 'PL'],
+      ['inum', 'i', 'DAT', 'SG'],
+      ['inni', '', 'DAT', 'SG'],
+      ['inu', 'i', 'DAT', 'SG'],
+      ['innar', 'ar', 'GEN', 'SG'],
+      ['ins', 's', 'GEN', 'SG'],
+      ['anna', 'a', 'GEN', 'PL'],
+      ['arnir', 'ar', 'NOM', 'PL'],
+      ['irnir', 'ir', 'NOM', 'PL'],
+      ['arnar', 'ar', 'ACC', 'PL'],
+      ['irnar', 'ir', 'ACC', 'PL'],
+      ['inn', '', 'NOM/ACC', 'SG'],
+      ['in', '', 'NOM/ACC', 'SG/PL'],
+      ['it', '', 'NOM/ACC', 'SG']
+    ];
+    for (const rule of defRules) {
+      const suf = rule.at(0);
+      if (clean.endsWith(suf) && clean.length - suf.length >= 3) {
+        const indefCand = clean.slice(0, -suf.length) + rule.at(1);
+        const nHits = fastInflected(indefCand, true).filter(r => /noun/i.test(r.pos || ''));
+        if (nHits.length) {
+          for (const r of nHits) {
+            hits.push({ ...r, source: 'derived', definiteness: 'DEF' });
+          }
+          break;
         }
-        break;
-      }
-      const rLem = fastLemmas(right, '', true).shift();
-      if (rLem) {
-        hits.push({ ...rLem, source: 'compound', headword: `${lHit.headword} + ${rLem.headword}` });
-        break;
+        const lHit = fastLemmas(indefCand, 'noun', true).shift();
+        if (lHit) {
+          hits.push({ ...lHit, source: 'derived', case_name: rule.at(2), number: rule.at(3), definiteness: 'DEF' });
+          break;
+        }
       }
     }
   }
 
-  hits.sort((a, b) => {
-    const score = x => {
-      let sc = (x.source === 'lemma' ? 0 : x.source === 'derived' ? 1 : 2);
-      if (/verb|prep|pron/i.test(x.pos || '')) sc -= 1;
-      if (/^from\s+/i.test((x.zoega_def || '').trim())) sc += 3;
-      return sc;
-    };
-    return score(a) - score(b);
-  });
+  // 4f. Syncopated noun stems (jaðri -> jaðarr, fingrum -> fingr, himni -> himinn)
+  if (!hits.length && clean.length >= 4) {
+    const syncM = clean.match(/^(.+[ðgkptvbmnsl])([rnl])(i|um|ar)$/);
+    if (syncM) {
+      const pre = syncM.at(1);
+      const liq = syncM.at(2);
+      const end = syncM.at(3);
+      const cCase = end === 'i' ? 'DAT' : end === 'um' ? 'DAT' : 'NOM/ACC';
+      const cNum = end === 'i' ? 'SG' : 'PL';
+      const cands = [
+        pre + 'a' + liq + liq,
+        pre + 'i' + liq + liq,
+        pre + 'u' + liq + liq,
+        pre + 'a' + liq,
+        pre + liq
+      ];
+      for (const cand of cands) {
+        const lHit = fastLemmas(cand, 'noun', true).shift();
+        if (lHit) {
+          hits.push({ ...lHit, source: 'derived', case_name: cCase, number: cNum, definiteness: 'INDEF' });
+          break;
+        }
+      }
+    }
+  }
 
-  GRAMMAR_CACHE.set(clean, hits);
-  return hits.map(x => ({ ...x }));
+  // 4g. Past participles & strong adjective endings (huldir, ristnum, svartnuðum, seint)
+  if (!hits.length && clean.length >= 4) {
+    // -nuðum / -num / -nir / -nar -> -inn / -naðr participle or adjective
+    const partM = clean.match(/^(.+)(nuðum|num|nir|nar)$/);
+    if (partM) {
+      const pStem = partM.at(1);
+      const pEnd = partM.at(2);
+      const cCase = (pEnd === 'nuðum' || pEnd === 'num') ? 'DAT' : 'NOM/ACC';
+      const cNum = 'PL';
+      for (const cand of [pStem + 'inn', pStem + 'naðr', pStem + 'a', pStem + 'ja']) {
+        const hit = fastLemmas(cand, '', true).shift();
+        if (hit) {
+          hits.push({ ...hit, source: 'derived', case_name: `${cCase} (PART./ADJ.)`, number: cNum });
+          break;
+        }
+      }
+    }
+    // Neuter -t on strong adjectives (seint -> seinn, kalt -> kaldr, hart -> harðr)
+    if (!hits.length && clean.endsWith('t') && clean.length >= 4) {
+      const aStem = clean.slice(0, -1);
+      for (const cand of [aStem + 'r', aStem + 'nr', aStem + 'nn', aStem + 'dr', aStem + 'ðr']) {
+        const aHit = fastLemmas(cand, 'adjective', true).shift();
+        if (aHit) {
+          hits.push({ ...aHit, source: 'derived', case_name: 'NOM/ACC • NEUT.', number: 'SG', definiteness: 'INDEF' });
+          break;
+        }
+      }
+    }
+    // Dental past participle plurals (huldir -> hylja)
+    if (!hits.length && /(dir|ðir|tir)$/.test(clean) && clean.length >= 5) {
+      const dStem = clean.replace(/(dir|ðir|tir)$/, '');
+      const uStem = dStem.replace(/u(?=[^aeiouyáéíóúýǫøœæ]+$)/, 'y');
+for (const cand of [uStem + 'ja', uStem + 'a', dStem + 'ja', dStem + 'a']) {
+const vHit = fastLemmas(cand, 'verb', true).shift();
+if (vHit) {
+hits.push({ ...vHit, source: 'derived', case_name: 'PAST PART. • NOM • PL', definiteness: 'VERB' });
+break;
 }
-
+}
+}
+}
+// 5. Fast indexed compound-word decomposition (vetrveðri -> vetr + veðri, snjófǫllum -> snjór + fǫllum)
+if (!hits.length && clean.length >= 6) {
+for (let split = 3; split <= clean.length - 3; split++) {
+const left = clean.slice(0, split);
+const right = clean.slice(split);
+const lHit = fastLemmas(left, '', true).shift() || fastLemmas(left + 'r', '', true).shift() || fastInflected(left, true).shift();
+if (!lHit) continue;
+const rHits = fastInflected(right, true);
+if (rHits.length) {
+for (const rHit of rHits.slice(0, 3)) {
+hits.push({ ...rHit, source: 'compound', headword: lHit.headword + " + " + rHit.headword });
+}
+break;
+}
+const rLem = fastLemmas(right, '', true).shift();
+if (rLem) {
+hits.push({ ...rLem, source: 'compound', headword: lHit.headword + " + " + rLem.headword });
+break;
+}
+}
+}
+hits.sort((a, b) => {
+const score = x => {
+let sc = (x.source === 'lemma' ? 0 : x.source === 'derived' ? 1 : 2);
+if (/verb|prep|pron/i.test(x.pos || '')) sc -= 1;
+if (/^from\s+/i.test((x.zoega_def || '').trim())) sc += 3;
+return sc;
+};
+return score(a) - score(b);
+});
+GRAMMAR_CACHE.set(clean, hits);
+return hits.map(x => ({ ...x }));
+}
 function getPronPerson(word) {
   const w = normTok(word);
   if (w === 'ek' || w === 'eg') return '1SG';
