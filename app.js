@@ -29,7 +29,7 @@ function renderAlphaGrid() {
     ['★','a','á','b','d','ð','e','é','f'],
     ['g','h','i','í','j','k','l','m','n'],
     ['o','ó','p','r','s','t','u','ú','v'],
-    ['y','ý','þ','æ','ø','ǫ','œ']
+    ['y','ý','þ','æ','ǽ','ø','ǫ','œ']
   ];
   $('alphaGrid').innerHTML = rows.map(r =>
     `<div class="alpha-row">${r.map(l => `<button class="alpha-btn" onclick="filterByLetter('${l}')">${l}</button>`).join('')}</div>`
