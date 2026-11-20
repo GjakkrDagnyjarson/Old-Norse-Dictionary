@@ -355,7 +355,7 @@ function fastLemmas(word, posFilter = '', exactOnly = true) {
   return exact.length ? exact : (exactOnly ? [] : all);
 }
 
-function lookupGrammarToken(raw) {
+function lookupGrammarToken(raw, depth = 0) {
   const clean = normTok(raw);
   if (!clean) return [];
   if (GRAMMAR_CACHE.has(clean)) return GRAMMAR_CACHE.get(clean).map(x => ({ ...x }));
