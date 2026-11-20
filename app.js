@@ -458,7 +458,7 @@ function lookupGrammarToken(raw) {
   }
 
   // 4e. Enclitic definite article on nouns (laufunum -> laufum -> lauf DAT • PL • DEF)
-  if (!hits.length && clean.length >= 5) {
+  if (!hits.length && depth === 0 && clean.length >= 5) {
     const defRules = [
       ['unum', 'um', 'DAT', 'PL'],
       ['inum', 'i', 'DAT', 'SG'],
@@ -563,11 +563,11 @@ break;
 }
 }
 // 4b. Short negative/intensive prefixes (ó-, ú-, á-, ør-) with full rule recursion
-if (!hits.length && clean.length >= 5) {
+if (!hits.length && depth === 0 && clean.length >= 5) {
   for (const pfx of ['ó', 'ú', 'á', 'ør']) {
     if (clean.startsWith(pfx)) {
       const rest = clean.slice(pfx.length);
-      const rHits = lookupGrammarToken(rest);
+      const rHits = lookupGrammarToken(rest, depth + 1);
       if (rHits.length) {
         for (const rHit of rHits.slice(0, 3)) {
           hits.push({ ...rHit, source: 'compound', headword: pfx + '- + ' + rHit.headword });
