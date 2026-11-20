@@ -1,1 +1,18 @@
-{"name":"Old Norse Dictionary (\u16a2\u00b7\u16be\u00b7\u16cf)","short_name":"Old Norse","start_url":"./index.html","display":"standalone","background_color":"#140D08","theme_color":"#140D08","icons":[{"src":"icon.png","sizes":"512x512","type":"image/png"}],"version":"2.0"}
+{
+  "name": "Old Norse Dictionary",
+  "short_name": "Old Norse",
+  "description": "Offline Old Norse Dictionary with Cleasby & Vigfússon, Zoëga, ONP, Wiktionary, declensions, conjugations, and Younger Futhark runes.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#16100C",
+  "theme_color": "#16100C",
+  "icons": [
+    {
+      "src": "ic_launcher.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

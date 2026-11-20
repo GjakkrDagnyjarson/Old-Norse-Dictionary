@@ -1,32 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <title>Old Norse Dictionary</title>
-  <link rel="icon" href="./icon.png" />
-  <link rel="preload" href="./sql-wasm.wasm" as="fetch" crossorigin />
-  <link rel="preload" href="./old_norse.db.gz" as="fetch" crossorigin />
-  <link rel="stylesheet" href="./style.css?v=3.0" />
-  <script src="./sql-wasm.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<title>Old Norse Dictionary</title>
+<link rel="manifest" href="./manifest.json" />
+<script src="./sql-wasm.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: #140d08 url('./bg_norse.jpg') center/100% 100% no-repeat;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #F8F1E5;
+}
+#root.open { padding: 17vh 8.5vw 12vh 8.5vw !important; }
+#root {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  padding: 36.5vh 15.5vw 16vh 16vw;
+}
+.title {
+  text-align: center; color: #F5E6C8; font-size: 13.5px; font-weight: bold;
+  letter-spacing: 0.6px; text-shadow: 0 2px 5px #000; margin-bottom: 5px; flex-shrink: 0;
+}
+.top-bar { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; flex-shrink: 0; }
+.nav-btn {
+  background: rgba(24, 17, 11, 0.88); color: #E8C988;
+  border: 1.5px solid rgba(218, 184, 118, 0.55); border-radius: 9px;
+  padding: 8px 11px; font-size: 12.5px; font-weight: bold; cursor: pointer;
+  font-family: inherit; flex-shrink: 0;
+}
+.nav-btn:active { background: rgba(232, 201, 136, 0.25); }
+#searchBox {
+  flex: 1; min-width: 0; background: rgba(20, 14, 10, 0.88);
+  border: 1.5px solid rgba(218, 184, 118, 0.55); border-radius: 9px;
+  color: #F8F1E5; font-size: 11px; padding: 6px 9px; outline: none; font-family: inherit;
+}
+#searchBox::placeholder { color: #B8A382; }
+#subStatus {
+  text-align: center; color: #E8C988; font-size: 11.5px;
+  margin-bottom: 6px; text-shadow: 0 1px 3px #000; flex-shrink: 0;
+}
+#mainArea { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+#alphaGrid { display: flex; flex-direction: column; gap: 3px; justify-content: flex-start; flex: 0 0 auto; margin-top: 4px; }
+.alpha-row { display: flex; justify-content: center; gap: 3px; width: 100%; }
+.alpha-btn {
+  flex: 1; max-width: calc((100% - 24px) / 9); height: 22px;
+  background: rgba(24, 17, 11, 0.84); border: 1px solid rgba(218, 184, 118, 0.45);
+  border-radius: 5px; color: #E8C988; font-size: 11px; font-weight: bold;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit;
+}
+.alpha-btn:active { background: rgba(232, 201, 136, 0.25); }
+.card-box {
+  flex: 1; min-height: 0; overflow-y: auto;
+  background: rgba(20, 14, 10, 0.86); border: 1.5px solid rgba(218, 184, 118, 0.5);
+  border-radius: 10px; padding: 6px 12px;
+}
+.word-row {
+  padding: 8px 2px; border-bottom: 1px solid rgba(218, 184, 118, 0.16);
+  cursor: pointer; display: flex; align-items: baseline; gap: 6px;
+}
+.word-row:last-child { border-bottom: none; }
+.word-row:active { background: rgba(232, 201, 136, 0.15); }
+.wr-hw { color: #E8C988; font-size: 15px; font-weight: bold; }
+.wr-sub { color: #C4B5A0; font-size: 12px; font-style: italic; }
+.det-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-top: 2px; }
+.det-hw { color: #E8C988; font-size: 21px; font-weight: bold; line-height: 1.15; }
+.det-pos { color: #D4C3A3; font-size: 13px; font-weight: bold; margin-left: 4px; }
+.back-pill {
+  background: rgba(34, 24, 16, 0.9); color: #E8C988; border: 1px solid rgba(218, 184, 118, 0.5);
+  border-radius: 8px; padding: 4px 10px; font-size: 12px; cursor: pointer; flex-shrink: 0;
+}
+.det-yf { color: #E6D5B8; font-size: 14px; margin: 3px 0 6px; letter-spacing: 0.4px; }
+.match-badge { color: #98E0A8; font-size: 11.5px; margin-bottom: 6px; font-weight: bold; }
+.tbl-title {
+  color: #E8C988; font-size: 11px; font-weight: bold; letter-spacing: 0.5px;
+  text-transform: uppercase; margin: 8px 0 5px;
+}
+.tbl-wrap {
+  overflow-x: auto; background: rgba(14, 9, 6, 0.75);
+  border: 1px solid rgba(218, 184, 118, 0.25); border-radius: 7px; padding: 4px; margin-bottom: 8px;
+}
+table { border-collapse: collapse; width: 100%; font-size: 11.5px; }
+th, td { padding: 5px 6px; text-align: left; white-space: nowrap; border-bottom: 1px solid rgba(218, 184, 118, 0.14); }
+th { color: #E8C988; font-weight: bold; }
+td { color: #F5EDEO; cursor: pointer; }
+td.hl { color: #98E0A8; font-weight: bold; }
+.sec-head {
+  color: #E8C988; font-size: 11px; font-weight: bold; letter-spacing: 0.4px;
+  text-transform: uppercase; margin: 10px 0 4px;
+  border-bottom: 1px solid rgba(218, 184, 118, 0.28); padding-bottom: 2px;
+}
+.sec-body { color: #F5EDEO; font-size: 13px; line-height: 1.42; white-space: pre-wrap; }
+.footer {
+  text-align: center; color: #F5E3C6; font-size: 10.5px; line-height: 1.3;
+  padding-top: 5px; text-shadow: 0 1px 3px #000; flex-shrink: 0; cursor: pointer;
+}
+#modalOverlay {
+  display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8);
+  align-items: center; justify-content: center; padding: 20px; z-index: 50;
+}
+#modalBox {
+  background: #1C140E; border: 1px solid #E8C988; border-radius: 10px;
+  padding: 16px; max-width: 420px; color: #F5EDEO; font-size: 12.5px; line-height: 1.45;
+}
+#modalClose {
+  margin-top: 12px; width: 100%; padding: 8px; background: #2E2117;
+  border: 1px solid #E8C988; color: #E8C988; border-radius: 6px; font-weight: bold;
+}
+#toast {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+  background: rgba(20, 14, 10, 0.95); border: 1px solid #E8C988; color: #E8C988;
+  padding: 6px 14px; border-radius: 20px; font-size: 12px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 60;
+}
+#toast.show { opacity: 1; }
+
+@media (min-width: 700px) {
+  #root { padding: 36.5vh 15.5vw 12vh 15.5vw; }
+  #root.open { padding: 17vh 8.5vw 12vh 8.5vw !important; }
+  .title { font-size: 28px; }
+  .nav-btn, #searchBox { font-size: 22px; padding: 12px 16px; }
+  #subStatus { font-size: 19px; }
+  .alpha-btn { height: 46px; font-size: 22px; max-width: calc((100% - 32px) / 9); }
+  .wr-hw { font-size: 24px; }
+  .wr-sub { font-size: 19px; }
+  .det-hw { font-size: 34px; }
+  .det-pos, .det-yf, .sec-body, table { font-size: 21px; }
+  .tbl-title, .sec-head { font-size: 18px; }
+  .footer { font-size: 18px; }
+}
+
+.gram-area { width: 100%; box-sizing: border-box; height: 74px; background: rgba(18, 11, 7, 0.9); color: #f3e6cc; border: 1px solid #6e4b2a; border-radius: 7px; padding: 8px; font-size: 13px; font-family: inherit; resize: vertical; }
+.gram-run { margin-top: 6px; width: 100%; padding: 7px; background: #3b2616; color: #E8C988; border: 1px solid #8a6035; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; }
+.g-tok { background: rgba(24, 15, 9, 0.85); border: 1px solid rgba(232, 201, 136, 0.25); border-radius: 7px; padding: 8px; margin-top: 8px; }
+.g-word { font-size: 15px; font-weight: bold; color: #E8C988; }
+.g-parse { margin-top: 4px; font-size: 12px; padding-left: 7px; border-left: 2px solid #8a6035; }
+.g-link { color: #E8C988; text-decoration: underline; cursor: pointer; }
+.alpha-btn, .wr-hw, .det-hw { text-transform: lowercase; }
+
+.tbl-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tbl-wrap table { width: 100%; min-width: max-content; table-layout: auto; font-size: 10.5px; }
+.tbl-wrap th, .tbl-wrap td { padding: 4px 5px; white-space: nowrap; }
+.back-pill { white-space: nowrap; flex-shrink: 0; }
+</style>
 </head>
 <body>
-  <div class="bg" id="bg">
-    <div class="title">OLD NORSE DICTIONARY</div>
-    <div class="srow">
-      <button id="hb" class="hbtn">Home</button>
-      <input id="q" class="sbox" type="text" placeholder="Search Old Norse, inflected, or English..." disabled />
-    </div>
-    <div class="cbar" id="cbar"></div>
-    <div class="stat" id="st">Loading 111,488 entries...</div>
-    <div class="agrid" id="ag"></div>
-    <div class="panel" id="pnl"></div>
-    <div class="foot">
-      Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary<br />
-      (CC BY-SA 4.0) • Version 3.0
-    </div>
+<div id="root">
+  <div class="title">OLD NORSE DICTIONARY</div>
+  <div class="top-bar">
+    <button id="homeBtn" class="nav-btn" style="display:none">Home</button>
+    <input id="searchBox" type="search" placeholder="Search Old Norse, inflected, or English..." autocomplete="off" />
+    <button id="grammarBtn" class="nav-btn" >Grammar</button>
   </div>
-  <script type="module" src="./app.js?v=3.0"></script>
+  <div id="subStatus" style="display:none">Loading Old Norse database...</div>
+  <div id="mainArea">
+    <div id="alphaGrid"></div>
+    <div id="listCard" class="card-box" style="display:none"></div>
+    <div id="detailCard" class="card-box" style="display:none"></div>
+  </div>
+  <div id="cred" class="footer">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary (CC BY-SA 4.0)<br/>Version 2.0</div>
+</div>
+<div id="modalOverlay"><div id="modalBox"><h3 style="color:#E8C988;margin-bottom:6px">Lexical Sources &amp; Licenses</h3>Cleasby &amp; Vigfússon (1874), Geir T. Zoëga (1910), Dictionary of Old Norse Prose (ONP, CC BY-SA 4.0), and Wiktionary (CC BY-SA 4.0). All data bundled locally for 100% offline use.<button id="modalClose">Close</button></div></div>
+<div id="toast"></div>
+<script src="sql-wasm.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
