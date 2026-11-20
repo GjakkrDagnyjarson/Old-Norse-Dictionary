@@ -535,7 +535,7 @@ function runGrammarAnalysis() {
         sp.free();
       }
       if (tagPos === 'verb' && copy.zoega_def && /\bII\)/.test(copy.zoega_def)) {
-        const part2 = copy.zoega_def.split(/\bII\)/) || '';
+        const part2 = copy.zoega_def.split(/\bII\)/).pop() || '';
         copy.zoega_def = part2.replace(/^\s*\([^)]+\),\s*v\.\s*/i, '').trim();
       }
       return copy;
