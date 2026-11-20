@@ -698,8 +698,8 @@ function analyzeGrammarClause(words) {
       }
     }
     const verbGovHit = cur.hits.find(h => /^(PRES|PAST)$/i.test(h.case_name || '') && inferGovCases(h, 'verb'));
-    if (verbGovHit) {
-      const req = inferGovCases(verbGovHit, 'verb') && cur.raw.toLowerCase() !== 'ok';
+    if (verbGovHit && cur.raw.toLowerCase() !== 'ok') {
+      const req = inferGovCases(verbGovHit, 'verb');
       const objTok = parsed.slice(i + 1, i + 5).find(t => t.hits.some(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
       if (objTok) {
         const objCases = objTok.hits.map(h => (h.case_name || '').toUpperCase()).filter(c => /^(NOM|ACC|DAT|GEN)$/.test(c));
@@ -708,7 +708,7 @@ function analyzeGrammarClause(words) {
       }
     }
     const prepHit = cur.hits.find(h => inferGovCases(h, 'prep'));
-    if (prepHit) {
+    if (prepHit && cur.raw.toLowerCase() !== 'ok') {
       const req = inferGovCases(prepHit, 'prep');
       const target = parsed.slice(i + 1, i + 4).find(t => t.hits.some(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
       if (target) {

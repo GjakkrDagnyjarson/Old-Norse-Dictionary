@@ -1,4 +1,4 @@
-const CACHE_NAME = "old-norse-v3.7";
+const CACHE_NAME = "old-norse-v3.8";
 const ASSETS = [
   './',
   './index.html',
