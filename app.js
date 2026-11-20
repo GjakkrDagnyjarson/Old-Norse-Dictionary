@@ -676,9 +676,9 @@ function analyzeGrammarClause(words) {
     if (!cur.hits.length) {
       const mod = detectModernScandinavian(cur.raw);
       if (mod) {
-        cur.notes.push({ ok: false, text: `⚠ ${mod.lang} spelling detected — in Old Norse use "${mod.suggestion}"` });
+        cur.notes.push({ ok: false, text: `✗ ${mod.lang} spelling detected — in Old Norse use "${mod.suggestion}"` });
       } else {
-        cur.notes.push({ ok: false, text: '⚠ Unrecognized wordform — check spelling or diacritics' });
+        cur.notes.push({ ok: false, text: '✗ Unrecognized wordform — check spelling or diacritics' });
       }
       continue;
     }
@@ -689,7 +689,7 @@ function analyzeGrammarClause(words) {
       if (verbTok) {
         const vForms = verbTok.hits.filter(h => /^(PRES|PAST)$/i.test(h.case_name || '')).map(h => (h.number || '').toUpperCase());
         if (vForms.includes(subjP)) cur.notes.push({ ok: true, text: `✓ Subject (${subjP}) agrees with verb "${verbTok.raw}"` });
-        else if (vForms.length) cur.notes.push({ ok: false, text: `⚠ Subject (${subjP}) does not match verb "${verbTok.raw}" (${[...new Set(vForms)].join('/')})` });
+        else if (vForms.length) cur.notes.push({ ok: false, text: `✗ Subject (${subjP}) does not match verb "${verbTok.raw}" (${[...new Set(vForms)].join('/')})` });
       }
     }
     const verbGovHit = cur.hits.find(h => /^(PRES|PAST)$/i.test(h.case_name || '') && inferGovCases(h, 'verb'));
@@ -699,7 +699,7 @@ function analyzeGrammarClause(words) {
       if (objTok) {
         const objCases = objTok.hits.map(h => (h.case_name || '').toUpperCase()).filter(c => /^(NOM|ACC|DAT|GEN)$/.test(c));
         if (objCases.some(c => req.includes(c))) cur.notes.push({ ok: true, text: `✓ Verb "${verbGovHit.headword}" governs ${req} (matches "${objTok.raw}")` });
-        else if (objCases.length) cur.notes.push({ ok: false, text: `⚠ Verb "${verbGovHit.headword}" governs ${req}, but "${objTok.raw}" is ${[...new Set(objCases)].join('/')}` });
+        else if (objCases.length) cur.notes.push({ ok: false, text: `✗ Verb "${verbGovHit.headword}" governs ${req}, but "${objTok.raw}" is ${[...new Set(objCases)].join('/')}` });
       }
     }
     const prepHit = cur.hits.find(h => inferGovCases(h, 'prep'));
@@ -710,9 +710,9 @@ function analyzeGrammarClause(words) {
         const tCases = target.hits.map(h => (h.case_name || '').toUpperCase()).filter(c => /^(NOM|ACC|DAT|GEN)$/.test(c));
         const hasGenEnd = req.includes('GEN') && /(a|ar|s|na)$/i.test(target.raw);
         if (tCases.some(c => req.includes(c)) || hasGenEnd) cur.notes.push({ ok: true, text: `✓ Preposition "${prepHit.headword}" governs ${req} (matches "${target.raw}")` });
-        else if (tCases.length) cur.notes.push({ ok: false, text: `⚠ Preposition "${prepHit.headword}" governs ${req}, but "${target.raw}" is ${[...new Set(tCases)].join('/')}` });
+        else if (tCases.length) cur.notes.push({ ok: false, text: `✗ Preposition "${prepHit.headword}" governs ${req}, but "${target.raw}" is ${[...new Set(tCases)].join('/')}` });
       } else {
-        cur.notes.push({ ok: false, text: `⚠ Preposition "${prepHit.headword}" has no nominal object following it` });
+        cur.notes.push({ ok: false, text: `✗ Preposition "${prepHit.headword}" has no nominal object following it` });
       }
     }
     const isDet = cur.hits.some(h => /pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
@@ -724,7 +724,7 @@ function analyzeGrammarClause(words) {
         const shared = nextNouns.filter(h => detPairs.includes(`${h.case_name}|${h.number}`.toUpperCase()));
         if (shared.length) cur.notes.push({ ok: true, text: `✓ Agrees in case/number (${shared[0].case_name} ${shared[0].number}) with "${nextTok.raw}"` });
         else if (detPairs.some(p => p.startsWith("DAT|")) && /a$/i.test(nextTok.raw) && nextTok.hits.some(h => /adj/i.test(h.pos || ""))) cur.notes.push({ ok: true, text: `✓ Weak dative singular agreement (DAT SG) with "${nextTok.raw}"` });
-        else cur.notes.push({ ok: false, text: `⚠ Case/number mismatch between "${cur.raw}" and noun "${nextTok.raw}"` });
+        else cur.notes.push({ ok: false, text: `✗ Case/number mismatch between "${cur.raw}" and noun "${nextTok.raw}"` });
       }
     }
     if (!cur.notes.length) {
