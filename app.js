@@ -190,42 +190,69 @@ function openEntry(id, matchedForm = '') {
 
 $('searchBox').addEventListener('input', e => {
   const q = e.target.value.trim().toLowerCase();
-  if (!q || !db) return renderAlphaGrid();
+  if (!q) return renderAlphaGrid();
+  if (!db) return showToast("Loading dictionary database...");
 
   const seen = new Set();
-  const results = [];
-  const addRows = (stmt) => {
-    while (stmt.step()) {
-      const row = stmt.getAsObject();
-      if (!seen.has(row.id)) { seen.add(row.id); results.push(row); }
-    }
-    stmt.free();
-  };
+  const onResults = [];
+  const engResults = [];
 
-  // 1. Exact & prefix headword matches (strictly words beginning with q)
-  let s1 = db.prepare("SELECT id, headword, pos, gender, sort_key FROM lemmas WHERE LOWER(headword) LIKE ? OR normalized_search LIKE ? ORDER BY sort_key, headword");
+  // 1. Strict Old Norse headword prefix matches
+  let s1 = db.prepare("SELECT id, headword, pos, gender, sort_key FROM lemmas WHERE headword LIKE ? OR normalized_search LIKE ? ORDER BY sort_key, headword");
   s1.bind([q + '%', q + '%']);
-  addRows(s1);
-
-  // 2. Inflected wordform matches
-  let s2 = db.prepare("SELECT DISTINCT l.id, l.headword, l.pos, l.gender, l.sort_key, w.form AS matchedForm FROM wordforms w JOIN lemmas l ON l.id = w.lemma_id WHERE LOWER(w.form) = ? OR w.normalized_form = ? ORDER BY l.sort_key");
-  s2.bind([q, q]);
-  addRows(s2);
-
-  // 3. Fallback to English definition search ONLY if zero Old Norse headwords/forms matched
-  if (!results.length && q.length >= 3) {
-    let s3 = db.prepare("SELECT id, headword, pos, gender, sort_key FROM lemmas WHERE LOWER(zoega_def) LIKE ? OR LOWER(wikt_def) LIKE ? OR LOWER(cleasby_def) LIKE ? ORDER BY sort_key LIMIT 100");
-    const pat = '%' + q + '%';
-    s3.bind([pat, pat, pat]);
-    addRows(s3);
+  while (s1.step()) {
+    const r = s1.getAsObject();
+    if (!seen.has(r.id)) { seen.add(r.id); onResults.push(r); }
   }
+  s1.free();
 
-  results.sort((x, y) => {
-    const xExact = x.headword.toLowerCase() === q ? 0 : 1;
-    const yExact = y.headword.toLowerCase() === q ? 0 : 1;
+  // 2. Old Norse inflected wordform matches
+  let s2 = db.prepare("SELECT DISTINCT l.id, l.headword, l.pos, l.gender, l.sort_key, w.form AS matchedForm FROM wordforms w JOIN lemmas l ON l.id = w.lemma_id WHERE w.form = ? OR w.normalized_form = ? ORDER BY l.sort_key");
+  s2.bind([q, q]);
+  while (s2.step()) {
+    const r = s2.getAsObject();
+    if (!seen.has(r.id)) { seen.add(r.id); onResults.push(r); }
+  }
+  s2.free();
+
+  onResults.sort((x, y) => {
+    const xExact = x.headword === q ? 0 : 1;
+    const yExact = y.headword === q ? 0 : 1;
     if (xExact !== yExact) return xExact - yExact;
     return (x.sort_key || x.headword).localeCompare(y.sort_key || y.headword);
   });
+
+  // 3. English whole-word definition matches (no LIMIT so U/Ú/V words like úlfr & vargr are never cut off)
+  if (q.length >= 3) {
+    const escQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const wordRe = new RegExp(`(^|[^a-z])${escQ}(s|es|ed|ing)?([^a-z]|$)`, 'i');
+    const primaryRe = new RegExp(`(\]\s*|\b(m|f|n|a|v|adv|prep)\.\s*|^|[,;]\s*)(a\s+|an\s+|the\s+|to\s+)?${escQ}(s|es)?([,;.]|\s*\(|$)`, 'i');
+    let s3 = db.prepare("SELECT id, headword, pos, gender, sort_key, zoega_def, wikt_def, cleasby_def FROM lemmas WHERE LOWER(zoega_def) LIKE ? OR LOWER(wikt_def) LIKE ? OR LOWER(cleasby_def) LIKE ?");
+    const pat = '%' + q + '%';
+    s3.bind([pat, pat, pat]);
+    while (s3.step()) {
+      const r = s3.getAsObject();
+      if (seen.has(r.id)) continue;
+      const defs = `${r.wikt_def || ''} | ${r.zoega_def || ''} | ${r.cleasby_def || ''}`;
+      if (wordRe.test(defs)) {
+        seen.add(r.id);
+        const isPrimary = primaryRe.test(defs) ? 0 : 1;
+        const idx = defs.toLowerCase().indexOf(q);
+        r._engScore = isPrimary * 10000 + (idx >= 0 ? idx : 9999);
+        engResults.push(r);
+      }
+    }
+    s3.free();
+    engResults.sort((x, y) => x._engScore - y._engScore || (x.sort_key || x.headword).localeCompare(y.sort_key || y.headword));
+  }
+
+  const results = [...onResults, ...engResults];
+  const st = `${results.length} matches for "${q}"`;
+  if (typeof LAST_VIEW !== 'undefined') LAST_VIEW = { type: 'list', rows: results, status: st };
+  $('subStatus').style.display = 'block';
+  $('subStatus').textContent = st;
+  renderList(results);
+});
 
   const st = `${results.length} matches for "${q}"`;
   if (typeof LAST_VIEW !== 'undefined') LAST_VIEW = { type: 'list', rows: results, status: st };
