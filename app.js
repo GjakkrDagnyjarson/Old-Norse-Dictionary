@@ -524,7 +524,7 @@ function lookupGrammarToken(raw) {
   // 4g. Past participles & strong adjective endings (huldir, ristnum, svartnuðum, seint)
   if (!hits.length && clean.length >= 4) {
     // -nuðum / -num / -nir / -nar -> -inn / -naðr participle or adjective
-    const partM = clean.match(/^(.+)(nuðum|num|nir|nar)$/);
+    const partM = clean.match(/^(.+)(nuðum|num|nir|nar|nu)$/);
     if (partM) {
       const pStem = partM.at(1);
       const pEnd = partM.at(2);
