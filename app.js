@@ -562,6 +562,27 @@ break;
 }
 }
 }
+// 4b. Short negative/intensive prefixes (ó-, ú-, á-, ør-)
+if (!hits.length && clean.length >= 5) {
+  for (const pfx of ['ó', 'ú', 'á', 'ør']) {
+    if (clean.startsWith(pfx)) {
+      const rest = clean.slice(pfx.length);
+      const rHits = fastInflected(rest, true);
+      if (rHits.length) {
+        for (const rHit of rHits.slice(0, 3)) {
+          hits.push({ ...rHit, source: 'compound', headword: pfx + '- + ' + rHit.headword });
+        }
+        break;
+      }
+      const rLem = fastLemmas(rest, '', true).shift();
+      if (rLem) {
+        hits.push({ ...rLem, source: 'compound', headword: pfx + '- + ' + rLem.headword });
+        break;
+      }
+    }
+  }
+}
+
 // 5. Fast indexed compound-word decomposition (vetrveðri -> vetr + veðri, snjófǫllum -> snjór + fǫllum)
 if (!hits.length && clean.length >= 6) {
 for (let split = 3; split <= clean.length - 3; split++) {
@@ -678,7 +699,7 @@ function analyzeGrammarClause(words) {
     }
     const verbGovHit = cur.hits.find(h => /^(PRES|PAST)$/i.test(h.case_name || '') && inferGovCases(h, 'verb'));
     if (verbGovHit) {
-      const req = inferGovCases(verbGovHit, 'verb');
+      const req = inferGovCases(verbGovHit, 'verb') && cur.raw.toLowerCase() !== 'ok';
       const objTok = parsed.slice(i + 1, i + 5).find(t => t.hits.some(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
       if (objTok) {
         const objCases = objTok.hits.map(h => (h.case_name || '').toUpperCase()).filter(c => /^(NOM|ACC|DAT|GEN)$/.test(c));
