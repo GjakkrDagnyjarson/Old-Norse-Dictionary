@@ -715,7 +715,7 @@ function analyzeGrammarClause(words) {
         cur.notes.push({ ok: false, text: `✗ Preposition "${prepHit.headword}" has no nominal object following it` });
       }
     }
-    const isDet = cur.hits.some(h => /pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+    const isDet = cur.hits.some(h => /pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '') && !/^(ek|þú|hann|hon|vér|þér|þeir|þær|þau|hvat|hverr|hvárr)$/i.test(h.headword || ''));
     const nextTok = parsed[i + 1];
     if (isDet && nextTok) {
       const nextNouns = nextTok.hits.filter(h => /noun/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
