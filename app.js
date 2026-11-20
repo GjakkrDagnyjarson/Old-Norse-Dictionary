@@ -43,8 +43,8 @@ function renderAlphaGrid() {
 
 function filterByLetter(letter) {
   if (!db) return showToast("Loading dictionary database...");
-  const stmt = db.prepare("SELECT id, headword, pos, gender FROM lemmas WHERE UPPER(SUBSTR(LTRIM(headword, '-*'),1,1)) = ? ORDER BY sort_key, headword");
-  stmt.bind([letter.toUpperCase()]);
+  const stmt = db.prepare("SELECT id, headword, pos, gender FROM lemmas WHERE SUBSTR(LTRIM(headword, '*'),1,1) = ? ORDER BY sort_key, headword");
+  stmt.bind([letter.toLowerCase()]);
   const rows = [];
   while (stmt.step()) rows.push(stmt.getAsObject());
   stmt.free();
