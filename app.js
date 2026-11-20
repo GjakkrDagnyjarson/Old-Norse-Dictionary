@@ -730,7 +730,7 @@ function analyzeGrammarClause(words) {
     if (!cur.notes.length) {
       const top = cur.hits[0];
       const morph = [top.case_name, top.number, top.definiteness].filter(Boolean).join(' • ');
-      cur.notes.push({ ok: true, text: `✓ Recognized — "${top.headword}"${morph ? ` (${morph})` : ''}` });
+      cur.notes.push({ ok: true, text: '✓ Grammatically Correct' });
     }
   }
   return parsed;
