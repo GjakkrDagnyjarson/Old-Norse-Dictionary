@@ -328,9 +328,9 @@ function fastInflected(word, exactOnly = true) {
     SELECT l.id, l.headword, l.pos, l.gender, l.prep_cases, l.zoega_def,
            w.form, w.case_name, w.number, w.definiteness
     FROM wordforms w JOIN lemmas l ON l.id = w.lemma_id
-    WHERE w.normalized_form = ?
+    WHERE w.normalized_form = ? OR LOWER(w.form) = ?
   `);
-  st.bind([nf]);
+  st.bind([nf, word.toLowerCase()]);
   const all = [];
   while (st.step()) all.push({ source: 'inflected', ...st.getAsObject() });
   st.free();
