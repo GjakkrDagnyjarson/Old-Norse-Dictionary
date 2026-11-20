@@ -369,6 +369,30 @@ function lookupGrammarToken(raw) {
     }
   }
 
+  // 4c. 2sg Imperatives & enclitic -ðu / -du / -tu pronouns (e.g., seg -> segja, segðu -> seg + þú)
+  if (!hits.length && clean.length >= 2) {
+    const encliticRe = /(ðu|du|tu)$/;
+    const hasEnclitic = encliticRe.test(clean) && clean.length >= 4;
+    const impStem = hasEnclitic ? clean.replace(encliticRe, '') : clean;
+    const candInfs = [...new Set([impStem + 'a', impStem + 'ja', impStem + 'va', impStem])];
+    for (const inf of candInfs) {
+      const si = db.prepare("SELECT id, headword, pos, gender, prep_cases, zoega_def FROM lemmas WHERE LOWER(headword) = ? AND LOWER(pos) LIKE '%verb%' LIMIT 1");
+      si.bind([inf]);
+      if (si.step()) {
+        hits.push({
+          source: 'derived',
+          case_name: 'IMP',
+          number: '2SG',
+          definiteness: hasEnclitic ? 'VERB (+ enclitic þú)' : 'VERB',
+          ...si.getAsObject()
+        });
+        si.free();
+        break;
+      }
+      si.free();
+    }
+  }
+
   // 5. Compound-word decomposition (e.g., norðrskýjum -> norðr + skýjum)
   if (!hits.length && clean.length >= 6) {
     for (let split = 3; split <= clean.length - 3; split++) {
@@ -511,7 +535,7 @@ function runGrammarAnalysis() {
         sp.free();
       }
       if (tagPos === 'verb' && copy.zoega_def && /\bII\)/.test(copy.zoega_def)) {
-        const part2 = copy.zoega_def.split(/\bII\)/)[1] || '';
+        const part2 = copy.zoega_def.split(/\bII\)/) || '';
         copy.zoega_def = part2.replace(/^\s*\([^)]+\),\s*v\.\s*/i, '').trim();
       }
       return copy;
