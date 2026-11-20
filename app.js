@@ -297,143 +297,173 @@ function inferGovCases(h, kind = 'prep') {
   return cases.join('/');
 }
 
-function lookupGrammarToken(raw) {
-  const clean = normTok(raw);
-  if (!clean) return [];
-  const hits = [];
+const GRAMMAR_CACHE = new Map();
+const NORM_CHAR_MAP = {
+  'á':'a','é':'e','í':'i','ó':'o','ú':'u','ý':'y',
+  'ǫ':'o','ö':'o','ø':'o','œ':'oe','æ':'ae','ð':'d','þ':'th'
+};
+function foldON(str) {
+  return str.toLowerCase().replace(/[áéíóúýǫöøœæðþ]/g, ch => NORM_CHAR_MAP[ch] || ch);
+}
 
-  const s1 = db.prepare(`
+function fastInflected(word, exactOnly = true) {
+  const nf = foldON(word);
+  const st = db.prepare(`
     SELECT l.id, l.headword, l.pos, l.gender, l.prep_cases, l.zoega_def,
            w.form, w.case_name, w.number, w.definiteness
     FROM wordforms w JOIN lemmas l ON l.id = w.lemma_id
-    WHERE LOWER(w.form) = ? OR w.normalized_form = ?
+    WHERE w.normalized_form = ?
   `);
-  s1.bind([clean, clean]);
-  while (s1.step()) hits.push({ source: 'inflected', ...s1.getAsObject() });
-  s1.free();
+  st.bind([nf]);
+  const all = [];
+  while (st.step()) all.push({ source: 'inflected', ...st.getAsObject() });
+  st.free();
+  const exact = all.filter(r => (r.form || '').toLowerCase() === word);
+  return exact.length ? exact : (exactOnly ? [] : all);
+}
 
-  const s2 = db.prepare(`SELECT id, headword, pos, gender, prep_cases, zoega_def FROM lemmas WHERE LOWER(headword) = ? OR normalized_search = ?`);
-  s2.bind([clean, clean]);
-  while (s2.step()) hits.push({ source: 'lemma', ...s2.getAsObject() });
-  s2.free();
+function fastLemmas(word, posFilter = '', exactOnly = true) {
+  const ns = foldON(word);
+  const st = db.prepare(`
+    SELECT id, headword, pos, gender, prep_cases, zoega_def
+    FROM lemmas WHERE normalized_search = ?
+  `);
+  st.bind([ns]);
+  const all = [];
+  while (st.step()) {
+    const row = { source: 'lemma', ...st.getAsObject() };
+    if (!posFilter || (row.pos || '').toLowerCase().includes(posFilter)) all.push(row);
+  }
+  st.free();
+  const exact = all.filter(r => (r.headword || '').toLowerCase() === word);
+  return exact.length ? exact : (exactOnly ? [] : all);
+}
 
+function lookupGrammarToken(raw) {
+  const clean = normTok(raw);
+  if (!clean) return [];
+  if (GRAMMAR_CACHE.has(clean)) return GRAMMAR_CACHE.get(clean).map(x => ({ ...x }));
+
+  let hits = [];
+
+  // 1. Indexed wordform lookup (exact first, folded fallback if needed)
+  hits.push(...fastInflected(clean, false));
+
+  // 2. Indexed base lemma lookup
+  hits.push(...fastLemmas(clean, '', false));
+
+  // 3. Present participle (-andi / -ndi -> verb infinitive)
   if (!hits.length && clean.endsWith('ndi') && clean.length > 4) {
     const stem = clean.endsWith('andi') ? clean.slice(0, -4) + 'a' : clean.slice(0, -3) + 'a';
-    const s3 = db.prepare(`SELECT id, headword, pos, gender, prep_cases, zoega_def FROM lemmas WHERE LOWER(headword) = ?`);
-    s3.bind([stem]);
-    while (s3.step()) hits.push({ source: 'derived', case_name: 'PRES. PART.', ...s3.getAsObject() });
-    s3.free();
+    for (const r of fastLemmas(stem, 'verb')) {
+      hits.push({ ...r, source: 'derived', case_name: 'PRES. PART.' });
+    }
   }
 
+  // 4. Subjunctive (-i -> infinitive -a)
   if (clean.endsWith('i') && clean.length > 3 && !hits.some(h => /verb/i.test(h.pos || ''))) {
     const inf = clean.slice(0, -1) + 'a';
-    const s4 = db.prepare(`SELECT id, headword, pos, gender, prep_cases, zoega_def FROM lemmas WHERE LOWER(headword) = ? AND LOWER(pos) LIKE '%verb%'`);
-    s4.bind([inf]);
-    while (s4.step()) hits.push({ source: 'derived', case_name: 'SUBJ.', ...s4.getAsObject() });
-    s4.free();
+    for (const r of fastLemmas(inf, 'verb')) {
+      hits.push({ ...r, source: 'derived', case_name: 'SUBJ.' });
+    }
   }
 
-  // 4b. -ja verb stem rule (j drops before i/e: sverið -> sverja, berið -> berja)
+  // 4b. -ja verb stem rule (sverið -> sverja, berið -> berja)
   if (!hits.length && /(ið|ir|i)$/.test(clean) && clean.length > 3) {
-    const jInf = clean.replace(/(ið|ir|i)$/, 'ja');
-    const sj = db.prepare("SELECT id, headword, pos, gender, prep_cases, zoega_def FROM lemmas WHERE LOWER(headword) = ? AND LOWER(pos) LIKE '%verb%'");
-    sj.bind([jInf]);
-    while (sj.step()) {
-      const tag = clean.endsWith('ið') ? 'PRES/IMP • 2PL' : clean.endsWith('ir') ? 'PRES • 2SG/3SG' : 'SUBJ/IMP';
-      hits.push({ source: 'derived', case_name: tag, ...sj.getAsObject() });
+    const jinf = clean.replace(/(ið|ir|i)$/, 'ja');
+    const tag = clean.endsWith('ið') ? 'PRES/IMP • 2PL' : clean.endsWith('ir') ? 'PRES • 2SG/3SG' : 'SUBJ/IMP';
+    for (const r of fastLemmas(jinf, 'verb')) {
+      hits.push({ ...r, source: 'derived', case_name: tag });
     }
-    sj.free();
   }
 
-  // 4c. 2sg Imperatives & enclitic -ðu / -du / -tu pronouns (e.g., seg -> segja, segðu -> seg + þú)
+  // 4c. Enclitic þú (-ðu / -du / -tu) on inflected verbs (sáttu -> sátt + þú) OR 2sg imperatives (segðu -> seg + þú)
   if (!hits.length && clean.length >= 2) {
     const encliticRe = /(ðu|du|tu)$/;
     const hasEnclitic = encliticRe.test(clean) && clean.length >= 4;
-    const impStem = hasEnclitic ? clean.replace(encliticRe, '') : clean;
-    const candInfs = [...new Set([impStem + 'a', impStem + 'ja', impStem + 'va', impStem])];
-    for (const inf of candInfs) {
-      const si = db.prepare("SELECT id, headword, pos, gender, prep_cases, zoega_def FROM lemmas WHERE LOWER(headword) = ? AND LOWER(pos) LIKE '%verb%' LIMIT 1");
-      si.bind([inf]);
-      if (si.step()) {
-        hits.push({
-          source: 'derived',
-          case_name: 'IMP',
-          number: '2SG',
-          definiteness: hasEnclitic ? 'VERB (+ enclitic þú)' : 'VERB',
-          ...si.getAsObject()
-        });
-        si.free();
-        break;
+    const stem = hasEnclitic ? clean.replace(encliticRe, '') : clean;
+
+    if (hasEnclitic) {
+      for (const r of fastInflected(stem, true)) {
+        if (/verb/i.test(r.pos || '') || /VERB/i.test(r.definiteness || '')) {
+          hits.push({ ...r, source: 'derived', definiteness: `${r.definiteness || 'VERB'} (+ enclitic þú)` });
+        }
       }
-      si.free();
+    }
+    if (!hits.length) {
+      const candInfs = [...new Set([stem + 'a', stem + 'ja', stem + 'va', stem])];
+      for (const inf of candInfs) {
+        const vHit = fastLemmas(inf, 'verb', true).shift();
+        if (vHit) {
+          hits.push({
+            ...vHit,
+            source: 'derived',
+            case_name: 'IMP',
+            number: '2SG',
+            definiteness: hasEnclitic ? 'VERB (+ enclitic þú)' : 'VERB'
+          });
+          break;
+        }
+      }
     }
   }
 
-  // 4c. 2sg Imperatives & enclitic -ðu / -du / -tu pronouns (e.g., seg -> segja, segðu -> seg + þú)
-  if (!hits.length && clean.length >= 2) {
-    const encliticRe = /(ðu|du|tu)$/;
-    const hasEnclitic = encliticRe.test(clean) && clean.length >= 4;
-    const impStem = hasEnclitic ? clean.replace(encliticRe, '') : clean;
-    const candInfs = [...new Set([impStem + 'a', impStem + 'ja', impStem + 'va', impStem])];
-    for (const inf of candInfs) {
-      const si = db.prepare("SELECT id, headword, pos, gender, prep_cases, zoega_def FROM lemmas WHERE LOWER(headword) = ? AND LOWER(pos) LIKE '%verb%' LIMIT 1");
-      si.bind([inf]);
-      if (si.step()) {
-        hits.push({
-          source: 'derived',
-          case_name: 'IMP',
-          number: '2SG',
-          definiteness: hasEnclitic ? 'VERB (+ enclitic þú)' : 'VERB',
-          ...si.getAsObject()
-        });
-        si.free();
-        break;
+  // 4d. Mediopassive / reflexive verbs (-sk / -st: opnast, beygist, snerisk)
+  if (!hits.length && /(sk|st)$/.test(clean) && clean.length >= 4) {
+    const mStem = clean.slice(0, -2);
+    for (const cand of [mStem, mStem + 'r', mStem + 'a', mStem + 'i']) {
+      for (const r of fastInflected(cand, true)) {
+        if (/verb/i.test(r.pos || '') || /VERB/i.test(r.definiteness || '')) {
+          hits.push({ ...r, source: 'derived', definiteness: `${r.definiteness || 'VERB'} (MEDIOPASSIVE)` });
+        }
       }
-      si.free();
+      if (hits.length) break;
+    }
+    if (!hits.length) {
+      for (const inf of [mStem + 'a', mStem + 'ja', mStem.replace(/[ia]$/, '') + 'a', mStem.replace(/[ia]$/, '') + 'ja']) {
+        const vHit = fastLemmas(inf, 'verb', true).shift();
+        if (vHit) {
+          hits.push({ ...vHit, source: 'derived', case_name: 'MEDIOPASSIVE (-sk/-st)', definiteness: 'VERB' });
+          break;
+        }
+      }
     }
   }
 
-  // 5. Compound-word decomposition (e.g., norðrskýjum -> norðr + skýjum)
+  // 5. Fast indexed compound-word decomposition (vetrveðri -> vetr + veðri, snjófǫllum -> snjór + fǫllum)
   if (!hits.length && clean.length >= 6) {
     for (let split = 3; split <= clean.length - 3; split++) {
       const left = clean.slice(0, split);
       const right = clean.slice(split);
-      const sl = db.prepare("SELECT id, headword, pos, gender, zoega_def FROM lemmas WHERE LOWER(headword) IN (?, ?) LIMIT 1");
-      sl.bind([left, left + '-']);
-      const lHit = sl.step() ? sl.getAsObject() : null;
-      sl.free();
+      const lHit = fastLemmas(left, '', true).shift() || fastLemmas(left + 'r', '', true).shift() || fastInflected(left, true).shift();
       if (!lHit) continue;
-
-      const sr = db.prepare(`
-        SELECT l.id, l.headword, l.pos, l.gender, l.prep_cases, l.zoega_def,
-               w.form, w.case_name, w.number, w.definiteness
-        FROM wordforms w JOIN lemmas l ON l.id = w.lemma_id
-        WHERE LOWER(w.form) = ? OR w.normalized_form = ? LIMIT 3
-      `);
-      sr.bind([right, right]);
-      while (sr.step()) {
-        const rHit = sr.getAsObject();
-        hits.push({
-          ...rHit,
-          source: 'compound',
-          headword: `${lHit.headword} + ${rHit.headword}`
-        });
+      const rHits = fastInflected(right, true);
+      if (rHits.length) {
+        for (const rHit of rHits.slice(0, 3)) {
+          hits.push({ ...rHit, source: 'compound', headword: `${lHit.headword} + ${rHit.headword}` });
+        }
+        break;
       }
-      sr.free();
-      if (hits.length) break;
+      const rLem = fastLemmas(right, '', true).shift();
+      if (rLem) {
+        hits.push({ ...rLem, source: 'compound', headword: `${lHit.headword} + ${rLem.headword}` });
+        break;
+      }
     }
   }
 
   hits.sort((a, b) => {
     const score = x => {
-      let s = (x.source === 'lemma' ? 0 : x.source === 'derived' ? 1 : 2);
-      if (/verb|prep|pron/i.test(x.pos || '')) s -= 1;
-      if (/^from\s+/i.test((x.zoega_def || '').trim())) s += 3;
-      return s;
+      let sc = (x.source === 'lemma' ? 0 : x.source === 'derived' ? 1 : 2);
+      if (/verb|prep|pron/i.test(x.pos || '')) sc -= 1;
+      if (/^from\s+/i.test((x.zoega_def || '').trim())) sc += 3;
+      return sc;
     };
     return score(a) - score(b);
   });
-  return hits;
+
+  GRAMMAR_CACHE.set(clean, hits);
+  return hits.map(x => ({ ...x }));
 }
 
 function getPronPerson(word) {
