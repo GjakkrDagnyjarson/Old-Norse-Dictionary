@@ -25,7 +25,7 @@ _addON(['milli','millum','ímilli'], { headword:'milli', pos:'preposition', gov_
 _addON(['at'], { headword:'at', pos:'preposition / conjunction', gov_cases:['DAT'], zoega_def:'prep. (dat.) at, to; conj. that' });
 _addON(['ok','en','er','sem','ef','þó','þótt','áðr','síðan','meðan','eða','eðr','né','bæði'], { headword:'conjunction', pos:'conjunction', zoega_def:'Old Norse conjunction / relative particle' });
 _addON(['eigi','ekki','æva','svá','nú','hér','þar','hvar','upp','niðr','út','inn','fram','aptr','vel','illa','mjǫk','mjök'], { headword:'adverb', pos:'adverb', zoega_def:'Old Norse adverb' });
-[
+const _ON_DETS = [
   ['hinn','hinn','m.','NOM','SG'],['hinn','hinn','m.','ACC','SG'],['hin','hinn','f.','NOM','SG'],['hin','hinn','n.','NOM','PL'],['hin','hinn','n.','ACC','PL'],
   ['hit','hinn','n.','NOM','SG'],['hit','hinn','n.','ACC','SG'],['hið','hinn','n.','NOM','SG'],['hið','hinn','n.','ACC','SG'],
   ['hina','hinn','f.','ACC','SG'],['hinni','hinn','f.','DAT','SG'],['hinu','hinn','n.','DAT','SG'],['hinum','hinn','m.','DAT','SG'],['hinum','hinn','m.','DAT','PL'],
@@ -33,15 +33,26 @@ _addON(['eigi','ekki','æva','svá','nú','hér','þar','hvar','upp','niðr','ú
   ['sá','sá','m.','NOM','SG'],['sú','sá','f.','NOM','SG'],['þat','sá','n.','NOM','SG'],['þat','sá','n.','ACC','SG'],['þann','sá','m.','ACC','SG'],
   ['þá','sá','f.','ACC','SG'],['þeim','sá','m.','DAT','SG'],['þeim','sá','m.','DAT','PL'],['þeirri','sá','f.','DAT','SG'],['því','sá','n.','DAT','SG'],
   ['þess','sá','m.','GEN','SG'],['þeirrar','sá','f.','GEN','SG'],['þeir','sá','m.','NOM','PL'],['þær','sá','f.','NOM','PL'],['þau','sá','n.','NOM','PL']
-].forEach(d => _addON([d], { headword:d, pos:'pronoun', gender:d, case_name:d, number:d, definiteness:'DEF', zoega_def:'demonstrative / definite article' }));
-[
-  ['ek','ek','NOM','SG'],['mik','ek','ACC','SG'],['mér','ek','DAT','SG'],['mín','ek','GEN','SG'],
-  ['þú','þú','NOM','SG'],['þik','þú','ACC','SG'],['þér','þú','DAT','SG'],['þín','þú','GEN','SG'],
-  ['hann','hann','NOM','SG'],['hann','hann','ACC','SG'],['honum','hann','DAT','SG'],['hans','hann','GEN','SG'],
-  ['hon','hon','NOM','SG'],['hón','hon','NOM','SG'],['hana','hon','ACC','SG'],['henni','hon','DAT','SG'],['hennar','hon','GEN','SG'],
-  ['vér','vér','NOM','PL'],['oss','vér','ACC','PL'],['oss','vér','DAT','PL'],['vár','vér','GEN','PL']
-].forEach(p => _addON([p], { headword:p, pos:'pronoun', case_name:p, number:p, definiteness:'INDEF', zoega_def:'personal pronoun' }));
-[
+];
+for (const row of _ON_DETS) {
+  const [f, hw, g, c, n] = row;
+  _addON([f], { headword:hw, pos:'pronoun', gender:g, case_name:c, number:n, definiteness:'DEF', zoega_def:'demonstrative / definite article' });
+}
+
+const _ON_PRONS = [
+  ['ek','ek','n.','NOM','SG','1st pers. pron. I'],['mik','ek','n.','ACC','SG','1st pers. pron. me'],['mér','ek','n.','DAT','SG','1st pers. pron. to me'],['mín','ek','n.','GEN','SG','1st pers. pron. of me'],
+  ['þú','þú','n.','NOM','SG','2nd pers. pron. thou'],['þik','þú','n.','ACC','SG','2nd pers. pron. thee'],['þér','þú','n.','DAT','SG','2nd pers. pron. to thee'],['þín','þú','n.','GEN','SG','2nd pers. pron. of thee'],
+  ['hann','hann','m.','NOM','SG','3rd pers. pron. he'],['hann','hann','m.','ACC','SG','3rd pers. pron. him'],['honum','hann','m.','DAT','SG','3rd pers. pron. to him'],['hans','hann','m.','GEN','SG','3rd pers. pron. his'],
+  ['hon','hon','f.','NOM','SG','3rd pers. pron. she'],['hón','hon','f.','NOM','SG','3rd pers. pron. she'],['hana','hon','f.','ACC','SG','3rd pers. pron. her'],['henni','hon','f.','DAT','SG','3rd pers. pron. to her'],['hennar','hon','f.','GEN','SG','3rd pers. pron. her'],
+  ['vér','vér','n.','NOM','PL','1st pers. pron. we'],['oss','vér','n.','ACC','PL','1st pers. pron. us'],['oss','vér','n.','DAT','PL','1st pers. pron. us'],['vár','vér','n.','GEN','PL','1st pers. pron. our'],
+  ['hvat','hvat','n.','NOM','SG','interrogative pron. what'],['hvat','hvat','n.','ACC','SG','interrogative pron. what'],['hví','hvat','n.','DAT','SG','interrogative pron. why'],['hvers','hvat','n.','GEN','SG','interrogative pron. of what']
+];
+for (const row of _ON_PRONS) {
+  const [f, hw, g, c, n, def] = row;
+  _addON([f], { headword:hw, pos:'pronoun', gender:g, case_name:c, number:n, definiteness:'INDEF', zoega_def:def });
+}
+
+const _ON_ENCLITICS = [
   ['sáttu','sjá','PAST','2SG','(+ enclitic þú) v. to see (sátt + þú)'],
   ['segðu','segja','PRES','2SG','(+ enclitic þú) v. to say, tell (seg + þú)'],
   ['farðu','fara','PRES','2SG','(+ enclitic þú) v. to go, travel (far + þú)'],
@@ -57,9 +68,8 @@ _addON(['eigi','ekki','æva','svá','nú','hér','þar','hvar','upp','niðr','ú
   ['kanntu','kunna','PRES','2SG','(+ enclitic þú) v. to know, can (kannt + þú)'],
   ['veiztu','vita','PRES','2SG','(+ enclitic þú) v. to know (veizt + þú)'],
   ['áttu','eiga','PRES','2SG','(+ enclitic þú) v. to own, have (átt + þú)']
-].forEach(e => _addON([e], { headword:e, pos:'verb', case_name:e, number:e, definiteness:'ENCLITIC', zoega_def:e }));
-
-[
-  ['hvat','hvat','n.','NOM','SG'],['hvat','hvat','n.','ACC','SG'],
-  ['hví','hvat','n.','DAT','SG'],['hvers','hvat','n.','GEN','SG']
-].forEach(h => _addON([h], { headword:h, pos:'pronoun', gender:h, case_name:h, number:h, definiteness:'INDEF', zoega_def:'interrogative pron. what, why' }));
+];
+for (const row of _ON_ENCLITICS) {
+  const [f, hw, c, n, def] = row;
+  _addON([f], { headword:hw, pos:'verb', case_name:c, number:n, definiteness:'ENCLITIC', zoega_def:def });
+}
