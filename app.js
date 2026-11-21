@@ -41,9 +41,9 @@ function renderAlphaGrid() {
       if (l === '↻') {
         const cls = window.__updReady ? 'upd-ready' : 'upd-ok';
         const ttl = window.__updReady ? 'Update available — tap to reload' : 'Up to date — tap to check';
-        return '<button id="updateBtn" class="alpha-btn ' + cls + '" onclick="handleUpdateClick()" title="' + ttl + '"><img src="glyphs/upd.png?v=33" alt="Update"></button>';
+        return '<button id="updateBtn" class="alpha-btn ' + cls + '" onclick="handleUpdateClick()" title="' + ttl + '"><img src="glyphs/upd.png?v=35" alt="Update"></button>';
       }
-      return '<button class="alpha-btn" onclick="filterByLetter(\'' + l + '\')"><img src="glyphs/' + encodeURIComponent(l) + '.png?v=33" alt="' + l + '"></button>';
+      return '<button class="alpha-btn" onclick="filterByLetter(\'' + l + '\')"><img src="glyphs/' + encodeURIComponent(l) + '.png?v=35" alt="' + l + '"></button>';
     }).join('') +
     '</div>'
   ).join('');
