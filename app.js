@@ -28,7 +28,7 @@ function renderAlphaGrid() {
   const grid = document.getElementById('alphaGrid');
   if (!grid) return;
   const rows = [
-    ['↻', 'a', 'á', 'b', 'd', 'ð'],
+    ['UPD', 'a', 'á', 'b', 'd', 'ð'],
     ['e', 'é', 'f', 'g', 'h', 'i'],
     ['í', 'j', 'k', 'l', 'm', 'n'],
     ['o', 'ó', 'p', 'r', 's', 't'],
@@ -38,15 +38,26 @@ function renderAlphaGrid() {
   grid.innerHTML = rows.map(row =>
     '<div class="alpha-row">' +
     row.map(l => {
-      if (l === '↻') {
+      if (l === 'UPD') {
         const cls = window.__updReady ? 'upd-ready' : 'upd-ok';
         const ttl = window.__updReady ? 'Update available — tap to reload' : 'Up to date — tap to check';
-        return '<button id="updateBtn" class="alpha-btn ' + cls + '" onclick="handleUpdateClick()" title="' + ttl + '" aria-label="Update"></button>';
+        return '<button id="updateBtn" type="button" class="alpha-btn ' + cls + '" data-action="upd" title="' + ttl + '" aria-label="Update"></button>';
       }
-      return '<button class="alpha-btn" onclick="filterByLetter('' + l + '')" aria-label="' + l + '"></button>';
+      return '<button type="button" class="alpha-btn" data-letter="' + l + '" aria-label="' + l + '"></button>';
     }).join('') +
     '</div>'
   ).join('');
+  grid.onclick = function(e) {
+    const btn = e.target.closest('.alpha-btn');
+    if (!btn) return;
+    if (btn.dataset.action === 'upd') {
+      if (typeof handleUpdateClick === 'function') handleUpdateClick();
+      return;
+    }
+    if (btn.dataset.letter) {
+      filterByLetter(btn.dataset.letter);
+    }
+  };
 }
 
 function filterByLetter(letter) {
