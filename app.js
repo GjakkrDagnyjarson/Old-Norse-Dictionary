@@ -66,9 +66,9 @@ function rowHTML(r) {
   const tag = [r.pos, r.gender].filter(Boolean).join(' • ');
   const mf = r.matchedForm ? r.matchedForm.replace(/'/g, "\\'") : '';
   return `<div class="word-row" onclick="openEntry(${r.id}, '${mf}')">
-    <span class="wr-hw">${esc(r.headword)}</span>
-    ${tag ? `<span class="wr-sub">(${esc(tag)})</span>` : ''}
-    ${r.matchedForm ? `<span class="wr-sub">← ${esc(r.matchedForm)}</span>` : ''}
+    <span class="wr-hw">${esc(r.headword)}
+    ${tag ? `<span class="wr-sub">(${esc(tag)})` : ''}
+    ${r.matchedForm ? `<span class="wr-sub">← ${esc(r.matchedForm)}` : ''}
   </div>`;
 }
 function appendMoreRows() {
@@ -86,7 +86,7 @@ function renderList(rows) {
   $('root').classList.add('open');
   $('listCard').style.display = 'block';
   $('listCard').scrollTop = 0;
-  $('listCard').innerHTML = rows.length ? '' : '<div class="word-row"><span class="wr-sub">No entries found.</span></div>';
+  $('listCard').innerHTML = rows.length ? '' : '<div class="word-row"><span class="wr-sub">No entries found.</div>';
   appendMoreRows();
   $('listCard').onscroll = () => {
     const el = $('listCard');
@@ -183,7 +183,7 @@ function openEntry(id, matchedForm = '') {
 
   $('detailCard').innerHTML = `
     <div class="det-top">
-      <div><span class="det-hw">${esc(r.headword)}</span>${meta ? `<span class="det-pos">${esc(meta)}</span>` : ''}</div>
+      <div><span class="det-hw">${esc(r.headword)}${meta ? `<span class="det-pos">${esc(meta)}` : ''}</div>
       <button class="back-pill" onclick="RETURN_TO_GRAMMAR ? openGrammarTool() : renderAlphaGrid()">←</button>
     </div>
     <div class="det-yf">Younger Futhark: ${toYoungerFuthark(r.headword)}</div>
@@ -795,8 +795,8 @@ function runGrammarAnalysis() {
       const gloss = (h.zoega_def || '').replace(/\s+/g, ' ').slice(0, 95);
       const mf = h.form ? h.form.replace(/'/g, "\\'") : '';
       return `<div class="g-parse">
-        <span class="g-link" onclick="RETURN_TO_GRAMMAR=true; openEntry(${h.id}, '${mf}')">${esc(h.headword)}</span> ${meta ? `<em>(${esc(meta)})</em>` : ''}
-        — <span style="color:#E8C988">${esc(morphs.join(' / '))}</span>
+        <span class="g-link" onclick="RETURN_TO_GRAMMAR=true; openEntry(${h.id}, '${mf}')">${esc(h.headword)} ${meta ? `<em>(${esc(meta)})</em>` : ''}
+        — <span style="color:#E8C988">${esc(morphs.join(' / '))}
         ${gloss ? `<div style="opacity:.8">${esc(gloss)}</div>` : ''}
       </div>`;
     }).join('');
@@ -821,7 +821,7 @@ function openGrammarTool() {
   $('detailCard').style.display = 'block';
   $('detailCard').innerHTML = `
     <div class="det-top">
-      <span class="det-hw" style="font-size:18px">Grammar &amp; Syntax Analyzer</span>
+      <span class="det-hw" style="font-size:18px">Grammar &amp; Syntax Analyzer
       <button class="back-pill" onclick="renderAlphaGrid()">←</button>
     </div>
     <textarea id="gramInput" class="gram-area" placeholder="Enter Old Norse text (e.g. Ek held hinu fornu blóði)...">${esc(LAST_GRAMMAR_TEXT)}</textarea>
