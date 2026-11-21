@@ -58,3 +58,8 @@ _addON(['eigi','ekki','æva','svá','nú','hér','þar','hvar','upp','niðr','ú
   ['veiztu','vita','PRES','2SG','(+ enclitic þú) v. to know (veizt + þú)'],
   ['áttu','eiga','PRES','2SG','(+ enclitic þú) v. to own, have (átt + þú)']
 ].forEach(e => _addON([e], { headword:e, pos:'verb', case_name:e, number:e, definiteness:'ENCLITIC', zoega_def:e }));
+
+[
+  ['hvat','hvat','n.','NOM','SG'],['hvat','hvat','n.','ACC','SG'],
+  ['hví','hvat','n.','DAT','SG'],['hvers','hvat','n.','GEN','SG']
+].forEach(h => _addON([h], { headword:h, pos:'pronoun', gender:h, case_name:h, number:h, definiteness:'INDEF', zoega_def:'interrogative pron. what, why' }));

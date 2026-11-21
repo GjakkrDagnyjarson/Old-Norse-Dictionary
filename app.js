@@ -795,7 +795,7 @@ function analyzeGrammarClause(words) {
       }
     }
     const verbGovHit = cur.hits.find(h => /^(PRES|PAST)$/i.test(h.case_name || '') && inferGovCases(h, 'verb'));
-    if (verbGovHit && cur.raw.toLowerCase() !== 'ok') {
+    if (verbGovHit && !/^(ok|hvat)$/i.test(cur.raw)) {
       const req = inferGovCases(verbGovHit, 'verb');
       const objTok = parsed.slice(i + 1, i + 5).find(t => t.hits.some(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
       if (objTok) {
