@@ -34,7 +34,7 @@ function renderAlphaGrid() {
     ['æ', 'ø', 'ǫ', 'œ']
   ];
   $('alphaGrid').innerHTML = rows.map(r =>
-    `<div class="alpha-row">${r.map(l => `<button id="${l === '↻' ? 'updateBtn' : ''}" class="alpha-btn ${l === '↻' ? (window.__updReady ? 'upd-ready' : 'upd-ok') : ''}" onclick="${l === '↻' ? 'handleUpdateClick()' : `filterByLetter('${l}')`}" title="${l === '↻' ? (window.__updReady ? 'Update available — tap to reload' : 'Up to date — tap to check') : ''}">${l}</button>`).join('')}</div>`
+    `<div class="alpha-row">${r.map(l => `<button id="${l === '↻' ? 'updateBtn' : ''}" class="alpha-btn ${l === '↻' ? (window.__updReady ? 'upd-ready' : 'upd-ok') : ''}" onclick="${l === '↻' ? 'handleUpdateClick()' : `filterByLetter('${l}')`}" title="${l === '↻' ? (window.__updReady ? 'Update available — tap to reload' : 'Up to date — tap to check') : ''}"><svg class="knot-bg" viewBox="0 0 64 64" fill="none" xmlns="http://w3.org"><defs><linearGradient id="kg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5c3a1c"/><stop offset="50%" stop-color="#b5834e"/><stop offset="100%" stop-color="#e3c291"/></linearGradient></defs><rect x="11" y="11" width="42" height="42" rx="9" stroke="url(#kg)" stroke-width="2.4" opacity="0.88"/><rect x="11" y="11" width="42" height="42" rx="9" transform="rotate(45 32 32)" stroke="url(#kg)" stroke-width="2.4" opacity="0.88"/><circle cx="32" cy="32" r="17.5" stroke="#1a0d05" stroke-width="3.2"/><circle cx="32" cy="32" r="17.5" stroke="url(#kg)" stroke-width="1.6" opacity="0.9"/></svg><span class="knot-char">${l}</span></button>`).join('')}</div>`
   ).join('');
   $('root').classList.remove('open'); $('alphaGrid').style.display = 'flex';
   $('listCard').style.display = 'none';
