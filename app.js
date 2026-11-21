@@ -738,6 +738,39 @@ function detectModernScandinavian(raw) {
   return null;
 }
 
+
+function suggestFormForTok(tok, reqCases, reqNum, reqGender) {
+  if (!tok || !tok.hits || !tok.hits.length) return '';
+  const cases = (reqCases || []).map(c => c.toUpperCase());
+  const num = (reqNum || '').toUpperCase();
+  const gen = (reqGender || '').toLowerCase().replace(/[^mfn]/g, '');
+  const hws = [...new Set(tok.hits.map(h => h.headword).filter(Boolean))];
+  if (typeof ON_CLOSED_CLASS !== 'undefined') {
+    for (const k of Object.keys(ON_CLOSED_CLASS)) {
+      const m = ON_CLOSED_CLASS[k].find(e =>
+        hws.includes(e.headword) &&
+        (!cases.length || cases.includes((e.case_name || '').toUpperCase())) &&
+        (!num || (e.number || '').toUpperCase() === num) &&
+        (!gen || !e.gender || e.gender.toLowerCase().replace(/[^mfn]/g, '') === gen)
+      );
+      if (m) return m.form;
+    }
+  }
+  const lids = [...new Set(tok.hits.map(h => h.id).filter(id => id > 0))];
+  if (lids.length && typeof db !== 'undefined' && db) {
+    try {
+      const cList = cases.map(c => `'${c}'`).join(',');
+      const q = `SELECT form FROM wordforms WHERE lemma_id IN (${lids.join(',')})` +
+        (cList ? ` AND UPPER(case_name) IN (${cList})` : '') +
+        (num ? ` AND UPPER(number)='${num}'` : '') +
+        ` LIMIT 1`;
+      const res = db.exec(q);
+      if (res.length && res[0].values.length) return res[0].values[0][0];
+    } catch (_) {}
+  }
+  return '';
+}
+
 function analyzeGrammarClause(words) {
   const parsed = words.map(t => ({ raw: t, hits: lookupGrammarToken(t), notes: [] }));
   for (let i = 0; i < parsed.length; i++) {
@@ -757,7 +790,7 @@ function analyzeGrammarClause(words) {
       const verbTok = windowToks.find(t => t.hits.some(h => /^(PRES|PAST)$/i.test(h.case_name || '')));
       if (verbTok) {
         const vForms = verbTok.hits.filter(h => /^(PRES|PAST)$/i.test(h.case_name || '')).map(h => (h.number || '').toUpperCase());
-        if (vForms.includes(subjP)) cur.notes.push({ ok: true, text: `✓ Subject (${subjP}) agrees with verb "${verbTok.raw}"` });
+        if (vForms.includes(subjP)) cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with verb "${verbTok.raw}" (${subjP})` });
         else if (vForms.some(v => /^(SG|PL)$/.test(v))) cur.notes.push({ ok: false, text: `✗ Subject (${subjP}) does not match verb "${verbTok.raw}" (${[...new Set(vForms.filter(v => /^(SG|PL)$/.test(v)))].join('/')})` });
       }
     }
@@ -801,7 +834,7 @@ function analyzeGrammarClause(words) {
         ));
         if (fullMatch) {
           const gLabel = normG(fullMatch.gender) ? normG(fullMatch.gender) + '. ' : '';
-          cur.notes.push({ ok: true, text: `✓ Agrees in gender/case/number (${gLabel}${fullMatch.case_name.toUpperCase()} ${fullMatch.number.toUpperCase()}) with "${nounTok.raw}"` });
+          cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with "${nounTok.raw}" (${gLabel}${fullMatch.case_name.toUpperCase()} ${fullMatch.number.toUpperCase()})` });
         } else {
           const cnMatch = detHits.find(d => nounHits.some(n =>
             (d.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() &&
@@ -811,7 +844,7 @@ function analyzeGrammarClause(words) {
           if (cnMatch && n0) {
             cur.notes.push({ ok: false, text: `✗ Gender mismatch: "${cur.raw}" is ${normG(cnMatch.gender) || '?'}., but noun "${nounTok.raw}" is ${normG(n0.gender) || '?'}.` });
           } else {
-            cur.notes.push({ ok: false, text: `✗ Case/number mismatch between "${cur.raw}" and noun "${nounTok.raw}"` });
+            const nRef = nounHits.find(Boolean); const sugCN = nRef ? suggestFormForTok(cur, [nRef.case_name], nRef.number, normG(nRef.gender)) : ''; cur.notes.push({ ok: false, text: `✗ Case/number mismatch between "${cur.raw}" and noun "${nounTok.raw}"${sugCN ? ` — use "${sugCN}"` : ''}` });
           }
         }
       }
@@ -819,7 +852,7 @@ function analyzeGrammarClause(words) {
     if (!cur.notes.length) {
       const top = cur.hits[0];
       const morph = [top.case_name, top.number, top.definiteness].filter(Boolean).join(' • ');
-      cur.notes.push({ ok: true, text: '✓ Grammatically Correct' });
+      cur.notes.push({ ok: true, text: morph ? `✓ Grammatically correct (${morph})` : '✓ Grammatically correct' });
     }
   }
   return parsed;
