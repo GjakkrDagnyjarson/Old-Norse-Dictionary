@@ -167,6 +167,31 @@ html, body {
   color: transparent !important;
   filter: drop-shadow(0 0 6px rgba(255, 190, 60, 0.95)) !important;
 }
+
+html, body {
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+}
+#root {
+  height: 100dvh !important;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+#mainArea {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.card-box {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 10px;
+}
 </style>
 </head>
 <body>
@@ -174,7 +199,7 @@ html, body {
   <div class="title"><span>GJAKKR DAGNÝJARSON'S</span>OLD NORSE DICTIONARY</div>
   <div class="top-bar">
     <button id="homeBtn" class="nav-btn" style="display:none">Home</button>
-    <input id="searchBox" type="search" placeholder="Search Old Norse or English..." autocomplete="off" />
+    <input id="searchBox" type="search" placeholder="Search Old Norse..." autocomplete="off" />
     <button id="grammarBtn" class="nav-btn" >Grammar</button>
   </div>
   <div id="subStatus" style="display:none">Loading Old Norse database...</div>
