@@ -850,6 +850,16 @@ function analyzeGrammarClause(words) {
         cur.notes.push({ ok: false, text: `✗ Preposition "${prepHit.headword}" has no nominal object following it` });
       }
     }
+        const cleanTyped = cur.raw.toLowerCase().replace(/^[^a-záéíóúýæøǫœþð]+|[^a-záéíóúýæøǫœþð]+$/gi, '');
+    const normOrtho = (s) => (s || '').toLowerCase().replace(/ö/g, 'ǫ');
+    const exactOrtho = cur.hits.some(h => normOrtho(h.form) === normOrtho(cleanTyped) || normOrtho(h.headword) === normOrtho(cleanTyped));
+    if (!exactOrtho) {
+      const properHit = cur.hits.find(h => h.form && normOrtho(h.form) !== normOrtho(cleanTyped)) || cur.hits.find(Boolean);
+      const properForm = properHit ? (properHit.form || properHit.headword) : '';
+      if (properForm) {
+        cur.notes.push({ ok: false, text: `✗ Spelling / orthography error ("${cur.raw}") — use "${properForm}"` });
+      }
+    }
     const isDet = cur.hits.some(h => /pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '') && !/^(ek|þú|hann|hon|hón|henni|hennar|honum|hans|vér|þér|þeir|þær|þau|þeira|þeirra|þeim|mik|þik|sik|mér|þér|sér|mín|þín|sín|hvat|hverr|hvárr)$/i.test(h.headword || '') && !/^(hon|hón|henni|hennar|honum|hans)$/i.test(cur.raw || ''));
     if (isDet) {
       const nounTok = parsed.slice(i + 1, i + 5).find(t => {
