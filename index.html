@@ -431,11 +431,48 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   font-size: 9px !important;
   line-height: 1.2 !important;
 }
+
+.title {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  padding: 2px 6px !important;
+}
+.kt-line {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: center !important;
+  flex-wrap: nowrap !important;
+  gap: 1px;
+}
+.kt-glyph {
+  height: 17px;
+  width: auto;
+  object-fit: contain;
+  margin: 0 -0.5px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.95));
+}
+.kt-glyph.kt-cap {
+  height: 22px;
+  margin-left: 4px;
+}
+.kt-line .kt-glyph.kt-cap:first-child {
+  margin-left: 0;
+}
+.kt-apos {
+  font-family: Georgia, serif;
+  font-weight: 900;
+  font-size: 16px;
+  color: #cfa068;
+  text-shadow: 0 1px 2px #000;
+  margin: 0 1px;
+}
 </style>
 </head>
 <body>
 <div id="root">
-  <div class="title"><span>GJAKKR DAGNÝJARSON'S</span>OLD NORSE DICTIONARY</div>
+  <div class="title"><div class="kt-line"><img class="kt-glyph kt-cap" src="title_glyphs/g.png?v=1" alt="G"><img class="kt-glyph" src="title_glyphs/j.png?v=1" alt="j"><img class="kt-glyph" src="title_glyphs/a.png?v=1" alt="a"><img class="kt-glyph" src="title_glyphs/k.png?v=1" alt="k"><img class="kt-glyph" src="title_glyphs/k.png?v=1" alt="k"><img class="kt-glyph" src="title_glyphs/r.png?v=1" alt="r"> <img class="kt-glyph kt-cap" src="title_glyphs/d.png?v=1" alt="D"><img class="kt-glyph" src="title_glyphs/a.png?v=1" alt="a"><img class="kt-glyph" src="title_glyphs/g.png?v=1" alt="g"><img class="kt-glyph" src="title_glyphs/n.png?v=1" alt="n"><img class="kt-glyph" src="title_glyphs/y_acute.png?v=1" alt="ý"><img class="kt-glyph" src="title_glyphs/j.png?v=1" alt="j"><img class="kt-glyph" src="title_glyphs/a.png?v=1" alt="a"><img class="kt-glyph" src="title_glyphs/r.png?v=1" alt="r"><img class="kt-glyph" src="title_glyphs/s.png?v=1" alt="s"><img class="kt-glyph" src="title_glyphs/o.png?v=1" alt="o"><img class="kt-glyph" src="title_glyphs/n.png?v=1" alt="n"><span class="kt-apos">’</span><img class="kt-glyph" src="title_glyphs/s.png?v=1" alt="s"></div><div class="kt-line"><img class="kt-glyph kt-cap" src="title_glyphs/o.png?v=1" alt="O"><img class="kt-glyph" src="title_glyphs/l.png?v=1" alt="l"><img class="kt-glyph" src="title_glyphs/d.png?v=1" alt="d"> <img class="kt-glyph kt-cap" src="title_glyphs/n.png?v=1" alt="N"><img class="kt-glyph" src="title_glyphs/o.png?v=1" alt="o"><img class="kt-glyph" src="title_glyphs/r.png?v=1" alt="r"><img class="kt-glyph" src="title_glyphs/s.png?v=1" alt="s"><img class="kt-glyph" src="title_glyphs/e.png?v=1" alt="e"> <img class="kt-glyph kt-cap" src="title_glyphs/d.png?v=1" alt="D"><img class="kt-glyph" src="title_glyphs/i.png?v=1" alt="i"><img class="kt-glyph" src="title_glyphs/c.png?v=1" alt="c"><img class="kt-glyph" src="title_glyphs/t.png?v=1" alt="t"><img class="kt-glyph" src="title_glyphs/i.png?v=1" alt="i"><img class="kt-glyph" src="title_glyphs/o.png?v=1" alt="o"><img class="kt-glyph" src="title_glyphs/n.png?v=1" alt="n"><img class="kt-glyph" src="title_glyphs/a.png?v=1" alt="a"><img class="kt-glyph" src="title_glyphs/r.png?v=1" alt="r"><img class="kt-glyph" src="title_glyphs/y.png?v=1" alt="y"></div></div>
   <div class="top-bar">
     <button id="homeBtn" class="nav-btn" style="display:none">Home</button>
     <input id="searchBox" type="search" placeholder="Search Old Norse..." autocomplete="off" />
