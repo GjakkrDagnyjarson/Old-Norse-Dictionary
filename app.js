@@ -32,27 +32,15 @@ function renderAlphaGrid() {
   if ($('homeBtn')) $('homeBtn').style.display = 'none';
   if ($('subStatus')) { $('subStatus').style.display = 'none'; $('subStatus').textContent = ''; }
   if ($('root')) $('root').classList.remove('open');
-  grid.style.display = 'flex';
-  const rows = [
-    ['UPD', 'a', 'á', 'b', 'd', 'ð'],
-    ['e', 'é', 'f', 'g', 'h', 'i'],
-    ['í', 'j', 'k', 'l', 'm', 'n'],
-    ['o', 'ó', 'p', 'r', 's', 't'],
-    ['u', 'ú', 'v', 'y', 'ý', 'þ'],
-    ['æ', 'ø', 'ǫ', 'œ']
-  ];
-  grid.innerHTML = rows.map(row =>
-    '<div class="alpha-row">' +
-    row.map(l => {
-      if (l === 'UPD') {
-        const cls = window.__updReady ? 'upd-ready' : 'upd-ok';
-        const ttl = window.__updReady ? 'Update available — tap to reload' : 'Up to date — tap to check';
-        return '<button id="updateBtn" type="button" class="alpha-btn ' + cls + '" data-action="upd" title="' + ttl + '" aria-label="Update"></button>';
-      }
-      return '<button type="button" class="alpha-btn" data-letter="' + l + '" aria-label="' + l + '"></button>';
-    }).join('') +
-    '</div>'
-  ).join('');
+  grid.style.display = 'block';
+  const pts = [{"k": "UPD", "x": 18.21, "y": 28.37}, {"k": "a", "x": 31.37, "y": 28.37}, {"k": "á", "x": 43.77, "y": 28.37}, {"k": "b", "x": 56.4, "y": 28.37}, {"k": "d", "x": 69.62, "y": 28.37}, {"k": "ð", "x": 82.78, "y": 28.37}, {"k": "e", "x": 17.63, "y": 36.14}, {"k": "é", "x": 31.02, "y": 36.14}, {"k": "f", "x": 43.3, "y": 36.14}, {"k": "g", "x": 56.82, "y": 36.14}, {"k": "h", "x": 69.8, "y": 36.14}, {"k": "i", "x": 82.73, "y": 36.14}, {"k": "í", "x": 17.45, "y": 44.07}, {"k": "j", "x": 30.02, "y": 44.07}, {"k": "k", "x": 44.3, "y": 44.07}, {"k": "l", "x": 56.64, "y": 44.07}, {"k": "m", "x": 69.1, "y": 44.07}, {"k": "n", "x": 80.67, "y": 44.07}, {"k": "o", "x": 17.51, "y": 51.25}, {"k": "ó", "x": 30.49, "y": 51.25}, {"k": "p", "x": 43.36, "y": 51.25}, {"k": "r", "x": 57.23, "y": 51.25}, {"k": "s", "x": 69.92, "y": 51.25}, {"k": "t", "x": 82.84, "y": 51.25}, {"k": "u", "x": 18.04, "y": 58.8}, {"k": "ú", "x": 31.14, "y": 58.8}, {"k": "v", "x": 44.01, "y": 58.8}, {"k": "y", "x": 57.23, "y": 58.8}, {"k": "ý", "x": 70.39, "y": 58.8}, {"k": "þ", "x": 83.14, "y": 58.8}, {"k": "æ", "x": 24.85, "y": 65.67}, {"k": "ø", "x": 42.6, "y": 65.67}, {"k": "ǫ", "x": 58.58, "y": 65.67}, {"k": "œ", "x": 75.91, "y": 65.67}];
+  grid.innerHTML = pts.map(p => {
+    if (p.k === 'UPD') {
+      const cls = window.__updReady ? 'upd-ready' : 'upd-ok';
+      return '<button id="updateBtn" type="button" class="alpha-btn ' + cls + '" data-action="upd" style="left:' + p.x + '%;top:' + p.y + '%;" aria-label="Update"></button>';
+    }
+    return '<button type="button" class="alpha-btn" data-letter="' + p.k + '" style="left:' + p.x + '%;top:' + p.y + '%;" aria-label="' + p.k + '"></button>';
+  }).join('');
   grid.onclick = function(e) {
     const btn = e.target.closest('.alpha-btn');
     if (!btn) return;
@@ -60,9 +48,7 @@ function renderAlphaGrid() {
       if (typeof handleUpdateClick === 'function') handleUpdateClick();
       return;
     }
-    if (btn.dataset.letter) {
-      filterByLetter(btn.dataset.letter);
-    }
+    if (btn.dataset.letter) filterByLetter(btn.dataset.letter);
   };
 }
 

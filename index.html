@@ -562,6 +562,37 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 .alpha-btn:active {
   background: radial-gradient(circle, rgba(255, 190, 95, 0.25) 0%, transparent 72%) !important;
 }
+
+#root {
+  position: relative !important;
+}
+#alphaGrid {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+  z-index: 4 !important;
+}
+#alphaGrid[style*="display: none"] {
+  display: none !important;
+}
+.top-bar, #listCard, #detailCard, #cred, #modalOverlay {
+  position: relative !important;
+  z-index: 10 !important;
+}
+#alphaGrid .alpha-btn {
+  position: absolute !important;
+  transform: translate(-50%, -50%) !important;
+  width: 11.8% !important;
+  height: 5.6% !important;
+  border-radius: 50% !important;
+  pointer-events: auto !important;
+  outline: 1.5px dashed rgba(255, 200, 110, 0.85) !important;
+  background: rgba(255, 190, 95, 0.12) !important;
+}
 </style>
 </head>
 <body>
@@ -588,6 +619,6 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="modalOverlay"><div id="modalBox"><h3 style="color:#E8C988;margin-bottom:6px">Lexical Sources &amp; Licenses</h3>Cleasby &amp; Vigfússon (1874), Geir T. Zoëga (1910), Dictionary of Old Norse Prose (ONP, CC BY-SA 4.0), and Wiktionary (CC BY-SA 4.0). All data bundled locally for 100% offline use.<button id="modalClose">Close</button></div></div>
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
-<script src="app.js?v=55"></script>
+<script src="app.js?v=56"></script>
 </body>
 </html>
