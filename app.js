@@ -367,7 +367,40 @@ function fastLemmas(word, posFilter = '', exactOnly = true) {
   return exact.length ? exact : (exactOnly ? [] : all);
 }
 
+
+const ON_DETERMINERS = {
+  'hinn':   [{ headword: 'hinn', pos: 'pronoun', gender: 'm.', case_name: 'NOM', number: 'SG' }, { headword: 'hinn', pos: 'pronoun', gender: 'm.', case_name: 'ACC', number: 'SG' }],
+  'hin':    [{ headword: 'hinn', pos: 'pronoun', gender: 'f.', case_name: 'NOM', number: 'SG' }, { headword: 'hinn', pos: 'pronoun', gender: 'n.', case_name: 'NOM', number: 'PL' }, { headword: 'hinn', pos: 'pronoun', gender: 'n.', case_name: 'ACC', number: 'PL' }],
+  'hit':    [{ headword: 'hinn', pos: 'pronoun', gender: 'n.', case_name: 'NOM', number: 'SG' }, { headword: 'hinn', pos: 'pronoun', gender: 'n.', case_name: 'ACC', number: 'SG' }],
+  'hið':    [{ headword: 'hinn', pos: 'pronoun', gender: 'n.', case_name: 'NOM', number: 'SG' }, { headword: 'hinn', pos: 'pronoun', gender: 'n.', case_name: 'ACC', number: 'SG' }],
+  'hina':   [{ headword: 'hinn', pos: 'pronoun', gender: 'f.', case_name: 'ACC', number: 'SG' }, { headword: 'hinn', pos: 'pronoun', gender: 'm.', case_name: 'ACC', number: 'PL' }],
+  'hinni':  [{ headword: 'hinn', pos: 'pronoun', gender: 'f.', case_name: 'DAT', number: 'SG' }],
+  'hinu':   [{ headword: 'hinn', pos: 'pronoun', gender: 'n.', case_name: 'DAT', number: 'SG' }],
+  'hinum':  [{ headword: 'hinn', pos: 'pronoun', gender: 'm.', case_name: 'DAT', number: 'SG' }, { headword: 'hinn', pos: 'pronoun', gender: 'm.', case_name: 'DAT', number: 'PL' }, { headword: 'hinn', pos: 'pronoun', gender: 'f.', case_name: 'DAT', number: 'PL' }, { headword: 'hinn', pos: 'pronoun', gender: 'n.', case_name: 'DAT', number: 'PL' }],
+  'hins':   [{ headword: 'hinn', pos: 'pronoun', gender: 'm.', case_name: 'GEN', number: 'SG' }, { headword: 'hinn', pos: 'pronoun', gender: 'n.', case_name: 'GEN', number: 'SG' }],
+  'hinnar': [{ headword: 'hinn', pos: 'pronoun', gender: 'f.', case_name: 'GEN', number: 'SG' }],
+  'hinna':  [{ headword: 'hinn', pos: 'pronoun', gender: 'm.', case_name: 'GEN', number: 'PL' }, { headword: 'hinn', pos: 'pronoun', gender: 'f.', case_name: 'GEN', number: 'PL' }, { headword: 'hinn', pos: 'pronoun', gender: 'n.', case_name: 'GEN', number: 'PL' }],
+  'sá':     [{ headword: 'sá', pos: 'pronoun', gender: 'm.', case_name: 'NOM', number: 'SG' }],
+  'sú':     [{ headword: 'sá', pos: 'pronoun', gender: 'f.', case_name: 'NOM', number: 'SG' }],
+  'þat':    [{ headword: 'sá', pos: 'pronoun', gender: 'n.', case_name: 'NOM', number: 'SG' }, { headword: 'sá', pos: 'pronoun', gender: 'n.', case_name: 'ACC', number: 'SG' }],
+  'þann':   [{ headword: 'sá', pos: 'pronoun', gender: 'm.', case_name: 'ACC', number: 'SG' }],
+  'þá':     [{ headword: 'sá', pos: 'pronoun', gender: 'f.', case_name: 'ACC', number: 'SG' }, { headword: 'sá', pos: 'pronoun', gender: 'm.', case_name: 'ACC', number: 'PL' }],
+  'þeim':   [{ headword: 'sá', pos: 'pronoun', gender: 'm.', case_name: 'DAT', number: 'SG' }, { headword: 'sá', pos: 'pronoun', gender: 'm.', case_name: 'DAT', number: 'PL' }, { headword: 'sá', pos: 'pronoun', gender: 'f.', case_name: 'DAT', number: 'PL' }, { headword: 'sá', pos: 'pronoun', gender: 'n.', case_name: 'DAT', number: 'PL' }],
+  'þeirri': [{ headword: 'sá', pos: 'pronoun', gender: 'f.', case_name: 'DAT', number: 'SG' }],
+  'því':    [{ headword: 'sá', pos: 'pronoun', gender: 'n.', case_name: 'DAT', number: 'SG' }],
+  'þess':   [{ headword: 'sá', pos: 'pronoun', gender: 'm.', case_name: 'GEN', number: 'SG' }, { headword: 'sá', pos: 'pronoun', gender: 'n.', case_name: 'GEN', number: 'SG' }],
+  'þeirrar':[{ headword: 'sá', pos: 'pronoun', gender: 'f.', case_name: 'GEN', number: 'SG' }],
+  'þessi':  [{ headword: 'þessi', pos: 'pronoun', gender: 'm.', case_name: 'NOM', number: 'SG' }, { headword: 'þessi', pos: 'pronoun', gender: 'f.', case_name: 'NOM', number: 'SG' }],
+  'þetta':  [{ headword: 'þessi', pos: 'pronoun', gender: 'n.', case_name: 'NOM', number: 'SG' }, { headword: 'þessi', pos: 'pronoun', gender: 'n.', case_name: 'ACC', number: 'SG' }],
+  'þessum': [{ headword: 'þessi', pos: 'pronoun', gender: 'm.', case_name: 'DAT', number: 'SG' }, { headword: 'þessi', pos: 'pronoun', gender: 'm.', case_name: 'DAT', number: 'PL' }, { headword: 'þessi', pos: 'pronoun', gender: 'f.', case_name: 'DAT', number: 'PL' }, { headword: 'þessi', pos: 'pronoun', gender: 'n.', case_name: 'DAT', number: 'PL' }],
+  'þessu':  [{ headword: 'þessi', pos: 'pronoun', gender: 'n.', case_name: 'DAT', number: 'SG' }]
+};
+
 function lookupGrammarToken(raw, depth = 0) {
+  const __low = (raw || "").toLowerCase();
+  if (ON_DETERMINERS[__low]) {
+    return ON_DETERMINERS[__low].map(d => ({ id: 0, headword: d.headword, pos: d.pos, gender: d.gender, form: __low, case_name: d.case_name, number: d.number, definiteness: "DEF", zoega_def: "demonstrative / definite article" }));
+  }
   const clean = normTok(raw);
   if (!clean) return [];
   if (GRAMMAR_CACHE.has(clean)) return GRAMMAR_CACHE.get(clean).map(x => ({ ...x }));
@@ -728,15 +761,32 @@ function analyzeGrammarClause(words) {
       }
     }
     const isDet = cur.hits.some(h => /pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '') && !/^(ek|þú|hann|hon|vér|þér|þeir|þær|þau|hvat|hverr|hvárr)$/i.test(h.headword || ''));
-    const nextTok = parsed[i + 1];
-    if (isDet && nextTok) {
-      const nextNouns = nextTok.hits.filter(h => /noun/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
-      if (nextNouns.length) {
-        const detPairs = cur.hits.filter(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')).map(h => `${h.case_name}|${h.number}`.toUpperCase());
-        const shared = nextNouns.filter(h => detPairs.includes(`${h.case_name}|${h.number}`.toUpperCase()));
-        if (shared.length) cur.notes.push({ ok: true, text: `✓ Agrees in case/number (${shared[0].case_name} ${shared[0].number}) with "${nextTok.raw}"` });
-        else if (detPairs.some(p => p.startsWith("DAT|")) && /a$/i.test(nextTok.raw) && nextTok.hits.some(h => /adj/i.test(h.pos || ""))) cur.notes.push({ ok: true, text: `✓ Weak dative singular agreement (DAT SG) with "${nextTok.raw}"` });
-        else cur.notes.push({ ok: false, text: `✗ Case/number mismatch between "${cur.raw}" and noun "${nextTok.raw}"` });
+    if (isDet) {
+      const nounTok = parsed.slice(i + 1, i + 5).find(t => t.hits.some(h => /noun/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
+      if (nounTok) {
+        const detHits = cur.hits.filter(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+        const nounHits = nounTok.hits.filter(h => /noun/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+        const normG = (g) => (g || '').toLowerCase().replace(/[^mfn]/g, '');
+        const fullMatch = detHits.find(d => nounHits.some(n =>
+          (d.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() &&
+          (d.number || '').toUpperCase() === (n.number || '').toUpperCase() &&
+          (!normG(d.gender) || !normG(n.gender) || normG(d.gender) === normG(n.gender))
+        ));
+        if (fullMatch) {
+          const gLabel = normG(fullMatch.gender) ? normG(fullMatch.gender) + '. ' : '';
+          cur.notes.push({ ok: true, text: `✓ Agrees in gender/case/number (${gLabel}${fullMatch.case_name.toUpperCase()} ${fullMatch.number.toUpperCase()}) with "${nounTok.raw}"` });
+        } else {
+          const cnMatch = detHits.find(d => nounHits.some(n =>
+            (d.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() &&
+            (d.number || '').toUpperCase() === (n.number || '').toUpperCase()
+          ));
+          const n0 = nounHits.find(Boolean);
+          if (cnMatch && n0) {
+            cur.notes.push({ ok: false, text: `✗ Gender mismatch: "${cur.raw}" is ${normG(cnMatch.gender) || '?'}., but noun "${nounTok.raw}" is ${normG(n0.gender) || '?'}.` });
+          } else {
+            cur.notes.push({ ok: false, text: `✗ Case/number mismatch between "${cur.raw}" and noun "${nounTok.raw}"` });
+          }
+        }
       }
     }
     if (!cur.notes.length) {
