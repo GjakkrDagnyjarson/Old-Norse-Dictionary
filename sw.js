@@ -1,11 +1,11 @@
-const CACHE_NAME = 'old-norse-v2.21';
+const CACHE_NAME = 'old-norse-v2.25';
 const ASSETS = [
   './',
   './index.html',
   './app.js',
   './manifest.json',
   './ic_launcher.png',
-  './bg_norse.jpg', './knot_bar.png',
+  './bg_norse.jpg', './glyphs/upd.png', './glyphs/a.png', './glyphs/á.png', './glyphs/b.png', './glyphs/d.png', './glyphs/ð.png', './glyphs/e.png', './glyphs/é.png', './glyphs/f.png', './glyphs/g.png', './glyphs/h.png', './glyphs/i.png', './glyphs/í.png', './glyphs/j.png', './glyphs/k.png', './glyphs/l.png', './glyphs/m.png', './glyphs/n.png', './glyphs/o.png', './glyphs/ó.png', './glyphs/p.png', './glyphs/r.png', './glyphs/s.png', './glyphs/t.png', './glyphs/u.png', './glyphs/ú.png', './glyphs/v.png', './glyphs/y.png', './glyphs/ý.png', './glyphs/þ.png', './glyphs/æ.png', './glyphs/ø.png', './glyphs/ǫ.png', './glyphs/œ.png', './knot_bar.png',
   './sql-wasm.js',
   './sql-wasm.wasm',
   './old_norse.db.gz'
