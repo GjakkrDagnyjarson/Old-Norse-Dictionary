@@ -71,13 +71,41 @@ html, body {
   margin-bottom: 6px; text-shadow: 0 1px 3px #000; flex-shrink: 0;
 }
 #mainArea { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
-#alphaGrid { display: flex; flex-direction: column; gap: 3px; justify-content: flex-start; flex: 0 0 auto; margin-top: 4px; }
-.alpha-row { display: flex; justify-content: center; gap: 3px; width: 100%; }
+#alphaGrid {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  flex: 1;
+  padding: 16px 4px 12px 4px;
+}
+.alpha-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+}
 .alpha-btn {
-  flex: 1; max-width: calc((100% - 24px) / 9); height: 22px;
-  background: rgba(24, 17, 11, 0.84); border: 1px solid rgba(218, 184, 118, 0.45);
-  border-radius: 5px; color: #E8C988; font-size: 11px; font-weight: bold;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit;
+  width: 42px;
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 8px;
+  font-size: 24px;
+  font-weight: 900;
+  font-family: inherit;
+  cursor: pointer;
+  flex: 0 0 auto;
+  background-image: linear-gradient(180deg, #6e4724 10%, #c4935e 50%, #edd0a3 92%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.98)) drop-shadow(0 1px 0 rgba(225, 180, 125, 0.42));
+  transition: transform 0.1s ease, filter 0.2s ease;
 }
 .alpha-btn:active { background: rgba(232, 201, 136, 0.25); }
 .card-box {
