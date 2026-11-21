@@ -41,7 +41,7 @@ function renderAlphaGrid() {
       if (l === '↻') {
         const cls = window.__updReady ? 'upd-ready' : 'upd-ok';
         const ttl = window.__updReady ? 'Update available — tap to reload' : 'Up to date — tap to check';
-        return '<button id="updateBtn" class="alpha-btn ' + cls + '" onclick="handleUpdateClick()" title="' + ttl + '"><img src="glyphs/upd.png?v=36" alt="Update"></button>';
+        return '<button id="updateBtn" class="alpha-btn ' + cls + '" onclick="handleUpdateClick()" title="' + ttl + '"><img src="glyphs/upd_clean.png" alt="Update"></button>';
       }
       return '<button class="alpha-btn" onclick="filterByLetter(\'' + l + '\')"><img src="glyphs/' + encodeURIComponent(l) + '.png?v=36" alt="' + l + '"></button>';
     }).join('') +
@@ -279,6 +279,7 @@ window.onerror = (m, u, l) => { const st = $("subStatus"); if (st) { st.style.di
       buf = raw.buffer;
     }
     db = new SQL.Database(new Uint8Array(buf));
+    st.style.display = 'none'; st.textContent = '';
     renderAlphaGrid();
   } catch (err) {
     $('subStatus').style.display = 'block'; $('subStatus').textContent = 'Error loading database: ' + err.message;
