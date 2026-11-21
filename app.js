@@ -27,6 +27,12 @@ function esc(s) {
 function renderAlphaGrid() {
   const grid = document.getElementById('alphaGrid');
   if (!grid) return;
+  if ($('listCard')) $('listCard').style.display = 'none';
+  if ($('detailCard')) $('detailCard').style.display = 'none';
+  if ($('homeBtn')) $('homeBtn').style.display = 'none';
+  if ($('subStatus')) { $('subStatus').style.display = 'none'; $('subStatus').textContent = ''; }
+  if ($('root')) $('root').classList.remove('open');
+  grid.style.display = 'flex';
   const rows = [
     ['UPD', 'a', 'á', 'b', 'd', 'ð'],
     ['e', 'é', 'f', 'g', 'h', 'i'],
