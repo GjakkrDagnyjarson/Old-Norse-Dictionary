@@ -1,11 +1,11 @@
-const CACHE_NAME = 'old-norse-v2.18';
+const CACHE_NAME = 'old-norse-v2.21';
 const ASSETS = [
   './',
   './index.html',
   './app.js',
   './manifest.json',
   './ic_launcher.png',
-  './bg_norse.jpg',
+  './bg_norse.jpg', './knot_bar.png',
   './sql-wasm.js',
   './sql-wasm.wasm',
   './old_norse.db.gz'
