@@ -850,3 +850,38 @@ function openGrammarTool() {
 }
 
 $('grammarBtn').onclick = openGrammarTool;
+
+
+async function handleUpdateClick() {
+  const toastEl = $('toast');
+  const notify = (msg) => {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.style.display = 'block';
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(() => { toastEl.style.display = 'none'; }, 2600);
+  };
+  try {
+    notify('Checking for updates...');
+    const res = await fetch('sw.js?t=' + Date.now(), { cache: 'no-store' });
+    const txt = await res.text();
+    const m = txt.match(/old-norse-ui-v([0-9.]+)/);
+    const remoteVer = m ? m[1] : null;
+    const curEl = $('appVersion');
+    const curVer = curEl ? curEl.textContent.trim() : '';
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (reg) await reg.update();
+    }
+    if (remoteVer && remoteVer !== curVer) {
+      notify('Updating to v' + remoteVer + '...');
+      const keys = await caches.keys();
+      await Promise.all(keys.filter(k => k.startsWith('old-norse-ui-')).map(k => caches.delete(k)));
+      setTimeout(() => location.reload(), 600);
+    } else {
+      notify('Up to date (Version ' + (remoteVer || curVer) + ')');
+    }
+  } catch (err) {
+    notify('Offline — using cached Version ' + ($('appVersion') ? $('appVersion').textContent : ''));
+  }
+}
