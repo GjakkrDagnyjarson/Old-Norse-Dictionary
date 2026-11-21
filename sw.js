@@ -1,4 +1,4 @@
-const CACHE_NAME = 'old-norse-v2.35';
+const CACHE_NAME = 'old-norse-v2.36';
 self.addEventListener('install', e => {
   self.skipWaiting();
 });
