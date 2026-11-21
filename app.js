@@ -771,6 +771,39 @@ function suggestFormForTok(tok, reqCases, reqNum, reqGender) {
   return '';
 }
 
+
+function suggestFormForTok(tok, reqCases, reqNum, reqGender) {
+  if (!tok || !tok.hits || !tok.hits.length) return '';
+  const cases = (reqCases || []).map(c => (c || '').toUpperCase()).filter(Boolean);
+  const num = (reqNum || '').toUpperCase();
+  const gen = (reqGender || '').toLowerCase().replace(/[^mfn]/g, '');
+  const hws = [...new Set(tok.hits.map(h => h.headword).filter(Boolean))];
+  if (typeof ON_CLOSED_CLASS !== 'undefined') {
+    for (const k of Object.keys(ON_CLOSED_CLASS)) {
+      const m = ON_CLOSED_CLASS[k].find(e =>
+        hws.includes(e.headword) &&
+        (!cases.length || cases.includes((e.case_name || '').toUpperCase())) &&
+        (!num || (e.number || '').toUpperCase() === num) &&
+        (!gen || !e.gender || e.gender.toLowerCase().replace(/[^mfn]/g, '') === gen)
+      );
+      if (m) return m.form;
+    }
+  }
+  const lids = [...new Set(tok.hits.map(h => h.id).filter(id => id > 0))];
+  if (lids.length && typeof db !== 'undefined' && db) {
+    try {
+      const cList = cases.map(c => `'${c}'`).join(',');
+      const q = `SELECT form FROM wordforms WHERE lemma_id IN (${lids.join(',')})` +
+        (cList ? ` AND UPPER(case_name) IN (${cList})` : '') +
+        (num ? ` AND UPPER(number)='${num}'` : '') +
+        ` LIMIT 1`;
+      const res = db.exec(q);
+      if (res.length && res.values.length) return String(res.values.flat());
+    } catch (_) {}
+  }
+  return '';
+}
+
 function analyzeGrammarClause(words) {
   const parsed = words.map(t => ({ raw: t, hits: lookupGrammarToken(t), notes: [] }));
   for (let i = 0; i < parsed.length; i++) {
@@ -791,7 +824,7 @@ function analyzeGrammarClause(words) {
       if (verbTok) {
         const vForms = verbTok.hits.filter(h => /^(PRES|PAST)$/i.test(h.case_name || '')).map(h => (h.number || '').toUpperCase());
         if (vForms.includes(subjP)) cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with verb "${verbTok.raw}" (${subjP})` });
-        else if (vForms.some(v => /^(SG|PL)$/.test(v))) cur.notes.push({ ok: false, text: `✗ Subject (${subjP}) does not match verb "${verbTok.raw}" (${[...new Set(vForms.filter(v => /^(SG|PL)$/.test(v)))].join('/')})` });
+        else if (vForms.some(v => /^(SG|PL)$/.test(v))) { const sugV = suggestFormForTok(verbTok, [], subjP.slice(-2)); cur.notes.push({ ok: false, text: `✗ Subject (${subjP}) does not match verb "${verbTok.raw}" (${[...new Set(vForms.filter(v => /^(SG|PL)$/.test(v)))].join('/')})${sugV ? ` — use "${sugV}"` : ''}` }); }
       }
     }
     const verbGovHit = cur.hits.find(h => /^(PRES|PAST)$/i.test(h.case_name || '') && inferGovCases(h, 'verb'));
@@ -846,6 +879,28 @@ function analyzeGrammarClause(words) {
           } else {
             const nRef = nounHits.find(Boolean); const sugCN = nRef ? suggestFormForTok(cur, [nRef.case_name], nRef.number, normG(nRef.gender)) : ''; cur.notes.push({ ok: false, text: `✗ Case/number mismatch between "${cur.raw}" and noun "${nounTok.raw}"${sugCN ? ` — use "${sugCN}"` : ''}` });
           }
+        }
+      }
+    }
+        const isAdj = !isDet && cur.hits.some(h => /adj/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+    if (isAdj && !cur.notes.length) {
+      const nounTok = parsed.slice(i + 1, i + 4).find(t => t.hits.some(h => /noun|\bn\.\b|\bm\.\b|\bf\.\b/i.test(h.pos || '') && !/adj|pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
+      if (nounTok) {
+        const adjHits = cur.hits.filter(h => /adj/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+        const nounHits = nounTok.hits.filter(h => /noun|\bn\.\b|\bm\.\b|\bf\.\b/i.test(h.pos || '') && !/adj|pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+        const normG = (g) => (g || '').toLowerCase().replace(/[^mfn]/g, '');
+        const mHit = adjHits.find(a => nounHits.some(n =>
+          (a.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() &&
+          (a.number || '').toUpperCase() === (n.number || '').toUpperCase() &&
+          (!normG(a.gender) || !normG(n.gender) || normG(a.gender) === normG(n.gender))
+        ));
+        if (mHit) {
+          const gLbl = normG(mHit.gender) ? normG(mHit.gender) + '. ' : '';
+          cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with "${nounTok.raw}" (${gLbl}${mHit.case_name.toUpperCase()} ${mHit.number.toUpperCase()})` });
+        } else {
+          const n0 = nounHits.find(Boolean);
+          const sugA = n0 ? suggestFormForTok(cur, [n0.case_name], n0.number, normG(n0.gender)) : '';
+          cur.notes.push({ ok: false, text: `✗ Adjective "${cur.raw}" does not agree with noun "${nounTok.raw}"${sugA ? ` — use "${sugA}"` : ''}` });
         }
       }
     }

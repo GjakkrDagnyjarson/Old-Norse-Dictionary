@@ -73,3 +73,5 @@ for (const row of _ON_ENCLITICS) {
   const [f, hw, c, n, def] = row;
   _addON([f], { headword:hw, pos:'verb', case_name:c, number:n, definiteness:'ENCLITIC', zoega_def:def });
 }
+
+_addON(['kallat','kallað','kallaðr'], { headword:'kalla', pos:'verb', case_name:'PAST', number:'PART', zoega_def:'(kallaða, kallaðr), v. to cry out, summon, call, name' });
