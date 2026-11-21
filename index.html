@@ -471,10 +471,43 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   cursor: pointer !important;
 }
 
-/* TEMP CALIBRATION RINGS */
+
+#alphaGrid {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  width: 77% !important;
+  height: 56% !important;
+  margin: 24px auto auto auto !important;
+  padding: 0 !important;
+}
+#alphaGrid[style*="display: none"] {
+  display: none !important;
+}
+.alpha-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 15.5% !important;
+}
+.alpha-row:last-child {
+  width: 76% !important;
+  margin: 0 auto !important;
+  justify-content: space-between !important;
+}
 .alpha-btn {
-  outline: 1.5px dashed rgba(255, 200, 110, 0.75) !important;
-  background: rgba(255, 190, 95, 0.10) !important;
+  width: 15.5% !important;
+  height: 100% !important;
+  outline: none !important;
+  background: transparent !important;
+}
+.alpha-row:last-child .alpha-btn {
+  width: 21% !important;
+}
+.alpha-btn:active {
+  background: radial-gradient(circle, rgba(255, 190, 95, 0.25) 0%, transparent 72%) !important;
 }
 </style>
 </head>
