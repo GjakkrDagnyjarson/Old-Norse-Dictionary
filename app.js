@@ -368,6 +368,24 @@ function fastLemmas(word, posFilter = '', exactOnly = true) {
 }
 
 
+
+const ON_INDECLINABLES = {
+  'áðr':  { headword: 'áðr',  pos: 'adverb / conjunction', zoega_def: 'adv. & conj. before, ere, previously' },
+  'æva':  { headword: 'æva',  pos: 'adverb', zoega_def: 'adv. never' },
+  'eigi': { headword: 'eigi', pos: 'adverb', zoega_def: 'adv. not' },
+  'ekki': { headword: 'ekki', pos: 'adverb / pronoun', zoega_def: 'not; nothing' },
+  'svá':  { headword: 'svá',  pos: 'adverb', zoega_def: 'adv. so, thus' },
+  'þó':   { headword: 'þó',   pos: 'adverb / conjunction', zoega_def: 'adv. & conj. yet, though, nevertheless' },
+  'nú':   { headword: 'nú',   pos: 'adverb', zoega_def: 'adv. now' },
+  'hér':  { headword: 'hér',  pos: 'adverb', zoega_def: 'adv. here' },
+  'þar':  { headword: 'þar',  pos: 'adverb', zoega_def: 'adv. there' },
+  'sem':  { headword: 'sem',  pos: 'conjunction', zoega_def: 'conj. as, which, who' },
+  'er':   { headword: 'er',   pos: 'conjunction / verb', zoega_def: 'rel. particle who, which, when; is' },
+  'en':   { headword: 'en',   pos: 'conjunction', zoega_def: 'conj. but, and; than' },
+  'ok':   { headword: 'ok',   pos: 'conjunction', zoega_def: 'conj. and, also' },
+  'at':   { headword: 'at',   pos: 'preposition / conjunction', zoega_def: 'to, at; that' }
+};
+
 const ON_DETERMINERS = {
   'hinn':   [{ headword: 'hinn', pos: 'pronoun', gender: 'm.', case_name: 'NOM', number: 'SG' }, { headword: 'hinn', pos: 'pronoun', gender: 'm.', case_name: 'ACC', number: 'SG' }],
   'hin':    [{ headword: 'hinn', pos: 'pronoun', gender: 'f.', case_name: 'NOM', number: 'SG' }, { headword: 'hinn', pos: 'pronoun', gender: 'n.', case_name: 'NOM', number: 'PL' }, { headword: 'hinn', pos: 'pronoun', gender: 'n.', case_name: 'ACC', number: 'PL' }],
@@ -398,6 +416,10 @@ const ON_DETERMINERS = {
 
 function lookupGrammarToken(raw, depth = 0) {
   const __low = (raw || "").toLowerCase();
+  if (ON_INDECLINABLES[__low]) {
+    const x = ON_INDECLINABLES[__low];
+    return [{ id: 0, headword: x.headword, pos: x.pos, gender: "", form: __low, case_name: "", number: "", definiteness: "", zoega_def: x.zoega_def }];
+  }
   if (ON_DETERMINERS[__low]) {
     return ON_DETERMINERS[__low].map(d => ({ id: 0, headword: d.headword, pos: d.pos, gender: d.gender, form: __low, case_name: d.case_name, number: d.number, definiteness: "DEF", zoega_def: "demonstrative / definite article" }));
   }
@@ -734,7 +756,7 @@ function analyzeGrammarClause(words) {
       if (verbTok) {
         const vForms = verbTok.hits.filter(h => /^(PRES|PAST)$/i.test(h.case_name || '')).map(h => (h.number || '').toUpperCase());
         if (vForms.includes(subjP)) cur.notes.push({ ok: true, text: `✓ Subject (${subjP}) agrees with verb "${verbTok.raw}"` });
-        else if (vForms.length) cur.notes.push({ ok: false, text: `✗ Subject (${subjP}) does not match verb "${verbTok.raw}" (${[...new Set(vForms)].join('/')})` });
+        else if (vForms.some(v => /^(SG|PL)$/.test(v))) cur.notes.push({ ok: false, text: `✗ Subject (${subjP}) does not match verb "${verbTok.raw}" (${[...new Set(vForms.filter(v => /^(SG|PL)$/.test(v)))].join('/')})` });
       }
     }
     const verbGovHit = cur.hits.find(h => /^(PRES|PAST)$/i.test(h.case_name || '') && inferGovCases(h, 'verb'));
@@ -760,12 +782,15 @@ function analyzeGrammarClause(words) {
         cur.notes.push({ ok: false, text: `✗ Preposition "${prepHit.headword}" has no nominal object following it` });
       }
     }
-    const isDet = cur.hits.some(h => /pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '') && !/^(ek|þú|hann|hon|vér|þér|þeir|þær|þau|hvat|hverr|hvárr)$/i.test(h.headword || ''));
+    const isDet = cur.hits.some(h => /pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '') && !/^(ek|þú|hann|hon|hón|henni|hennar|honum|hans|vér|þér|þeir|þær|þau|þeira|þeirra|þeim|mik|þik|sik|mér|þér|sér|mín|þín|sín|hvat|hverr|hvárr)$/i.test(h.headword || '') && !/^(hon|hón|henni|hennar|honum|hans)$/i.test(cur.raw || ''));
     if (isDet) {
-      const nounTok = parsed.slice(i + 1, i + 5).find(t => t.hits.some(h => /noun/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
+      const nounTok = parsed.slice(i + 1, i + 5).find(t => {
+        if (t.hits.some(h => /^verb$/i.test((h.pos || '').trim()) && /^(PRES|PAST)$/i.test(h.case_name || ''))) return false;
+        return t.hits.some(h => /noun|\bn\.\b|\bm\.\b|\bf\.\b/i.test(h.pos || '') && !/adj|pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+      });
       if (nounTok) {
         const detHits = cur.hits.filter(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
-        const nounHits = nounTok.hits.filter(h => /noun/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+        const nounHits = nounTok.hits.filter(h => /noun|\bn\.\b|\bm\.\b|\bf\.\b/i.test(h.pos || '') && !/adj|pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
         const normG = (g) => (g || '').toLowerCase().replace(/[^mfn]/g, '');
         const fullMatch = detHits.find(d => nounHits.some(n =>
           (d.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() &&
