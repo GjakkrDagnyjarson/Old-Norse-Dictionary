@@ -41,3 +41,20 @@ _addON(['eigi','ekki','æva','svá','nú','hér','þar','hvar','upp','niðr','ú
   ['hon','hon','NOM','SG'],['hón','hon','NOM','SG'],['hana','hon','ACC','SG'],['henni','hon','DAT','SG'],['hennar','hon','GEN','SG'],
   ['vér','vér','NOM','PL'],['oss','vér','ACC','PL'],['oss','vér','DAT','PL'],['vár','vér','GEN','PL']
 ].forEach(p => _addON([p], { headword:p, pos:'pronoun', case_name:p, number:p, definiteness:'INDEF', zoega_def:'personal pronoun' }));
+[
+  ['sáttu','sjá','PAST','2SG','(+ enclitic þú) v. to see (sátt + þú)'],
+  ['segðu','segja','PRES','2SG','(+ enclitic þú) v. to say, tell (seg + þú)'],
+  ['farðu','fara','PRES','2SG','(+ enclitic þú) v. to go, travel (far + þú)'],
+  ['komðu','koma','PRES','2SG','(+ enclitic þú) v. to come (kom + þú)'],
+  ['gefðu','gefa','PRES','2SG','(+ enclitic þú) v. to give (gef + þú)'],
+  ['takðu','taka','PRES','2SG','(+ enclitic þú) v. to take (tak + þú)'],
+  ['ertu','vera','PRES','2SG','(+ enclitic þú) v. to be (ert + þú)'],
+  ['vartu','vera','PAST','2SG','(+ enclitic þú) v. to be (vart + þú)'],
+  ['skaltu','skulu','PRES','2SG','(+ enclitic þú) v. shall, must (skalt + þú)'],
+  ['muntu','munu','PRES','2SG','(+ enclitic þú) v. will, shall (munt + þú)'],
+  ['máttu','mega','PRES','2SG','(+ enclitic þú) v. may, can (mátt + þú)'],
+  ['viltu','vilja','PRES','2SG','(+ enclitic þú) v. to will, wish (vilt + þú)'],
+  ['kanntu','kunna','PRES','2SG','(+ enclitic þú) v. to know, can (kannt + þú)'],
+  ['veiztu','vita','PRES','2SG','(+ enclitic þú) v. to know (veizt + þú)'],
+  ['áttu','eiga','PRES','2SG','(+ enclitic þú) v. to own, have (átt + þú)']
+].forEach(e => _addON([e], { headword:e, pos:'verb', case_name:e, number:e, definiteness:'ENCLITIC', zoega_def:e }));
