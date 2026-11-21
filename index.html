@@ -192,6 +192,48 @@ html, body {
   -webkit-overflow-scrolling: touch;
   padding-bottom: 10px;
 }
+
+.card-box {
+  flex: 1; min-height: 0; overflow-y: auto;
+  background: rgba(20, 14, 10, 0.86); border: 1.5px solid rgba(218, 184, 118, 0.5);
+  border-radius: 10px; padding: 6px 12px;
+}
+.word-row {
+  padding: 8px 2px; border-bottom: 1px solid rgba(218, 184, 118, 0.16);
+  cursor: pointer; display: flex; align-items: baseline; gap: 6px;
+}
+.word-row:last-child { border-bottom: none; }
+.word-row:active { background: rgba(232, 201, 136, 0.15); }
+.wr-hw { color: #E8C988; font-size: 15px; font-weight: bold; }
+.wr-sub { color: #C4B5A0; font-size: 12px; font-style: italic; }
+.det-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-top: 2px; }
+.det-hw { color: #E8C988; font-size: 21px; font-weight: bold; line-height: 1.15; }
+.det-pos { color: #D4C3A3; font-size: 13px; font-weight: bold; margin-left: 4px; }
+.back-pill {
+  background: rgba(34, 24, 16, 0.9); color: #E8C988; border: 1px solid rgba(218, 184, 118, 0.5);
+  border-radius: 8px; padding: 4px 10px; font-size: 12px; cursor: pointer; flex-shrink: 0;
+}
+.det-yf { color: #E6D5B8; font-size: 14px; margin: 3px 0 6px; letter-spacing: 0.4px; }
+.match-badge { color: #98E0A8; font-size: 11.5px; margin-bottom: 6px; font-weight: bold; }
+.tbl-title {
+  color: #E8C988; font-size: 11px; font-weight: bold; letter-spacing: 0.5px;
+  text-transform: uppercase; margin: 8px 0 5px;
+}
+.tbl-wrap {
+  overflow-x: auto; background: rgba(14, 9, 6, 0.75);
+  border: 1px solid rgba(218, 184, 118, 0.25); border-radius: 7px; padding: 4px; margin-bottom: 8px;
+}
+table { border-collapse: collapse; width: 100%; font-size: 11.5px; }
+th, td { padding: 5px 6px; text-align: left; white-space: nowrap; border-bottom: 1px solid rgba(218, 184, 118, 0.14); }
+th { color: #E8C988; font-weight: bold; }
+td { color: #F5EDEO; cursor: pointer; }
+td.hl { color: #98E0A8; font-weight: bold; }
+.sec-head {
+  color: #E8C988; font-size: 11px; font-weight: bold; letter-spacing: 0.4px;
+  text-transform: uppercase; margin: 10px 0 4px;
+  border-bottom: 1px solid rgba(218, 184, 118, 0.28); padding-bottom: 2px;
+}
+.sec-body { color: #F5EDEO; font-size: 13px; line-height: 1.42; white-space: pre-wrap; }
 </style>
 </head>
 <body>
