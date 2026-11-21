@@ -415,6 +415,8 @@ const ON_DETERMINERS = {
 };
 
 function lookupGrammarToken(raw, depth = 0) {
+  const __k = (raw || "").toLowerCase().replace(/^[^a-záéíóúýæøǫœþð]+|[^a-záéíóúýæøǫœþð]+$/gi, "");
+  if (typeof ON_CLOSED_CLASS !== "undefined" && ON_CLOSED_CLASS[__k]) return ON_CLOSED_CLASS[__k];
   const __low = (raw || "").toLowerCase();
   if (ON_INDECLINABLES[__low]) {
     const x = ON_INDECLINABLES[__low];
