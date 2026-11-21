@@ -852,7 +852,7 @@ function analyzeGrammarClause(words) {
     }
         const cleanTyped = cur.raw.toLowerCase().replace(/^[^a-záéíóúýæøǫœþð]+|[^a-záéíóúýæøǫœþð]+$/gi, '');
     const normOrtho = (s) => (s || '').toLowerCase().replace(/ö/g, 'ǫ');
-    const exactOrtho = cur.hits.some(h => normOrtho(h.form) === normOrtho(cleanTyped) || normOrtho(h.headword) === normOrtho(cleanTyped));
+    const exactOrtho = cur.hits.some(h => h.source === "derived" || normOrtho(h.form) === normOrtho(cleanTyped) || normOrtho(h.headword) === normOrtho(cleanTyped));
     if (!exactOrtho) {
       const properHit = cur.hits.find(h => h.form && normOrtho(h.form) !== normOrtho(cleanTyped)) || cur.hits.find(Boolean);
       const properForm = properHit ? (properHit.form || properHit.headword) : '';
