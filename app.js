@@ -26,13 +26,13 @@ function esc(s) {
 
 function renderAlphaGrid() {
   const rows = [
-    ['★','a','á','b','d','ð','e','é','f'],
+    ['↻','a','á','b','d','ð','e','é','f'],
     ['g','h','i','í','j','k','l','m','n'],
     ['o','ó','p','r','s','t','u','ú','v'],
     ['y','ý','þ','æ','ǽ','ø','ǫ','œ']
   ];
   $('alphaGrid').innerHTML = rows.map(r =>
-    `<div class="alpha-row">${r.map(l => `<button class="alpha-btn" onclick="filterByLetter('${l}')">${l}</button>`).join('')}</div>`
+    `<div class="alpha-row">${r.map(l => `<button id="${l === '↻' ? 'updateBtn' : ''}" class="alpha-btn ${l === '↻' ? (window.__updReady ? 'upd-ready' : 'upd-ok') : ''}" onclick="${l === '↻' ? 'handleUpdateClick()' : `filterByLetter('${l}')`}" title="${l === '↻' ? (window.__updReady ? 'Update available — tap to reload' : 'Up to date — tap to check') : ''}">${l}</button>`).join('')}</div>`
   ).join('');
   $('root').classList.remove('open'); $('alphaGrid').style.display = 'flex';
   $('listCard').style.display = 'none';

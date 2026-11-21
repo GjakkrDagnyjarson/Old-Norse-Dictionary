@@ -175,6 +175,14 @@ td.hl { color: #98E0A8; font-weight: bold; }
 .tbl-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: block; }
 .tbl-wrap table { width: 100%; border-collapse: collapse; font-size: 9.2px; }
 .tbl-wrap th, .tbl-wrap td { padding: 3px 2px; white-space: nowrap; }
+
+.upd-ok { color: #8c7254 !important; transition: all 0.25s ease; }
+.upd-ready {
+  color: #ffca57 !important;
+  border-color: #e6a12e !important;
+  box-shadow: 0 0 8px rgba(255, 190, 60, 0.65), inset 0 0 4px rgba(255, 190, 60, 0.35) !important;
+  text-shadow: 0 0 6px rgba(255, 190, 60, 0.8) !important;
+}
 </style>
 </head>
 <body>
@@ -188,7 +196,7 @@ td.hl { color: #98E0A8; font-weight: bold; }
   <div id="subStatus" style="display:none">Loading Old Norse database...</div>
   <div id="mainArea">
     <div id="alphaGrid">
-<div class="alpha-row"><button class="alpha-btn" onclick="filterByLetter('★')">★</button><button class="alpha-btn" onclick="filterByLetter('a')">a</button><button class="alpha-btn" onclick="filterByLetter('á')">á</button><button class="alpha-btn" onclick="filterByLetter('b')">b</button><button class="alpha-btn" onclick="filterByLetter('d')">d</button><button class="alpha-btn" onclick="filterByLetter('ð')">ð</button><button class="alpha-btn" onclick="filterByLetter('e')">e</button><button class="alpha-btn" onclick="filterByLetter('é')">é</button><button class="alpha-btn" onclick="filterByLetter('f')">f</button></div>
+<div class="alpha-row"><button id="updateBtn" class="alpha-btn upd-ok" onclick="handleUpdateClick()" title="App is up to date">↻</button><button class="alpha-btn" onclick="filterByLetter('a')">a</button><button class="alpha-btn" onclick="filterByLetter('á')">á</button><button class="alpha-btn" onclick="filterByLetter('b')">b</button><button class="alpha-btn" onclick="filterByLetter('d')">d</button><button class="alpha-btn" onclick="filterByLetter('ð')">ð</button><button class="alpha-btn" onclick="filterByLetter('e')">e</button><button class="alpha-btn" onclick="filterByLetter('é')">é</button><button class="alpha-btn" onclick="filterByLetter('f')">f</button></div>
 <div class="alpha-row"><button class="alpha-btn" onclick="filterByLetter('g')">g</button><button class="alpha-btn" onclick="filterByLetter('h')">h</button><button class="alpha-btn" onclick="filterByLetter('i')">i</button><button class="alpha-btn" onclick="filterByLetter('í')">í</button><button class="alpha-btn" onclick="filterByLetter('j')">j</button><button class="alpha-btn" onclick="filterByLetter('k')">k</button><button class="alpha-btn" onclick="filterByLetter('l')">l</button><button class="alpha-btn" onclick="filterByLetter('m')">m</button><button class="alpha-btn" onclick="filterByLetter('n')">n</button></div>
 <div class="alpha-row"><button class="alpha-btn" onclick="filterByLetter('o')">o</button><button class="alpha-btn" onclick="filterByLetter('ó')">ó</button><button class="alpha-btn" onclick="filterByLetter('p')">p</button><button class="alpha-btn" onclick="filterByLetter('r')">r</button><button class="alpha-btn" onclick="filterByLetter('s')">s</button><button class="alpha-btn" onclick="filterByLetter('t')">t</button><button class="alpha-btn" onclick="filterByLetter('u')">u</button><button class="alpha-btn" onclick="filterByLetter('ú')">ú</button><button class="alpha-btn" onclick="filterByLetter('v')">v</button></div>
 <div class="alpha-row"><button class="alpha-btn" onclick="filterByLetter('y')">y</button><button class="alpha-btn" onclick="filterByLetter('ý')">ý</button><button class="alpha-btn" onclick="filterByLetter('þ')">þ</button><button class="alpha-btn" onclick="filterByLetter('æ')">æ</button><button class="alpha-btn" onclick="filterByLetter('ǽ')">ǽ</button><button class="alpha-btn" onclick="filterByLetter('ø')">ø</button><button class="alpha-btn" onclick="filterByLetter('ǫ')">ǫ</button><button class="alpha-btn" onclick="filterByLetter('œ')">œ</button></div>
