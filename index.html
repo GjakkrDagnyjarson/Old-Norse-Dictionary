@@ -1,6 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+window.__updReady = false;
+function markUpdateReady() {
+  window.__updReady = true;
+  const btn = document.getElementById('updateBtn');
+  if (btn) {
+    btn.classList.remove('upd-ok');
+    btn.classList.add('upd-ready');
+    btn.title = 'Update available — tap to reload';
+  }
+}
+async function handleUpdateClick() {
+  const btn = document.getElementById('updateBtn');
+  if (btn) btn.style.transform = 'rotate(360deg)';
+  try {
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+  } catch (e) {}
+  window.location.reload();
+}
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', markUpdateReady);
+  navigator.serviceWorker.getRegistration().then(reg => {
+    if (!reg) return;
+    if (reg.waiting) markUpdateReady();
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      if (nw) nw.addEventListener('statechange', () => {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) markUpdateReady();
+      });
+    });
+  });
+}
+</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
 <title>Old Norse Dictionary</title>
@@ -134,7 +174,7 @@ html, body {
   <div class="title"><span>GJAKKR DAGNÝJARSON'S</span>OLD NORSE DICTIONARY</div>
   <div class="top-bar">
     <button id="homeBtn" class="nav-btn" style="display:none">Home</button>
-    <input id="searchBox" type="search" placeholder="Search Old Norse, inflected, or English..." autocomplete="off" />
+    <input id="searchBox" type="search" placeholder="Search Old Norse or English..." autocomplete="off" />
     <button id="grammarBtn" class="nav-btn" >Grammar</button>
   </div>
   <div id="subStatus" style="display:none">Loading Old Norse database...</div>
