@@ -749,72 +749,40 @@ function detectModernScandinavian(raw) {
 }
 
 
-function suggestFormForTok(tok, reqCases, reqNum, reqGender) {
+function suggestFormForTok(tok, reqCases, reqNum, reqGender, reqDef = '') {
   if (!tok || !tok.hits || !tok.hits.length) return '';
-  const cases = (reqCases || []).map(c => c.toUpperCase());
+  const cases = (reqCases || []).map(c => c.toUpperCase()).filter(Boolean);
   const num = (reqNum || '').toUpperCase();
   const gen = (reqGender || '').toLowerCase().replace(/[^mfn]/g, '');
+  const def = (reqDef || '').toUpperCase();
   const hws = [...new Set(tok.hits.map(h => h.headword).filter(Boolean))];
+  const mDef = (d) => !def || (d || '').toUpperCase() === def;
+
   for (const cw of getCraftedWords()) {
     if (hws.includes(cw.headword)) {
-      const cm = (cw.forms || []).find(f => (!cases.length || cases.includes((f.case_name || "").toUpperCase())) && (!num || (f.number || "").toUpperCase() === num));
-      if (cm) return cm.form;
+      const f = (cw.forms || []).find(x => (!cases.length || cases.includes((x.case_name || '').toUpperCase())) && (!num || (x.number || '').toUpperCase() === num) && mDef(x.definiteness)) ||
+                (cw.forms || []).find(x => (!cases.length || cases.includes((x.case_name || '').toUpperCase())) && (!num || (x.number || '').toUpperCase() === num));
+      if (f) return f.form;
     }
   }
   if (typeof ON_CLOSED_CLASS !== 'undefined') {
     for (const k of Object.keys(ON_CLOSED_CLASS)) {
-      const m = ON_CLOSED_CLASS[k].find(e =>
-        hws.includes(e.headword) &&
-        (!cases.length || cases.includes((e.case_name || '').toUpperCase())) &&
-        (!num || (e.number || '').toUpperCase() === num) &&
-        (!gen || !e.gender || e.gender.toLowerCase().replace(/[^mfn]/g, '') === gen)
-      );
+      const m = ON_CLOSED_CLASS[k].find(x => hws.includes(x.headword) && (!cases.length || cases.includes((x.case_name || '').toUpperCase())) && (!num || (x.number || '').toUpperCase() === num) && (!gen || !x.gender || x.gender.toLowerCase().replace(/[^mfn]/g, '') === gen) && mDef(x.definiteness)) ||
+                ON_CLOSED_CLASS[k].find(x => hws.includes(x.headword) && (!cases.length || cases.includes((x.case_name || '').toUpperCase())) && (!num || (x.number || '').toUpperCase() === num) && (!gen || !x.gender || x.gender.toLowerCase().replace(/[^mfn]/g, '') === gen));
       if (m) return m.form;
     }
   }
   const lids = [...new Set(tok.hits.map(h => h.id).filter(id => id > 0))];
   if (lids.length && typeof db !== 'undefined' && db) {
     try {
-      const cList = cases.map(c => `'${c}'`).join(',');
-      const q = `SELECT form FROM wordforms WHERE lemma_id IN (${lids.join(',')})` +
-        (cList ? ` AND UPPER(case_name) IN (${cList})` : '') +
-        (num ? ` AND UPPER(number)='${num}'` : '') +
-        ` LIMIT 1`;
-      const res = db.exec(q);
-      if (res.length && res[0].values.length) return res[0].values[0][0];
-    } catch (_) {}
-  }
-  return '';
-}
-
-
-function suggestFormForTok(tok, reqCases, reqNum, reqGender) {
-  if (!tok || !tok.hits || !tok.hits.length) return '';
-  const cases = (reqCases || []).map(c => (c || '').toUpperCase()).filter(Boolean);
-  const num = (reqNum || '').toUpperCase();
-  const gen = (reqGender || '').toLowerCase().replace(/[^mfn]/g, '');
-  const hws = [...new Set(tok.hits.map(h => h.headword).filter(Boolean))];
-  if (typeof ON_CLOSED_CLASS !== 'undefined') {
-    for (const k of Object.keys(ON_CLOSED_CLASS)) {
-      const m = ON_CLOSED_CLASS[k].find(e =>
-        hws.includes(e.headword) &&
-        (!cases.length || cases.includes((e.case_name || '').toUpperCase())) &&
-        (!num || (e.number || '').toUpperCase() === num) &&
-        (!gen || !e.gender || e.gender.toLowerCase().replace(/[^mfn]/g, '') === gen)
-      );
-      if (m) return m.form;
-    }
-  }
-  const lids = [...new Set(tok.hits.map(h => h.id).filter(id => id > 0))];
-  if (lids.length && typeof db !== 'undefined' && db) {
-    try {
-      const cList = cases.map(c => `'${c}'`).join(',');
-      const q = `SELECT form FROM wordforms WHERE lemma_id IN (${lids.join(',')})` +
-        (cList ? ` AND UPPER(case_name) IN (${cList})` : '') +
-        (num ? ` AND UPPER(number)='${num}'` : '') +
-        ` LIMIT 1`;
-      const res = db.exec(q);
-      if (res.length && res.values.length) return String(res.values.flat());
+      const clist = cases.map(c => `'${c}'`).join(',');
+      const w = `WHERE lemma_id IN (${lids.join(',')})` + (clist ? ` AND UPPER(case_name) IN (${clist})` : '') + (num ? ` AND UPPER(number)='${num}'` : '');
+      if (def) {
+        const r1 = db.exec(`SELECT form FROM wordforms ${w} AND UPPER(definiteness)='${def}' LIMIT 1`);
+        if (r1.length && r1[0].values.length) return String(r1[0].values[0][0]);
+      }
+      const r2 = db.exec(`SELECT form FROM wordforms ${w} LIMIT 1`);
+      if (r2.length && r2[0].values.length) return String(r2[0].values[0][0]);
     } catch (_) {}
   }
   return '';
@@ -822,119 +790,206 @@ function suggestFormForTok(tok, reqCases, reqNum, reqGender) {
 
 function analyzeGrammarClause(words) {
   const parsed = words.map(t => ({ raw: t, hits: lookupGrammarToken(t), notes: [] }));
+  const normG = (g) => (g || '').toLowerCase().replace(/[^mfn]/g, '');
+  const isNounHit = (h) => /noun\bn\.|\bm\.|\bf\.|\bn\./i.test(h.pos || '') && !/adj|pron|verb|prep/i.test(h.pos || '');
+  const isAdjHit = (h) => /adj/i.test(h.pos || '');
+  const isPrepHit = (h) => /prep/i.test(h.pos || '');
+  const isVerbHit = (h) => /^(PRES|PAST)$/i.test(h.case_name || '');
+  const isDetHit = (h) => (/pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '') && !/^(ek|þú|hann|hon|hón|henni|hennar|honum|hans|vér|þér|þeir|þær|þau|þeira|þeirra|þeim|mik|þik|sik|mér|þér|sér|mín|þín|sín|hvat|hverr|hvárr)$/i.test(h.headword || '') && !/^(hon|hón|henni|hennar|honum|hans)$/i.test(h.form || '')) || /^(hinn|sá|þessi|minn|þinn|sinn|várr|yðarr|einn|báðir|allr|margr|sumr|enginn|engi|nokkurr)$/i.test(h.headword || '');
+  const isDefTrig = (h) => /^(hinn|sá|þessi|minn|þinn|sinn|várr|yðarr)$/i.test(h.headword || '');
+
+  parsed.forEach(tok => {
+    if (tok.hits && tok.hits.length > 1) {
+      const inf = tok.hits.filter(h => h.source !== 'lemma' || !/base lemma/i.test(h.case_name || ''));
+      if (inf.length) tok.hits = inf;
+    }
+  });
+
+  const TWO_WAY = new Set(['í', 'á', 'undir', 'yfir', 'fyrir', 'at', 'við', 'með', 'eptir', 'eftir']);
+  const IMPERS = new Set(['langa', 'þykkja', 'dreyma', 'minna', 'lysta', 'sýnast', 'skorta', 'hungra', 'þyrsta']);
+  const COPULA = new Set(['vera', 'verða', 'heita', 'þykkja']);
+  const govReq = new Array(parsed.length).fill(null);
+  let activeGov = null;
+
+  for (let i = 0; i < parsed.length; i++) {
+    const tok = parsed[i];
+    if (!tok.hits.length) continue;
+    const rawLow = tok.raw.toLowerCase();
+    const pHit = tok.hits.find(h => isPrepHit(h) && inferGovCases(h, 'prep'));
+    if (pHit && rawLow !== 'ok') {
+      activeGov = { cases: TWO_WAY.has(rawLow) ? ['ACC', 'DAT'] : inferGovCases(pHit, 'prep'), source: 'prep', headword: pHit.headword };
+      continue;
+    }
+    const vHit = tok.hits.find(isVerbHit);
+    if (vHit) {
+      const hw = (vHit.headword || '').toLowerCase();
+      if (COPULA.has(hw)) activeGov = { cases: ['NOM'], source: 'copula', headword: vHit.headword };
+      else {
+        const vc = inferGovCases(vHit, 'verb');
+        activeGov = (vc && vc.length) ? { cases: vc, source: 'verb', headword: vHit.headword } : null;
+      }
+      continue;
+    }
+    if (/^(ok|en|eða|heldr|því|at|ef|er|sem)$/i.test(rawLow) && !tok.hits.some(h => isNounHit(h) || isAdjHit(h) || isDetHit(h))) {
+      activeGov = null;
+      continue;
+    }
+    if (activeGov && tok.hits.some(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''))) {
+      const verbAhead = parsed.slice(i + 1).some(t => t.hits.some(isVerbHit));
+      const isNomPron = tok.hits.some(h => /^(ek|þú|hann|hon|hón|þat|vér|þér|þeir|þær|þau)$/i.test(tok.raw) && (h.case_name || '').toUpperCase() === 'NOM');
+      if (!(verbAhead && isNomPron)) govReq[i] = activeGov;
+      if (tok.hits.some(isNounHit) && !tok.hits.some(isAdjHit) && !tok.hits.some(isDetHit)) activeGov = null;
+    }
+  }
+
+  const has3rdSubj = parsed.some(t => t.hits.some(h => (/^(hann|hon|hón|þat|þeir|þær|þau)$/i.test(t.raw) || isNounHit(h)) && (h.case_name || '').toUpperCase() === 'NOM'));
+  const has12Subj = parsed.some(t => t.hits.some(h => /^(ek|þú|vér|þér)$/i.test(t.raw) && (h.case_name || '').toUpperCase() === 'NOM'));
+
   for (let i = 0; i < parsed.length; i++) {
     const cur = parsed[i];
     if (!cur.hits.length) {
       const mod = detectModernScandinavian(cur.raw);
-      if (mod) {
-        cur.notes.push({ ok: false, text: `✗ ${mod.lang} spelling detected — in Old Norse use "${mod.suggestion}"` });
-      } else {
-        cur.notes.push({ ok: false, text: '✗ Unrecognized wordform — check spelling or diacritics' });
-      }
+      cur.notes.push(mod ? { ok: false, text: `✗ ${mod.lang} spelling detected — in Old Norse use "${mod.suggestion}"` } : { ok: false, text: `✗ Unrecognized wordform — check spelling or diacritics` });
+      continue;
+    }
+    const cleanTyped = cur.raw.toLowerCase().replace(/^[^a-záéíóúýæœǫþð]+|[^a-záéíóúýæœǫþð]+$/gi, '');
+    const normOrtho = (s) => (s || '').toLowerCase().replace(/ö/g, 'ǫ');
+    const exactOrtho = cur.hits.some(h => h.source === 'derived' || h.source === 'compound' || (h.headword && h.headword.includes(' + ')) || normOrtho(h.form) === normOrtho(cleanTyped) || normOrtho(h.headword) === normOrtho(cleanTyped));
+    if (!exactOrtho) {
+      const pHit = cur.hits.find(h => h.form && normOrtho(h.form) !== normOrtho(cleanTyped)) || cur.hits.find(Boolean);
+      const pForm = pHit ? (pHit.form || pHit.headword) : '';
+      if (pForm) cur.notes.push({ ok: false, text: `✗ Spelling / orthography error ("${cur.raw}") — use "${pForm}"` });
+    }
+    if (/^(sik|sér|sín)$/i.test(cur.raw)) {
+      cur.notes.push((has12Subj && !has3rdSubj)
+        ? { ok: false, text: `✗ Reflexive "${cur.raw}" requires a 3rd-person subject` }
+        : { ok: true, text: `✓ Reflexive pronoun "${cur.raw}" refers to 3rd-person subject` });
       continue;
     }
     const subjP = getPronPerson(cur.raw);
     if (subjP) {
-      const windowToks = [...parsed.slice(Math.max(0, i - 2), i), ...parsed.slice(i + 1, i + 4)];
-      const verbTok = windowToks.find(t => t.hits.some(h => /^(PRES|PAST)$/i.test(h.case_name || '')));
-      if (verbTok) {
-        const vForms = verbTok.hits.filter(h => /^(PRES|PAST)$/i.test(h.case_name || '')).map(h => (h.number || '').toUpperCase());
-        if (vForms.includes(subjP)) cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with verb "${verbTok.raw}" (${subjP})` });
-        else if (vForms.some(v => /^(SG|PL)$/.test(v))) { const sugV = suggestFormForTok(verbTok, [], subjP.slice(-2)); cur.notes.push({ ok: false, text: `✗ Subject (${subjP}) does not match verb "${verbTok.raw}" (${[...new Set(vForms.filter(v => /^(SG|PL)$/.test(v)))].join('/')})${sugV ? ` — use "${sugV}"` : ''}` }); }
+      const win = [...parsed.slice(Math.max(0, i - 2), i), ...parsed.slice(i + 1, i + 5)];
+      const vTok = win.find(t => t.hits.some(isVerbHit));
+      if (vTok) {
+        const vHits = vTok.hits.filter(isVerbHit);
+        const vForms = vHits.map(h => (h.number || '').toUpperCase());
+        const impHit = vHits.find(h => IMPERS.has((h.headword || '').toLowerCase()));
+        if (impHit && (cur.hits.case_name || '').toUpperCase() === 'NOM') {
+          const sugE = suggestFormForTok(cur, ['ACC', 'DAT'], subjP.slice(1));
+          cur.notes.push({ ok: false, text: `✗ Impersonal verb "${impHit.headword}" takes ACC/DAT experiencer, not NOM${sugE ? ` — use "${sugE}"` : ''}` });
+        } else if (vForms.includes(subjP)) {
+          cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with verb "${vTok.raw}" (${subjP})` });
+        } else if (vForms.some(v => /^(SG|PL)$/.test(v))) {
+          const sugV = suggestFormForTok(vTok, [subjP], subjP.slice(-2));
+          cur.notes.push({ ok: false, text: `✗ Subject (${subjP}) does not match verb "${vTok.raw}" (${[...new Set(vForms.filter(v => /^(SG|PL)$/.test(v)))].join('/')})${sugV ? ` — use "${sugV}"` : ''}` });
+        }
       }
     }
-    const verbGovHit = cur.hits.find(h => /^(PRES|PAST)$/i.test(h.case_name || '') && inferGovCases(h, 'verb'));
-    if (verbGovHit && !/^(ok|hvat)$/i.test(cur.raw)) {
-      const req = inferGovCases(verbGovHit, 'verb');
-      const objTok = parsed.slice(i + 1, i + 5).find(t => t.hits.some(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
-      if (objTok) {
-        const objCases = objTok.hits.map(h => (h.case_name || '').toUpperCase()).filter(c => /^(NOM|ACC|DAT|GEN)$/.test(c));
-        if (objCases.some(c => req.includes(c))) cur.notes.push({ ok: true, text: `✓ Verb "${verbGovHit.headword}" governs ${req} (matches "${objTok.raw}")` });
-        else if (objCases.length) cur.notes.push({ ok: false, text: `✗ Verb "${verbGovHit.headword}" governs ${req}, but "${objTok.raw}" is ${[...new Set(objCases)].join('/')}` });
+    const vGov = cur.hits.find(isVerbHit);
+    if (vGov && !/^(ok|hvat)$/i.test(cur.raw)) {
+      if (i >= 2 && !/^(hvat|hverr|hvar|hvé|hví|ef|at|er|sem)$/i.test(parsed.raw)) {
+        const prev = parsed[i - 1], first = parsed;
+        const firstAdv = first.hits.some(h => /adv|prep/i.test(h.pos || '')) && !first.hits.some(h => /^(ek|þú|hann|hon|hón|þat|vér|þér|þeir|þær|þau)$/i.test(first.raw));
+        const prevSubj = prev && prev.hits.some(h => (h.case_name || '').toUpperCase() === 'NOM' && (/^(ek|þú|hann|hon|hón|þat|vér|þér|þeir|þær|þau)$/i.test(prev.raw) || isNounHit(h)));
+        if (firstAdv && prevSubj) cur.notes.push({ ok: false, text: `✗ V2 word-order rule: invert verb "${cur.raw}" before subject "${prev.raw}"` });
+      }
+      const req = inferGovCases(vGov, 'verb');
+      if (req) {
+        const obj = parsed.slice(i + 1, i + 6).find(t => !t.hits.some(isPrepHit) && t.hits.some(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
+        if (obj) {
+          const oCases = [...new Set(obj.hits.map(h => (h.case_name || '').toUpperCase()).filter(c => /^(NOM|ACC|DAT|GEN)$/.test(c)))];
+          if (oCases.some(c => req.includes(c))) cur.notes.push({ ok: true, text: `✓ Verb "${vGov.headword}" governs ${req} (matches "${obj.raw}")` });
+          else if (oCases.length) cur.notes.push({ ok: false, text: `✗ Verb "${vGov.headword}" governs ${req}, but "${obj.raw}" is ${oCases.join('/')}` });
+        }
       }
     }
-    const prepHit = cur.hits.find(h => inferGovCases(h, 'prep'));
-    if (prepHit && cur.raw.toLowerCase() !== 'ok') {
-      const req = inferGovCases(prepHit, 'prep');
-      const target = parsed.slice(i + 1, i + 4).find(t => t.hits.some(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
-      if (target) {
-        const tCases = target.hits.map(h => (h.case_name || '').toUpperCase()).filter(c => /^(NOM|ACC|DAT|GEN)$/.test(c));
-        const hasGenEnd = req.includes('GEN') && /(a|ar|s|na)$/i.test(target.raw);
-        if (tCases.some(c => req.includes(c)) || hasGenEnd) cur.notes.push({ ok: true, text: `✓ Preposition "${prepHit.headword}" governs ${req} (matches "${target.raw}")` });
-        else if (tCases.length) cur.notes.push({ ok: false, text: `✗ Preposition "${prepHit.headword}" governs ${req}, but "${target.raw}" is ${[...new Set(tCases)].join('/')}` });
+    const pHit = cur.hits.find(h => isPrepHit(h) && inferGovCases(h, 'prep'));
+    if (pHit && cur.raw.toLowerCase() !== 'ok') {
+      const req = TWO_WAY.has(cur.raw.toLowerCase()) ? ['ACC', 'DAT'] : inferGovCases(pHit, 'prep');
+      const tgt = parsed.slice(i + 1, i + 5).find(t => t.hits.some(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
+      if (tgt) {
+        const tCases = [...new Set(tgt.hits.map(h => (h.case_name || '').toUpperCase()).filter(c => /^(NOM|ACC|DAT|GEN)$/.test(c)))];
+        if (tCases.some(c => req.includes(c)) || (req.includes('GEN') && /(ajar|s|na)$/i.test(tgt.raw))) {
+          cur.notes.push({ ok: true, text: `✓ Preposition "${pHit.headword}" governs ${req.join('/')} (matches "${tgt.raw}")` });
+        } else if (tCases.length) {
+          cur.notes.push({ ok: false, text: `✗ Preposition "${pHit.headword}" governs ${req.join('/')}, but "${tgt.raw}" is ${tCases.join('/')}` });
+        }
+      }
+    }
+    let nounTok = null;
+    for (let j = i + 1; j < Math.min(parsed.length, i + 5); j++) {
+      if (parsed[j].hits.some(h => isVerbHit(h) || isPrepHit(h))) break;
+      if (parsed[j].hits.some(h => isNounHit(h) && !isAdjHit(h) && !isDetHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''))) { nounTok = parsed[j]; break; }
+    }
+    const isDet = cur.hits.some(h => isDetHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+    if (isDet && nounTok) {
+      const detHits = cur.hits.filter(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+      const nounHits = nounTok.hits.filter(h => isNounHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+      const gov = govReq[i];
+      const full = detHits.find(d => nounHits.some(n => (d.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() && (d.number || '').toUpperCase() === (n.number || '').toUpperCase() && (!normG(d.gender) || !normG(n.gender) || normG(d.gender) === normG(n.gender)) && (!gov || gov.cases.includes((d.case_name || '').toUpperCase()))));
+      if (full) {
+        cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with "${nounTok.raw}" (${normG(full.gender) ? normG(full.gender) + '. ' : ''}${full.case_name.toUpperCase()} ${full.number.toUpperCase()})` });
       } else {
-        cur.notes.push({ ok: false, text: `✗ Preposition "${prepHit.headword}" has no nominal object following it` });
-      }
-    }
-        const cleanTyped = cur.raw.toLowerCase().replace(/^[^a-záéíóúýæøǫœþð]+|[^a-záéíóúýæøǫœþð]+$/gi, '');
-    const normOrtho = (s) => (s || '').toLowerCase().replace(/ö/g, 'ǫ');
-    const exactOrtho = cur.hits.some(h => h.source === "derived" || h.source === "compound" || (h.headword && h.headword.includes(" + ")) || normOrtho(h.form) === normOrtho(cleanTyped) || normOrtho(h.headword) === normOrtho(cleanTyped));
-    if (!exactOrtho) {
-      const properHit = cur.hits.find(h => h.form && normOrtho(h.form) !== normOrtho(cleanTyped)) || cur.hits.find(Boolean);
-      const properForm = properHit ? (properHit.form || properHit.headword) : '';
-      if (properForm) {
-        cur.notes.push({ ok: false, text: `✗ Spelling / orthography error ("${cur.raw}") — use "${properForm}"` });
-      }
-    }
-    const isDet = cur.hits.some(h => /pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '') && !/^(ek|þú|hann|hon|hón|henni|hennar|honum|hans|vér|þér|þeir|þær|þau|þeira|þeirra|þeim|mik|þik|sik|mér|þér|sér|mín|þín|sín|hvat|hverr|hvárr)$/i.test(h.headword || '') && !/^(hon|hón|henni|hennar|honum|hans)$/i.test(cur.raw || ''));
-    if (isDet) {
-      const nounTok = parsed.slice(i + 1, i + 5).find(t => {
-        if (t.hits.some(h => /^verb$/i.test((h.pos || '').trim()) && /^(PRES|PAST)$/i.test(h.case_name || ''))) return false;
-        return t.hits.some(h => /noun|\bn\.\b|\bm\.\b|\bf\.\b/i.test(h.pos || '') && !/adj|pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
-      });
-      if (nounTok) {
-        const detHits = cur.hits.filter(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
-        const nounHits = nounTok.hits.filter(h => /noun|\bn\.\b|\bm\.\b|\bf\.\b/i.test(h.pos || '') && !/adj|pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
-        const normG = (g) => (g || '').toLowerCase().replace(/[^mfn]/g, '');
-        const fullMatch = detHits.find(d => nounHits.some(n =>
-          (d.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() &&
-          (d.number || '').toUpperCase() === (n.number || '').toUpperCase() &&
-          (!normG(d.gender) || !normG(n.gender) || normG(d.gender) === normG(n.gender))
-        ));
-        if (fullMatch) {
-          const gLabel = normG(fullMatch.gender) ? normG(fullMatch.gender) + '. ' : '';
-          cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with "${nounTok.raw}" (${gLabel}${fullMatch.case_name.toUpperCase()} ${fullMatch.number.toUpperCase()})` });
+        const n0 = nounHits.find(Boolean);
+        const tCases = gov ? gov.cases : (n0 ? [n0.case_name.toUpperCase()] : []);
+        const sug = suggestFormForTok(cur, tCases, n0 ? n0.number : '', n0 ? normG(n0.gender) : '');
+        if (gov && !detHits.some(d => gov.cases.includes((d.case_name || '').toUpperCase()))) {
+          cur.notes.push({ ok: false, text: `✗ ${gov.source === 'prep' ? 'Preposition' : 'Verb'} "${gov.headword}" requires ${gov.cases.join('/')} on "${cur.raw}"${sug ? ` — use "${sug}"` : ''}` });
         } else {
-          const cnMatch = detHits.find(d => nounHits.some(n =>
-            (d.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() &&
-            (d.number || '').toUpperCase() === (n.number || '').toUpperCase()
-          ));
-          const n0 = nounHits.find(Boolean);
-          if (cnMatch && n0) {
-            cur.notes.push({ ok: false, text: `✗ Gender mismatch: "${cur.raw}" is ${normG(cnMatch.gender) || '?'}., but noun "${nounTok.raw}" is ${normG(n0.gender) || '?'}.` });
-          } else {
-            const nRef = nounHits.find(Boolean); const sugCN = nRef ? suggestFormForTok(cur, [nRef.case_name], nRef.number, normG(nRef.gender)) : ''; cur.notes.push({ ok: false, text: `✗ Case/number mismatch between "${cur.raw}" and noun "${nounTok.raw}"${sugCN ? ` — use "${sugCN}"` : ''}` });
-          }
+          cur.notes.push({ ok: false, text: `✗ Case/number/gender mismatch between "${cur.raw}" and "${nounTok.raw}"${sug ? ` — use "${sug}"` : ''}` });
         }
       }
     }
-        const isAdj = !isDet && cur.hits.some(h => /adj/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+
+    const isAdj = !isDet && cur.hits.some(h => isAdjHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
     if (isAdj && !cur.notes.length) {
-      const nounTok = parsed.slice(i + 1, i + 4).find(t => t.hits.some(h => /noun|\bn\.\b|\bm\.\b|\bf\.\b/i.test(h.pos || '') && !/adj|pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
+      const adjHits = cur.hits.filter(h => isAdjHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+      const gov = govReq[i];
+      const prevDet = parsed.slice(Math.max(0, i - 2), i).find(t => t.hits.some(isDefTrig));
+      const nounDef = nounTok && nounTok.hits.some(h => (h.definiteness || '').toUpperCase() === 'DEF');
+      const reqDef = (prevDet || nounDef) ? 'WEAK' : 'INDEF';
+
       if (nounTok) {
-        const adjHits = cur.hits.filter(h => /adj/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
-        const nounHits = nounTok.hits.filter(h => /noun|\bn\.\b|\bm\.\b|\bf\.\b/i.test(h.pos || '') && !/adj|pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
-        const normG = (g) => (g || '').toLowerCase().replace(/[^mfn]/g, '');
-        const mHit = adjHits.find(a => nounHits.some(n =>
-          (a.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() &&
-          (a.number || '').toUpperCase() === (n.number || '').toUpperCase() &&
-          (!normG(a.gender) || !normG(n.gender) || normG(a.gender) === normG(n.gender))
-        ));
-        if (mHit) {
-          const gLbl = normG(mHit.gender) ? normG(mHit.gender) + '. ' : '';
-          cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with "${nounTok.raw}" (${gLbl}${mHit.case_name.toUpperCase()} ${mHit.number.toUpperCase()})` });
+        const nounHits = nounTok.hits.filter(h => isNounHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+        const cng = adjHits.filter(a => nounHits.some(n => (a.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() && (a.number || '').toUpperCase() === (n.number || '').toUpperCase() && (!normG(a.gender) || !normG(n.gender) || normG(a.gender) === normG(n.gender)) && (!gov || gov.cases.includes((a.case_name || '').toUpperCase()))));
+        const full = cng.find(a => !a.definiteness || a.definiteness.toUpperCase() === reqDef);
+        const n0 = nounHits.find(Boolean);
+        const tCases = gov ? gov.cases : (n0 ? [n0.case_name.toUpperCase()] : []);
+        const sug = suggestFormForTok(cur, tCases, n0 ? n0.number : '', n0 ? normG(n0.gender) : '', reqDef);
+
+        if (full) {
+          cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with "${nounTok.raw}" (${normG(full.gender) ? normG(full.gender) + '. ' : ''}${full.case_name.toUpperCase()} ${full.number.toUpperCase()} ${reqDef})` });
+        } else if (cng.length) {
+          cur.notes.push({ ok: false, text: reqDef === 'WEAK'
+            ? `✗ Weak adjective declension required after "${prevDet ? prevDet.raw : nounTok.raw}"${sug ? ` — use "${sug}"` : ''}`
+            : `✗ Strong (indefinite) adjective declension required without definite article${sug ? ` — use "${sug}"` : ''}` });
+        } else if (gov && !adjHits.some(a => gov.cases.includes((a.case_name || '').toUpperCase()))) {
+          cur.notes.push({ ok: false, text: `✗ ${gov.source === 'prep' ? 'Preposition' : 'Verb'} "${gov.headword}" requires ${gov.cases.join('/')} on adjective "${cur.raw}"${sug ? ` — use "${sug}"` : ''}` });
         } else {
-          const n0 = nounHits.find(Boolean);
-          const sugA = n0 ? suggestFormForTok(cur, [n0.case_name], n0.number, normG(n0.gender)) : '';
-          cur.notes.push({ ok: false, text: `✗ Adjective "${cur.raw}" does not agree with noun "${nounTok.raw}"${sugA ? ` — use "${sugA}"` : ''}` });
+          cur.notes.push({ ok: false, text: `✗ Adjective "${cur.raw}" does not agree with noun "${nounTok.raw}"${sug ? ` — use "${sug}"` : ''}` });
         }
       }
     }
+
+    const isNounOnly = cur.hits.some(isNounHit) && !isAdj && !isDet;
+    if (isNounOnly && !cur.notes.length) {
+      const nounHits = cur.hits.filter(h => isNounHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+      const gov = govReq[i];
+      if (gov && nounHits.length) {
+        const gMatch = nounHits.find(n => gov.cases.includes((n.case_name || '').toUpperCase()));
+        if (gMatch) cur.notes.push({ ok: true, text: `✓ Grammatically correct — ${gMatch.case_name.toUpperCase()} ${gMatch.number.toUpperCase()} governed by "${gov.headword}"` });
+        else {
+          const n0 = nounHits;
+          const sugN = suggestFormForTok(cur, gov.cases, n0.number, normG(n0.gender));
+          cur.notes.push({ ok: false, text: `✗ ${gov.source === 'prep' ? 'Preposition' : 'Verb'} "${gov.headword}" governs ${gov.cases.join('/')}, but "${cur.raw}" is ${[...new Set(nounHits.map(n => n.case_name.toUpperCase()))].join('/')}${sugN ? ` — use "${sugN}"` : ''}` });
+        }
+      }
+    }
+
     if (!cur.notes.length) {
-      const top = cur.hits[0];
-      const morph = [top.case_name, top.number, top.definiteness].filter(Boolean).join(' • ');
-      const _g = (top.gender || '').toLowerCase().replace(/[^mfn]/g, '');
-      const _det = [(_g ? _g + '.' : ''), top.case_name, top.number].filter(Boolean).join(' ');
+      const top = cur.hits;
+      const g = (top.gender || '').toLowerCase().replace(/[^mfn]/g, '');
+      const det = [(g ? g + '.' : ''), top.case_name, top.number].filter(Boolean).join(' ');
       const _prev = parsed.slice(Math.max(0, i - 3), i).reverse().find(t => t.hits && t.hits.some(h => /pron|adj|verb|prep/i.test(h.pos || '')));
       cur.notes.push({ ok: true, text: _prev && _det ? `✓ Grammatically correct — agrees with "${_prev.raw}" (${_det})` : (_det ? `✓ Grammatically correct (${_det})` : '✓ Grammatically correct') });
     }
