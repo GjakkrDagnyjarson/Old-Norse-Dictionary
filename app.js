@@ -874,7 +874,7 @@ function analyzeGrammarClause(words) {
         const vHits = vTok.hits.filter(isVerbHit);
         const vForms = vHits.map(h => (h.number || '').toUpperCase());
         const impHit = vHits.find(h => IMPERS.has((h.headword || '').toLowerCase()));
-        if (impHit && (cur.hits.case_name || '').toUpperCase() === 'NOM') {
+        if (impHit && (cur.hits[0].case_name || '').toUpperCase() === 'NOM') {
           const sugE = suggestFormForTok(cur, ['ACC', 'DAT'], subjP.slice(1));
           cur.notes.push({ ok: false, text: `✗ Impersonal verb "${impHit.headword}" takes ACC/DAT experiencer, not NOM${sugE ? ` — use "${sugE}"` : ''}` });
         } else if (vForms.includes(subjP)) {
@@ -887,8 +887,8 @@ function analyzeGrammarClause(words) {
     }
     const vGov = cur.hits.find(isVerbHit);
     if (vGov && !/^(ok|hvat)$/i.test(cur.raw)) {
-      if (i >= 2 && !/^(hvat|hverr|hvar|hvé|hví|ef|at|er|sem)$/i.test(parsed.raw)) {
-        const prev = parsed[i - 1], first = parsed;
+      if (i >= 2 && !/^(hvat|hverr|hvar|hvé|hví|ef|at|er|sem)$/i.test(parsed[0].raw)) {
+        const prev = parsed[i - 1], first = parsed[0];
         const firstAdv = first.hits.some(h => /adv|prep/i.test(h.pos || '')) && !first.hits.some(h => /^(ek|þú|hann|hon|hón|þat|vér|þér|þeir|þær|þau)$/i.test(first.raw));
         const prevSubj = prev && prev.hits.some(h => (h.case_name || '').toUpperCase() === 'NOM' && (/^(ek|þú|hann|hon|hón|þat|vér|þér|þeir|þær|þau)$/i.test(prev.raw) || isNounHit(h)));
         if (firstAdv && prevSubj) cur.notes.push({ ok: false, text: `✗ V2 word-order rule: invert verb "${cur.raw}" before subject "${prev.raw}"` });
@@ -979,7 +979,7 @@ function analyzeGrammarClause(words) {
         const gMatch = nounHits.find(n => gov.cases.includes((n.case_name || '').toUpperCase()));
         if (gMatch) cur.notes.push({ ok: true, text: `✓ Grammatically correct — ${gMatch.case_name.toUpperCase()} ${gMatch.number.toUpperCase()} governed by "${gov.headword}"` });
         else {
-          const n0 = nounHits;
+          const n0 = nounHits[0];
           const sugN = suggestFormForTok(cur, gov.cases, n0.number, normG(n0.gender));
           cur.notes.push({ ok: false, text: `✗ ${gov.source === 'prep' ? 'Preposition' : 'Verb'} "${gov.headword}" governs ${gov.cases.join('/')}, but "${cur.raw}" is ${[...new Set(nounHits.map(n => n.case_name.toUpperCase()))].join('/')}${sugN ? ` — use "${sugN}"` : ''}` });
         }
@@ -987,9 +987,9 @@ function analyzeGrammarClause(words) {
     }
 
     if (!cur.notes.length) {
-      const top = cur.hits;
+      const top = cur.hits[0];
       const g = (top.gender || '').toLowerCase().replace(/[^mfn]/g, '');
-      const det = [(g ? g + '.' : ''), top.case_name, top.number].filter(Boolean).join(' ');
+      const _det = [(g ? g + '.' : ''), top.case_name, top.number].filter(Boolean).join(' ');
       const _prev = parsed.slice(Math.max(0, i - 3), i).reverse().find(t => t.hits && t.hits.some(h => /pron|adj|verb|prep/i.test(h.pos || '')));
       cur.notes.push({ ok: true, text: _prev && _det ? `✓ Grammatically correct — agrees with "${_prev.raw}" (${_det})` : (_det ? `✓ Grammatically correct (${_det})` : '✓ Grammatically correct') });
     }
