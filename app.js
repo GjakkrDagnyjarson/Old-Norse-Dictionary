@@ -417,8 +417,15 @@ const ON_DETERMINERS = {
 
 function lookupGrammarToken(raw, depth = 0) {
   const __k = (raw || "").toLowerCase().replace(/^[^a-záéíóúýæøǫœþð]+|[^a-záéíóúýæøǫœþð]+$/gi, "");
-  const __cw = getCraftedWords().find(x => x.headword === __k);
-  if (__cw) return [{ id: __cw.id, headword: __cw.headword, pos: __cw.pos, gender: __cw.gender, form: __cw.headword, case_name: "NOM", number: "SG", definiteness: "INDEF", zoega_def: __cw.zoega_def }];
+  for (const __cw of getCraftedWords()) {
+    const __fHits = (__cw.forms || []).filter(f => f.form === __k);
+    if (__fHits.length) {
+      return __fHits.map(f => ({ id: __cw.id, headword: __cw.headword, pos: __cw.pos, gender: __cw.gender, form: f.form, case_name: f.case_name || 'NOM', number: f.number || 'SG', definiteness: f.definiteness || 'INDEF', zoega_def: __cw.zoega_def }));
+    }
+    if (__cw.headword === __k) {
+      return [{ id: __cw.id, headword: __cw.headword, pos: __cw.pos, gender: __cw.gender, form: __cw.headword, case_name: 'NOM', number: 'SG', definiteness: 'INDEF', zoega_def: __cw.zoega_def }];
+    }
+  }
   if (typeof ON_CLOSED_CLASS !== "undefined" && ON_CLOSED_CLASS[__k]) return ON_CLOSED_CLASS[__k];
   const __low = (raw || "").toLowerCase();
   if (ON_INDECLINABLES[__low]) {
@@ -748,6 +755,12 @@ function suggestFormForTok(tok, reqCases, reqNum, reqGender) {
   const num = (reqNum || '').toUpperCase();
   const gen = (reqGender || '').toLowerCase().replace(/[^mfn]/g, '');
   const hws = [...new Set(tok.hits.map(h => h.headword).filter(Boolean))];
+  for (const cw of getCraftedWords()) {
+    if (hws.includes(cw.headword)) {
+      const cm = (cw.forms || []).find(f => (!cases.length || cases.includes((f.case_name || "").toUpperCase())) && (!num || (f.number || "").toUpperCase() === num));
+      if (cm) return cm.form;
+    }
+  }
   if (typeof ON_CLOSED_CLASS !== 'undefined') {
     for (const k of Object.keys(ON_CLOSED_CLASS)) {
       const m = ON_CLOSED_CLASS[k].find(e =>
@@ -1004,14 +1017,48 @@ function runGrammarAnalysis() {
 }
 
 
+function buildCraftedParadigm(cleanWord, roots, pos, gender) {
+  const parts = (roots || '').split('+').map(s => s.trim().toLowerCase()).filter(Boolean);
+  const headRoot = parts.length > 1 ? parts.pop() : '';
+  const prefix = headRoot && cleanWord.endsWith(headRoot)
+    ? cleanWord.slice(0, cleanWord.length - headRoot.length)
+    : (parts.join('') || '');
+  const forms = [];
+  const seen = new Set();
+  const addF = (f, c, n, d) => {
+    const key = `${f}|${c}|${n}|${d}`;
+    if (!f || seen.has(key)) return;
+    seen.add(key);
+    forms.push({ form: f, case_name: c || '', number: n || '', definiteness: d || '' });
+  };
+  addF(cleanWord, /verb/i.test(pos) ? 'INF' : 'NOM', /verb/i.test(pos) ? '' : 'SG', /verb/i.test(pos) ? '' : 'INDEF');
+  if (headRoot && typeof db !== 'undefined' && db) {
+    try {
+      const st = db.prepare("SELECT w.form, w.case_name, w.number, w.definiteness FROM wordforms w JOIN lemmas l ON l.id = w.lemma_id WHERE LOWER(l.headword) = ? LIMIT 80");
+      st.bind([headRoot]);
+      while (st.step()) {
+        const r = st.getAsObject();
+        if (r.form) addF(prefix + r.form.toLowerCase(), r.case_name, r.number, r.definiteness);
+      }
+      st.free();
+    } catch (_) {}
+  }
+  return forms;
+}
 function getCraftedWords() {
   try { return JSON.parse(localStorage.getItem('on_crafted_words') || '[]'); } catch (_) { return []; }
+}
+function deleteCraftedWord(word) {
+  const list = getCraftedWords().filter(x => x.headword !== word);
+  localStorage.setItem('on_crafted_words', JSON.stringify(list));
+  renderAlphaGrid();
 }
 function saveCraftedCompound(word, roots, pos, gender, autoGloss) {
   const clean = (word || '').toLowerCase().replace(/^[^a-záéíóúýæøǫœþð]+|[^a-záéíóúýæøǫœþð]+$/gi, '');
   if (!clean) return;
   const def = prompt(`Add definition for crafted Old Norse word "${clean}" (${roots}):`, autoGloss || `Crafted compound (${roots})`);
   if (def === null) return;
+  const forms = buildCraftedParadigm(clean, roots, pos, gender);
   const list = getCraftedWords().filter(x => x.headword !== clean);
   list.unshift({
     id: -Date.now(),
@@ -1019,13 +1066,14 @@ function saveCraftedCompound(word, roots, pos, gender, autoGloss) {
     pos: pos || 'noun',
     gender: gender || '',
     roots: roots || '',
+    forms,
     zoega_def: `[Crafted Coinage · ${roots}] ${def.trim()}`
   });
   localStorage.setItem('on_crafted_words', JSON.stringify(list));
   runGrammarAnalysis();
 }
 function openCraftedEntry(word) {
-  const item = getCraftedWords().find(x => x.headword === word);
+  const item = getCraftedWords().find(x => x.headword === word || (x.forms || []).some(f => f.form === word));
   if (!item) return;
   $('alphaGrid').style.display = 'none';
   $('listCard').style.display = 'none';
@@ -1035,7 +1083,11 @@ function openCraftedEntry(word) {
   $('root').classList.add('open');
   $('mainArea').style.flex = '1';
   $('detailCard').style.display = 'block';
-  $('detailCard').innerHTML = `<div class="det-top"><div><div class="det-word">${esc(item.headword)}</div><div class="det-meta">${esc([item.pos, item.gender].filter(Boolean).join(' · '))} · <span style="color:#E8C988">Crafted Coinage</span></div></div><button class="back-btn" onclick="renderAlphaGrid()">← Back</button></div><div class="dict-sec"><h4>Crafted Coinage (${esc(item.roots)})</h4><p>${esc(item.zoega_def)}</p></div>`;
+  const rows = (item.forms || []).slice(0, 24).map(f =>
+    `<tr><td style="padding:4px 8px;color:#E8C988">${esc(f.form)}</td><td style="padding:4px 8px;opacity:.85">${esc([f.case_name, f.number, f.definiteness].filter(Boolean).join(' · '))}</td></tr>`
+  ).join('');
+  const tableHTML = rows ? `<div class="dict-sec"><h4>Inflected Variants (${item.forms.length} forms)</h4><table style="width:100%;border-collapse:collapse;font-size:13px">${rows}</table></div>` : '';
+  $('detailCard').innerHTML = `<div class="det-top"><div><div class="det-word">${esc(item.headword)}</div><div class="det-meta">${esc([item.pos, item.gender].filter(Boolean).join(' · '))} · <span style="color:#E8C988">Crafted Coinage</span></div></div><button class="back-btn" onclick="renderAlphaGrid()">← Back</button></div><div class="dict-sec"><h4>Crafted Coinage (${esc(item.roots)})</h4><p>${esc(item.zoega_def)}</p></div>${tableHTML}<button onclick="deleteCraftedWord('${esc(item.headword)}')" style="margin-top:10px;padding:6px 12px;font-size:12px;background:#3a1815;color:#ff8a75;border:1px solid #7a352c;border-radius:6px;cursor:pointer">Delete Crafted Word</button>`;
 }
 
 function openGrammarTool() {
