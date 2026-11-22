@@ -791,7 +791,7 @@ function suggestFormForTok(tok, reqCases, reqNum, reqGender, reqDef = '') {
 function analyzeGrammarClause(words) {
   const parsed = words.map(t => ({ raw: t, hits: lookupGrammarToken(t), notes: [] }));
   const normG = (g) => (g || '').toLowerCase().replace(/[^mfn]/g, '');
-  const isNounHit = (h) => /noun\bn\.|\bm\.|\bf\.|\bn\./i.test(h.pos || '') && !/adj|pron|verb|prep/i.test(h.pos || '');
+  const isNounHit = (h) => /noun|\b[mfn]\./i.test(h.pos || '') && !/adj|pron|verb|prep/i.test(h.pos || '');
   const isAdjHit = (h) => /adj/i.test(h.pos || '');
   const isPrepHit = (h) => /prep/i.test(h.pos || '');
   const isVerbHit = (h) => /^(PRES|PAST)$/i.test(h.case_name || '');
