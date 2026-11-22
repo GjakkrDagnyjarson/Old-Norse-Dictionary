@@ -751,7 +751,8 @@ function detectModernScandinavian(raw) {
 
 function suggestFormForTok(tok, reqCases, reqNum, reqGender, reqDef = '') {
   if (!tok || !tok.hits || !tok.hits.length) return '';
-  const cases = (reqCases || []).map(c => c.toUpperCase()).filter(Boolean);
+  const rawCases = Array.isArray(reqCases) ? reqCases : (reqCases ? String(reqCases).split(/[\s,/]+/) : []);
+  const cases = rawCases.map(c => c.toUpperCase()).filter(Boolean);
   const num = (reqNum || '').toUpperCase();
   const gen = (reqGender || '').toLowerCase().replace(/[^mfn]/g, '');
   const def = (reqDef || '').toUpperCase();
@@ -825,8 +826,9 @@ function analyzeGrammarClause(words) {
       const hw = (vHit.headword || '').toLowerCase();
       if (COPULA.has(hw)) activeGov = { cases: ['NOM'], source: 'copula', headword: vHit.headword };
       else {
-        const vc = inferGovCases(vHit, 'verb');
-        activeGov = (vc && vc.length) ? { cases: vc, source: 'verb', headword: vHit.headword } : null;
+        const vcRaw = inferGovCases(vHit, 'verb');
+        const vc = Array.isArray(vcRaw) ? vcRaw : (vcRaw ? String(vcRaw).split(/[\s,/]+/).filter(Boolean) : []);
+        activeGov = vc.length ? { cases: vc, source: 'verb', headword: vHit.headword } : null;
       }
       continue;
     }
@@ -905,7 +907,8 @@ function analyzeGrammarClause(words) {
     }
     const pHit = cur.hits.find(h => isPrepHit(h) && inferGovCases(h, 'prep'));
     if (pHit && cur.raw.toLowerCase() !== 'ok') {
-      const req = TWO_WAY.has(cur.raw.toLowerCase()) ? ['ACC', 'DAT'] : inferGovCases(pHit, 'prep');
+      const pRaw2 = inferGovCases(pHit, 'prep');
+      const req = TWO_WAY.has(cur.raw.toLowerCase()) ? ['ACC', 'DAT'] : (Array.isArray(pRaw2) ? pRaw2 : String(pRaw2 || '').split(/[\s,/]+/).filter(Boolean));
       const tgt = parsed.slice(i + 1, i + 5).find(t => t.hits.some(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
       if (tgt) {
         const tCases = [...new Set(tgt.hits.map(h => (h.case_name || '').toUpperCase()).filter(c => /^(NOM|ACC|DAT|GEN)$/.test(c)))];
