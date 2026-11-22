@@ -255,7 +255,8 @@ $('searchBox').addEventListener('input', e => {
     engResults.sort((x, y) => x._engScore - y._engScore || (x.sort_key || x.headword).localeCompare(y.sort_key || y.headword));
   }
 
-  const results = [...onResults, ...engResults];
+  const cwMatches = q ? getCraftedWords().filter(x => x.headword.includes(q.toLowerCase()) || (x.zoega_def || "").toLowerCase().includes(q.toLowerCase())).map(x => ({ id: x.id, headword: x.headword, pos: x.pos, gender: x.gender, zoega_def: x.zoega_def })) : [];
+    const results = [...cwMatches, ...onResults, ...engResults];
   const st = `${results.length} matches for "${q}"`;
   if (typeof LAST_VIEW !== 'undefined') LAST_VIEW = { type: 'list', rows: results, status: st };
   $('subStatus').style.display = 'block';
@@ -416,6 +417,8 @@ const ON_DETERMINERS = {
 
 function lookupGrammarToken(raw, depth = 0) {
   const __k = (raw || "").toLowerCase().replace(/^[^a-záéíóúýæøǫœþð]+|[^a-záéíóúýæøǫœþð]+$/gi, "");
+  const __cw = getCraftedWords().find(x => x.headword === __k);
+  if (__cw) return [{ id: __cw.id, headword: __cw.headword, pos: __cw.pos, gender: __cw.gender, form: __cw.headword, case_name: "NOM", number: "SG", definiteness: "INDEF", zoega_def: __cw.zoega_def }];
   if (typeof ON_CLOSED_CLASS !== "undefined" && ON_CLOSED_CLASS[__k]) return ON_CLOSED_CLASS[__k];
   const __low = (raw || "").toLowerCase();
   if (ON_INDECLINABLES[__low]) {
@@ -987,8 +990,52 @@ function runGrammarAnalysis() {
       `<div style="color:${n.ok ? '#8fd998' : '#ff8a75'};font-size:11.5px;margin-top:4px">${esc(n.text)}</div>`
     ).join('');
 
-    return `<div class="g-tok"><div class="g-word">${esc(item.raw)}</div>${lines}${notesHTML}</div>`;
+    const topHit = resolved.find(Boolean) || {};
+    const allOk = item.notes.length && item.notes.every(n => n.ok);
+    const isCraftable = allOk && topHit.headword && topHit.headword.includes(' + ');
+    const alreadySaved = getCraftedWords().some(x => x.headword === item.raw.toLowerCase().replace(/[^a-záéíóúýæøǫœþð]/gi, ''));
+    const saveBtn = isCraftable
+      ? (alreadySaved
+          ? `<div style="margin-top:6px;font-size:11px;color:#E8C988">★ Saved in Crafted Coinages</div>`
+          : `<button onclick="saveCraftedCompound('${esc(item.raw)}','${esc(topHit.headword)}','${esc(topHit.pos || 'noun')}','${esc(topHit.gender || '')}','${esc((topHit.zoega_def || '').replace(/'/g, ''))}')" style="margin-top:6px;padding:4px 9px;font-size:11px;background:#3a2415;color:#E8C988;border:1px solid #8c6239;border-radius:6px;cursor:pointer">+ Save Crafted Compound</button>`)
+      : '';
+    return `<div class="g-tok"><div class="g-word">${esc(item.raw)}</div>${lines}${notesHTML}${saveBtn}</div>`;
   }).join('');
+}
+
+
+function getCraftedWords() {
+  try { return JSON.parse(localStorage.getItem('on_crafted_words') || '[]'); } catch (_) { return []; }
+}
+function saveCraftedCompound(word, roots, pos, gender, autoGloss) {
+  const clean = (word || '').toLowerCase().replace(/^[^a-záéíóúýæøǫœþð]+|[^a-záéíóúýæøǫœþð]+$/gi, '');
+  if (!clean) return;
+  const def = prompt(`Add definition for crafted Old Norse word "${clean}" (${roots}):`, autoGloss || `Crafted compound (${roots})`);
+  if (def === null) return;
+  const list = getCraftedWords().filter(x => x.headword !== clean);
+  list.unshift({
+    id: -Date.now(),
+    headword: clean,
+    pos: pos || 'noun',
+    gender: gender || '',
+    roots: roots || '',
+    zoega_def: `[Crafted Coinage · ${roots}] ${def.trim()}`
+  });
+  localStorage.setItem('on_crafted_words', JSON.stringify(list));
+  runGrammarAnalysis();
+}
+function openCraftedEntry(word) {
+  const item = getCraftedWords().find(x => x.headword === word);
+  if (!item) return;
+  $('alphaGrid').style.display = 'none';
+  $('listCard').style.display = 'none';
+  $('homeBtn').style.display = 'inline-block';
+  $('subStatus').style.display = 'block';
+  $('subStatus').textContent = 'Crafted Old Norse Coinage';
+  $('root').classList.add('open');
+  $('mainArea').style.flex = '1';
+  $('detailCard').style.display = 'block';
+  $('detailCard').innerHTML = `<div class="det-top"><div><div class="det-word">${esc(item.headword)}</div><div class="det-meta">${esc([item.pos, item.gender].filter(Boolean).join(' · '))} · <span style="color:#E8C988">Crafted Coinage</span></div></div><button class="back-btn" onclick="renderAlphaGrid()">← Back</button></div><div class="dict-sec"><h4>Crafted Coinage (${esc(item.roots)})</h4><p>${esc(item.zoega_def)}</p></div>`;
 }
 
 function openGrammarTool() {
