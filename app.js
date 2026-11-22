@@ -791,7 +791,7 @@ function suggestFormForTok(tok, reqCases, reqNum, reqGender, reqDef = '') {
 
 function analyzeGrammarClause(words) {
   const parsed = words.map(t => ({ raw: t, hits: lookupGrammarToken(t), notes: [] }));
-  const normG = (g) => (g || '').toLowerCase().replace(/[^mfn]/g, '');
+  const normG = (g, pos = '') => { const raw = (g || '').toLowerCase().replace(/[^mfn]/g, ''); if (raw) return raw; const pm = (pos || '').match(/\b([mfn])\./i); return pm ? pm[1].toLowerCase() : ''; };
   const isNounHit = (h) => /noun|\b[mfn]\./i.test(h.pos || '') && !/adj|pron|verb|prep/i.test(h.pos || '');
   const isAdjHit = (h) => /adj/i.test(h.pos || '');
   const isPrepHit = (h) => /prep/i.test(h.pos || '');
@@ -922,20 +922,23 @@ function analyzeGrammarClause(words) {
     let nounTok = null;
     for (let j = i + 1; j < Math.min(parsed.length, i + 5); j++) {
       if (parsed[j].hits.some(h => isVerbHit(h) || isPrepHit(h))) break;
-      if (parsed[j].hits.some(h => isNounHit(h) && !isAdjHit(h) && !isDetHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''))) { nounTok = parsed[j]; break; }
+      const pureNoun = parsed[j].hits.some(h => isNounHit(h) && !isAdjHit(h) && !isDetHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+      const anyAdj = parsed[j].hits.some(isAdjHit);
+      if (pureNoun && !anyAdj) { nounTok = parsed[j]; }
+      else if (pureNoun && !nounTok) { nounTok = parsed[j]; }
     }
     const isDet = cur.hits.some(h => isDetHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
     if (isDet && nounTok) {
       const detHits = cur.hits.filter(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
       const nounHits = nounTok.hits.filter(h => isNounHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
       const gov = govReq[i];
-      const full = detHits.find(d => nounHits.some(n => (d.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() && (d.number || '').toUpperCase() === (n.number || '').toUpperCase() && (!normG(d.gender) || !normG(n.gender) || normG(d.gender) === normG(n.gender)) && (!gov || gov.cases.includes((d.case_name || '').toUpperCase()))));
+      const full = detHits.find(d => nounHits.some(n => (d.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() && (d.number || '').toUpperCase() === (n.number || '').toUpperCase() && (!normG(d.gender, d.pos) || !normG(n.gender, n.pos) || normG(d.gender, d.pos) === normG(n.gender, n.pos)) && (!gov || gov.cases.includes((d.case_name || '').toUpperCase()))));
       if (full) {
-        cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with "${nounTok.raw}" (${normG(full.gender) ? normG(full.gender) + '. ' : ''}${full.case_name.toUpperCase()} ${full.number.toUpperCase()})` });
+        cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with "${nounTok.raw}" (${normG(full.gender, full.pos) ? normG(full.gender, full.pos) + '. ' : ''}${full.case_name.toUpperCase()} ${full.number.toUpperCase()})` });
       } else {
         const n0 = nounHits.find(Boolean);
         const tCases = gov ? gov.cases : (n0 ? [n0.case_name.toUpperCase()] : []);
-        const sug = suggestFormForTok(cur, tCases, n0 ? n0.number : '', n0 ? normG(n0.gender) : '');
+        const sug = suggestFormForTok(cur, tCases, n0 ? n0.number : '', n0 ? normG(n0.gender, n0.pos) : '');
         if (gov && !detHits.some(d => gov.cases.includes((d.case_name || '').toUpperCase()))) {
           cur.notes.push({ ok: false, text: `✗ ${gov.source === 'prep' ? 'Preposition' : 'Verb'} "${gov.headword}" requires ${gov.cases.join('/')} on "${cur.raw}"${sug ? ` — use "${sug}"` : ''}` });
         } else {
@@ -954,14 +957,14 @@ function analyzeGrammarClause(words) {
 
       if (nounTok) {
         const nounHits = nounTok.hits.filter(h => isNounHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
-        const cng = adjHits.filter(a => nounHits.some(n => (a.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() && (a.number || '').toUpperCase() === (n.number || '').toUpperCase() && (!normG(a.gender) || !normG(n.gender) || normG(a.gender) === normG(n.gender)) && (!gov || gov.cases.includes((a.case_name || '').toUpperCase()))));
+        const cng = adjHits.filter(a => nounHits.some(n => (a.case_name || '').toUpperCase() === (n.case_name || '').toUpperCase() && (a.number || '').toUpperCase() === (n.number || '').toUpperCase() && (!normG(a.gender, a.pos) || !normG(n.gender, n.pos) || normG(a.gender, a.pos) === normG(n.gender, n.pos)) && (!gov || gov.cases.includes((a.case_name || '').toUpperCase()))));
         const full = cng.find(a => !a.definiteness || a.definiteness.toUpperCase() === reqDef);
         const n0 = nounHits.find(Boolean);
         const tCases = gov ? gov.cases : (n0 ? [n0.case_name.toUpperCase()] : []);
-        const sug = suggestFormForTok(cur, tCases, n0 ? n0.number : '', n0 ? normG(n0.gender) : '', reqDef);
+        const sug = suggestFormForTok(cur, tCases, n0 ? n0.number : '', n0 ? normG(n0.gender, n0.pos) : '', reqDef);
 
         if (full) {
-          cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with "${nounTok.raw}" (${normG(full.gender) ? normG(full.gender) + '. ' : ''}${full.case_name.toUpperCase()} ${full.number.toUpperCase()} ${reqDef})` });
+          cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with "${nounTok.raw}" (${normG(full.gender, full.pos) ? normG(full.gender, full.pos) + '. ' : ''}${full.case_name.toUpperCase()} ${full.number.toUpperCase()} ${reqDef})` });
         } else if (cng.length) {
           cur.notes.push({ ok: false, text: reqDef === 'WEAK'
             ? `✗ Weak adjective declension required after "${prevDet ? prevDet.raw : nounTok.raw}"${sug ? ` — use "${sug}"` : ''}`
@@ -983,7 +986,7 @@ function analyzeGrammarClause(words) {
         if (gMatch) cur.notes.push({ ok: true, text: `✓ Grammatically correct — ${gMatch.case_name.toUpperCase()} ${gMatch.number.toUpperCase()} governed by "${gov.headword}"` });
         else {
           const n0 = nounHits[0];
-          const sugN = suggestFormForTok(cur, gov.cases, n0.number, normG(n0.gender));
+          const sugN = suggestFormForTok(cur, gov.cases, n0.number, normG(n0.gender, n0.pos));
           cur.notes.push({ ok: false, text: `✗ ${gov.source === 'prep' ? 'Preposition' : 'Verb'} "${gov.headword}" governs ${gov.cases.join('/')}, but "${cur.raw}" is ${[...new Set(nounHits.map(n => n.case_name.toUpperCase()))].join('/')}${sugN ? ` — use "${sugN}"` : ''}` });
         }
       }
