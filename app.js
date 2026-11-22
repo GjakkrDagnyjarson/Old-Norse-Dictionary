@@ -852,7 +852,15 @@ function analyzeGrammarClause(words) {
     }
         const cleanTyped = cur.raw.toLowerCase().replace(/^[^a-záéíóúýæøǫœþð]+|[^a-záéíóúýæøǫœþð]+$/gi, '');
     const normOrtho = (s) => (s || '').toLowerCase().replace(/ö/g, 'ǫ');
-    const exactOrtho = cur.hits.some(h => h.source === "derived" || normOrtho(h.form) === normOrtho(cleanTyped) || normOrtho(h.headword) === normOrtho(cleanTyped));
+    const exactOrtho = cur.hits.some(h => {
+      if (h.source === 'derived' || h.source === 'compound') return true;
+      if (h.headword && h.headword.includes(' + ')) {
+        const segs = h.headword.split(' + ');
+        const first = normOrtho((segs.find(Boolean) || '').trim());
+        return cleanTyped.startsWith(first) && (!h.form || normOrtho(cleanTyped).endsWith(normOrtho(h.form)));
+      }
+      return normOrtho(h.form) === normOrtho(cleanTyped) || normOrtho(h.headword) === normOrtho(cleanTyped);
+    });
     if (!exactOrtho) {
       const properHit = cur.hits.find(h => h.form && normOrtho(h.form) !== normOrtho(cleanTyped)) || cur.hits.find(Boolean);
       const properForm = properHit ? (properHit.form || properHit.headword) : '';
@@ -915,9 +923,28 @@ function analyzeGrammarClause(words) {
       }
     }
     if (!cur.notes.length) {
-      const top = cur.hits[0];
-      const morph = [top.case_name, top.number, top.definiteness].filter(Boolean).join(' • ');
-      cur.notes.push({ ok: true, text: morph ? `✓ Grammatically correct (${morph})` : '✓ Grammatically correct' });
+      const top = cur.hits.find(Boolean) || {};
+      const gStr = (top.gender || '').toLowerCase().replace(/[^mfn]/g, '');
+      const gTag = gStr ? gStr + '. ' : '';
+      const cnTag = [top.case_name, top.number].filter(Boolean).join(' ');
+      const prevMod = parsed.slice(Math.max(0, i - 3), i).reverse().find(t =>
+        t.hits && t.hits.some(h => /pron|adj/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''))
+      );
+      const prevGov = parsed.slice(Math.max(0, i - 4), i).reverse().find(t =>
+        t.hits && t.hits.some(h => /verb|prep/i.test(h.pos || ''))
+      );
+      const partner = prevMod || prevGov;
+      const detail = (gTag + cnTag).trim();
+      if (partner && detail) {
+        cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with "${partner.raw}" (${detail})` });
+      } else if (partner) {
+        cur.notes.push({ ok: true, text: `✓ Grammatically correct — agrees with "${partner.raw}"` });
+      } else if (detail) {
+        cur.notes.push({ ok: true, text: `✓ Grammatically correct (${detail})` });
+      } else {
+        cur.notes.push({ ok: true, text: '✓ Grammatically correct' });
+      }
+    })` : '✓ Grammatically correct' });
     }
   }
   return parsed;
