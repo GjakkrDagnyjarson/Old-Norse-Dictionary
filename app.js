@@ -816,7 +816,7 @@ function analyzeGrammarClause(words) {
     const tok = parsed[i];
     if (!tok.hits.length) continue;
     const rawLow = tok.raw.toLowerCase();
-    const pHit = tok.hits.find(h => isPrepHit(h) && inferGovCases(h, 'prep'));
+    const pHit = tok.hits.find(h => isPrepHit(h) && (TWO_WAY.has(rawLow) || inferGovCases(h, 'prep')));
     if (pHit && rawLow !== 'ok') {
       activeGov = { cases: TWO_WAY.has(rawLow) ? ['ACC', 'DAT'] : inferGovCases(pHit, 'prep'), source: 'prep', headword: pHit.headword };
       continue;
@@ -887,7 +887,7 @@ function analyzeGrammarClause(words) {
         }
       }
     }
-    const vGov = cur.hits.find(isVerbHit);
+    const vGov = govReq[i] ? null : cur.hits.find(isVerbHit);
     if (vGov && !/^(ok|hvat)$/i.test(cur.raw)) {
       if (i >= 2 && !/^(hvat|hverr|hvar|hvé|hví|ef|at|er|sem)$/i.test(parsed[0].raw)) {
         const prev = parsed[i - 1], first = parsed[0];
@@ -905,11 +905,12 @@ function analyzeGrammarClause(words) {
         }
       }
     }
-    const pHit = cur.hits.find(h => isPrepHit(h) && inferGovCases(h, 'prep'));
+    const pHit = cur.hits.find(h => isPrepHit(h) && (TWO_WAY.has(cur.raw.toLowerCase()) || inferGovCases(h, 'prep')));
     if (pHit && cur.raw.toLowerCase() !== 'ok') {
       const pRaw2 = inferGovCases(pHit, 'prep');
       const req = TWO_WAY.has(cur.raw.toLowerCase()) ? ['ACC', 'DAT'] : (Array.isArray(pRaw2) ? pRaw2 : String(pRaw2 || '').split(/[\s,/]+/).filter(Boolean));
-      const tgt = parsed.slice(i + 1, i + 5).find(t => t.hits.some(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
+      const tgt = parsed.slice(i + 1, i + 5).find(t => t.hits.some(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''))) ||
+                  parsed.slice(Math.max(0, i - 3), i).reverse().find(t => t.hits.some(h => isNounHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '')));
       if (tgt) {
         const tCases = [...new Set(tgt.hits.map(h => (h.case_name || '').toUpperCase()).filter(c => /^(NOM|ACC|DAT|GEN)$/.test(c)))];
         if (tCases.some(c => req.includes(c)) || (req.includes('GEN') && /(ajar|s|na)$/i.test(tgt.raw))) {
@@ -947,7 +948,7 @@ function analyzeGrammarClause(words) {
       }
     }
 
-    const isAdj = !isDet && cur.hits.some(h => isAdjHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+    const isAdj = !isDet && !vGov && cur.hits.some(h => isAdjHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
     if (isAdj && !cur.notes.length) {
       const adjHits = cur.hits.filter(h => isAdjHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
       const gov = govReq[i];
@@ -988,6 +989,16 @@ function analyzeGrammarClause(words) {
           const n0 = nounHits[0];
           const sugN = suggestFormForTok(cur, gov.cases, n0.number, normG(n0.gender, n0.pos));
           cur.notes.push({ ok: false, text: `✗ ${gov.source === 'prep' ? 'Preposition' : 'Verb'} "${gov.headword}" governs ${gov.cases.join('/')}, but "${cur.raw}" is ${[...new Set(nounHits.map(n => n.case_name.toUpperCase()))].join('/')}${sugN ? ` — use "${sugN}"` : ''}` });
+        }
+      } else if (!gov && nounHits.some(n => (n.case_name || '').toUpperCase() === 'NOM')) {
+        const vTok = parsed.find((t, idx) => idx !== i && !govReq[idx] && t.hits.some(isVerbHit));
+        if (vTok) {
+          const nNums = [...new Set(nounHits.filter(n => (n.case_name || '').toUpperCase() === 'NOM').map(n => (n.number || '').toUpperCase()))];
+          const vPers = [...new Set(vTok.hits.filter(isVerbHit).map(v => (v.number || '').toUpperCase()))];
+          const exp3 = nNums.map(num => `3${num}`);
+          if (exp3.some(p => vPers.includes(p))) {
+            cur.notes.push({ ok: true, text: `✓ Subject noun agrees with verb "${vTok.raw}" (${exp3.filter(p => vPers.includes(p)).join('/')})` });
+          }
         }
       }
     }
