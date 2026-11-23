@@ -969,7 +969,7 @@ function analyzeGrammarClause(words) {
     const rawLow = tok.raw.toLowerCase();
     const pHit = tok.hits.find(h => isPrepHit(h) && (TWO_WAY.has(rawLow) || inferGovCases(h, 'prep')));
     if (pHit && rawLow !== 'ok') {
-      activeGov = { cases: TWO_WAY.has(rawLow) ? ['ACC', 'DAT'] : inferGovCases(pHit, 'prep'), source: 'prep', headword: pHit.headword };
+      const _pc = inferGovCases(pHit, 'prep'); activeGov = { cases: TWO_WAY.has(rawLow) ? ['ACC', 'DAT'] : (Array.isArray(_pc) ? _pc : String(_pc || '').split(/\W+/).filter(Boolean)), source: 'prep', headword: pHit.headword };
       continue;
     }
     const vHit = tok.hits.find(isVerbHit);
