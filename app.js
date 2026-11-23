@@ -1014,6 +1014,31 @@ function analyzeGrammarClause(words) {
   return parsed;
 }
 
+function detectOldNorseMutation(surface, headword) {
+  const s = (surface || '').toLowerCase().replace(/^[^a-záéíóúýæœøǫþð]+|[^a-záéíóúýæœøǫþð]+$/gi, '').replace(/ö/g, 'ǫ');
+  const h = (headword || '').toLowerCase().split(' + ').pop().replace(/[^a-záéíóúýæœøǫþð]/gi, '').replace(/ö/g, 'ǫ');
+  if (!s || !h || s === h || s.length < 3 || h.length < 3) return '';
+  const stemH = h.slice(0, Math.min(5, h.length));
+  const stemS = s.slice(0, Math.min(5, s.length));
+  if (/a/.test(stemH) && /ǫ/.test(stemS) && !/ǫ/.test(stemH)) return 'u-umlaut (a → ǫ)';
+  const iRules = [
+    [/a/, /e/, 'i-umlaut (a → e)'],
+    [/á/, /æ/, 'i-umlaut (á → æ)'],
+    [/o/, /ø/, 'i-umlaut (o → ø)'],
+    [/ó/, /œ/, 'i-umlaut (ó → œ)'],
+    [/u/, /y/, 'i-umlaut (u → y)'],
+    [/ú/, /ý/, 'i-umlaut (ú → ý)'],
+    [/au/, /ey/, 'i-umlaut (au → ey)'],
+    [/j[úó]/, /ý/, 'i-umlaut (jú/jó → ý)']
+  ];
+  for (const [rFrom, rTo, label] of iRules) {
+    if (rFrom.test(stemH) && rTo.test(stemS) && !rTo.test(stemH)) return label;
+  }
+  if (/e/.test(stemH) && /jǫ/.test(stemS) && !/jǫ/.test(stemH)) return 'breaking + u-umlaut (e → jǫ)';
+  if (/e/.test(stemH) && /ja/.test(stemS) && !/ja/.test(stemH)) return 'breaking (e → ja)';
+  return '';
+}
+
 function runGrammarAnalysis() {
   const rawText = $('gramInput').value.trim();
   LAST_GRAMMAR_TEXT = rawText;
@@ -1076,6 +1101,8 @@ function runGrammarAnalysis() {
     ).join('');
 
     const topHit = resolved.find(Boolean) || {};
+      const mutLabel = detectOldNorseMutation(item.raw, topHit.headword);
+      const mutBadge = mutLabel ? `<span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;font-size:10px;background:#2a2138;color:#d8b4fe;border:1px solid #6b46c1;vertical-align:middle">${esc(mutLabel)}</span>` : '';
     const allOk = item.notes.length && item.notes.every(n => n.ok);
     const isCraftable = allOk && topHit.headword && topHit.headword.includes(' + ');
     const alreadySaved = getCraftedWords().some(x => x.headword === item.raw.toLowerCase().replace(/[^a-záéíóúýæøǫœþð]/gi, ''));
@@ -1084,7 +1111,7 @@ function runGrammarAnalysis() {
           ? `<div style="margin-top:6px;font-size:11px;color:#E8C988">★ Saved in Crafted Coinages</div>`
           : `<button onclick="saveCraftedCompound('${esc(item.raw)}','${esc(topHit.headword)}','${esc(topHit.pos || 'noun')}','${esc(topHit.gender || '')}','${esc((topHit.zoega_def || '').replace(/'/g, ''))}')" style="margin-top:6px;padding:4px 9px;font-size:11px;background:#3a2415;color:#E8C988;border:1px solid #8c6239;border-radius:6px;cursor:pointer">+ Save Crafted Compound</button>`)
       : '';
-    return `<div class="g-tok"><div class="g-word">${esc(item.raw)}</div>${lines}${notesHTML}${saveBtn}</div>`;
+    return `<div class="g-tok"><div class="g-word">${esc(item.raw)}${mutBadge}</div>${lines}${notesHTML}${saveBtn}</div>`;
   }).join('');
 }
 
