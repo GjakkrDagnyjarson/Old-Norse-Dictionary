@@ -665,6 +665,39 @@ if (!hits.length && depth === 0 && clean.length >= 5) {
   }
 }
 
+  // 4d. Enclitic definite article suffixes (-inn, -in, -it, -unum, -inum, -num, -ins, -nna, -nir, -nar, -na, -un) BEFORE compound splitting
+  if (!hits.length && depth === 0 && clean.length >= 5) {
+    const defRules = [
+      [/unum$/, ['', 'u'], 'DAT · PL · DEF'],
+      [/inum$/, ['i', ''], 'DAT · SG · DEF'],
+      [/num$/, ['', 'i', 'u'], 'DAT · SG · DEF'],
+      [/ins$/, ['', 's', 'ar'], 'GEN · SG · DEF'],
+      [/nna$/, ['a', ''], 'GEN · PL · DEF'],
+      [/nir$/, ['r', 'ar', 'ir', ''], 'NOM · PL · DEF'],
+      [/nar$/, ['r', 'ar', 'ir', ''], 'NOM/ACC · PL · DEF'],
+      [/inn$/, ['r', '', 'i'], 'NOM/ACC · SG · DEF'],
+      [/in$/, ['', 'a', 'i'], 'NOM/ACC · SG · DEF'],
+      [/it$/, ['', 'i'], 'NOM/ACC · SG · DEF'],
+      [/un$/, ['u', 'a'], 'NOM/ACC · PL · DEF'],
+      [/na$/, ['', 'a', 'u'], 'ACC/GEN · DEF']
+    ];
+    for (const [rx, sufList, tag] of defRules) {
+      if (rx.test(clean)) {
+        const base = clean.replace(rx, '');
+        if (base.length >= 2) {
+          for (const sf of sufList) {
+            const sub = lookupGrammarToken(base + sf, depth + 1).filter(h => !/verb|prep/i.test(h.pos || ''));
+            if (sub.length) {
+              hits.push(...sub.slice(0, 3).map(r => ({ ...r, source: 'derived', definiteness: tag })));
+              break;
+            }
+          }
+        }
+        if (hits.length) break;
+      }
+    }
+  }
+
 // 5. Fast indexed compound-word decomposition (vetrveðri -> vetr + veðri, snjófǫllum -> snjór + fǫllum)
 if (!hits.length && clean.length >= 6) {
 for (let split = 3; split <= clean.length - 3; split++) {
@@ -672,14 +705,14 @@ const left = clean.slice(0, split);
 const right = clean.slice(split);
 const lHit = fastLemmas(left, '', true).shift() || fastLemmas(left + 'r', '', true).shift() || fastInflected(left, true).shift();
 if (!lHit) continue;
-const rHits = fastInflected(right, true);
+const rHits = fastInflected(right, true).filter(h => !/verb/i.test(h.pos || '') && !/^(PRES|PAST|IMP|SUBJ)$/i.test(h.case_name || ''));
 if (rHits.length) {
 for (const rHit of rHits.slice(0, 3)) {
 hits.push({ ...rHit, source: 'compound', headword: lHit.headword + " + " + rHit.headword });
 }
 break;
 }
-const rLem = fastLemmas(right, '', true).shift();
+const rLem = fastLemmas(right, '', true).filter(h => !/verb/i.test(h.pos || '')).shift();
 if (rLem) {
 hits.push({ ...rLem, source: 'compound', headword: lHit.headword + " + " + rLem.headword });
 break;
@@ -755,7 +788,7 @@ break;
       for (let split = 3; split <= clean.length - 3; split++) {
         const left = clean.slice(0, split);
         const right = clean.slice(split);
-        const rHits = fastInflected(right, true);
+        const rHits = fastInflected(right, true).filter(h => !/verb/i.test(h.pos || '') && !/^(PRES|PAST|IMP|SUBJ)$/i.test(h.case_name || ''));
         const rLem = rHits.length ? null : fastLemmas(right, '', true).shift();
         if (!rHits.length && !rLem) continue;
         const leftCands = [left, left + 'r', left + 'a', left + 'i', left + 'u', left.replace(/[saui]$/, ''), left.replace(/[saui]$/, '') + 'r'].filter(x => x.length >= 2);
