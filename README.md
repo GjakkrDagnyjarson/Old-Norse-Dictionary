@@ -1,4 +1,4 @@
-# Old Norse Dictionary (Version 2.0)
+# Old Norse Dictionary (Version 2.98)
 
 An offline-first Progressive Web App (PWA) dictionary and grammar analyzer for Old Norse, styled in carved Viking-age oak knotwork.
 
