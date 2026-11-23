@@ -946,7 +946,7 @@ function analyzeGrammarClause(words) {
   const isNounHit = (h) => /noun|\b[mfn]\./i.test(h.pos || '') && !/adj|pron|verb|prep/i.test(h.pos || '');
   const isAdjHit = (h) => /adj/i.test(h.pos || '');
   const isPrepHit = (h) => /prep/i.test(h.pos || '');
-  const isVerbHit = (h) => /^(PRES|PAST)$/i.test(h.case_name || '');
+  const isVerbHit = (h) => /^(PRES|PAST)$/i.test(h.case_name || '') || (/verb/i.test(h.pos || '') && /MEDIOPASSIVE/i.test(h.definiteness || ''));
   const isDetHit = (h) => (/pron/i.test(h.pos || '') && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || '') && !/^(ek|þú|hann|hon|hón|henni|hennar|honum|hans|vér|þér|þeir|þær|þau|þeira|þeirra|þeim|mik|þik|sik|mér|þér|sér|mín|þín|sín|hvat|hverr|hvárr)$/i.test(h.headword || '') && !/^(hon|hón|henni|hennar|honum|hans)$/i.test(h.form || '')) || /^(hinn|sá|þessi|minn|þinn|sinn|várr|yðarr|einn|báðir|allr|margr|sumr|enginn|engi|nokkurr)$/i.test(h.headword || '');
   const isDefTrig = (h) => /^(hinn|sá|þessi|minn|þinn|sinn|várr|yðarr)$/i.test(h.headword || '');
 
