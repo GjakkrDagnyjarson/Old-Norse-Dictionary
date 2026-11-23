@@ -441,7 +441,7 @@ function lookupGrammarToken(raw, depth = 0) {
     return [{ id: 0, headword: x.headword, pos: x.pos, gender: "", form: __low, case_name: "", number: "", definiteness: "", zoega_def: x.zoega_def }];
   }
   if (ON_DETERMINERS[__low]) {
-    return ON_DETERMINERS[__low].map(d => ({ id: 0, headword: d.headword, pos: d.pos, gender: d.gender, form: __low, case_name: d.case_name, number: d.number, definiteness: "DEF", zoega_def: "demonstrative / definite article" }));
+    return ON_DETERMINERS[__low].map(d => ({ id: 0, headword: (/^þ/i.test(_low) && d.headword === 'sá') ? 'þat' : d.headword, pos: d.pos, gender: d.gender, form: __low, case_name: d.case_name, number: d.number, definiteness: "DEF", zoega_def: "demonstrative / definite article" }));
   }
   const clean = normTok(raw);
   if (!clean) return [];
@@ -900,6 +900,7 @@ function detectModernScandinavian(raw) {
 
 
 function suggestFormForTok(tok, reqCases, reqNum, reqGender, reqDef = '') {
+  if (tok && /^þat$/i.test(tok.raw || '') && (reqGender || '').toLowerCase().startsWith('m') && (reqNum || '').toUpperCase() === 'SG') return 'hinn';
   if (!tok || !tok.hits || !tok.hits.length) return '';
   const rawCases = Array.isArray(reqCases) ? reqCases : (reqCases ? String(reqCases).split(/[\s,/]+/) : []);
   const cases = rawCases.map(c => c.toUpperCase()).filter(Boolean);
@@ -1078,7 +1079,7 @@ function analyzeGrammarClause(words) {
       if (pureNoun && !anyAdj) { nounTok = parsed[j]; }
       else if (pureNoun && !nounTok) { nounTok = parsed[j]; }
     }
-    const isDet = cur.hits.some(h => isDetHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
+    const isDet = !(/^þat$/i.test(cur.raw) && parsed.slice(i + 1, i + 2).some(t => t.hits.some(isVerbHit))) && cur.hits.some(h => isDetHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
     if (isDet && nounTok) {
       const detHits = cur.hits.filter(h => /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
       const nounHits = nounTok.hits.filter(h => isNounHit(h) && /^(NOM|ACC|DAT|GEN)$/i.test(h.case_name || ''));
