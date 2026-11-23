@@ -686,6 +686,115 @@ break;
 }
 }
 }
+  // 6. Universal Old Norse fallback resolver (mediopassive -sk/-st, enclitic -inn, linking compounds, orthography, -liga/-ari/-astr)
+  if (!hits.length && depth === 0 && clean.length >= 3) {
+    // 6a. Mediopassive / reflexive -sk / -st verbs (e.g. finnask, sýnast)
+    if (/(sk|st)$/.test(clean) && clean.length >= 4) {
+      const stem = clean.replace(/(sk|st)$/, '');
+      for (const base of [stem, stem + 'a', stem + 'r', stem + 'i', stem + 'u', stem + 'um']) {
+        const sub = lookupGrammarToken(base, depth + 1).filter(h => /verb/i.test(h.pos || '') || /^(PRES|PAST|INF|IMP)$/i.test(h.case_name || ''));
+        if (sub.length) {
+          hits.push(...sub.slice(0, 3).map(r => ({ ...r, source: 'derived', definiteness: (r.definiteness || 'VERB') + ' (-sk/-st mediopassive)' })));
+          break;
+        }
+      }
+    }
+
+    // 6b. Enclitic definite article suffixes (-inn, -in, -it, -num, -ins, -nna, -nir, -nar, -na, -un)
+    if (!hits.length && clean.length >= 5) {
+      const defRules = [
+        [/inum$/, ['i', ''], 'DAT · SG · DEF'],
+        [/num$/, ['', 'i', 'u'], 'DAT · SG · DEF'],
+        [/ins$/, ['', 's', 'ar'], 'GEN · SG · DEF'],
+        [/nna$/, ['a', ''], 'GEN · PL · DEF'],
+        [/nir$/, ['r', 'ar', 'ir', ''], 'NOM · PL · DEF'],
+        [/nar$/, ['r', 'ar', 'ir', ''], 'NOM/ACC · PL · DEF'],
+        [/inn$/, ['r', '', 'i'], 'NOM/ACC · SG · DEF'],
+        [/in$/, ['', 'a', 'i'], 'NOM/ACC · SG · DEF'],
+        [/it$/, ['', 'i'], 'NOM/ACC · SG · DEF'],
+        [/un$/, ['u', 'a'], 'NOM/ACC · PL · DEF'],
+        [/na$/, ['', 'a', 'u'], 'ACC/GEN · DEF']
+      ];
+      for (const [rx, sufList, tag] of defRules) {
+        if (rx.test(clean)) {
+          const base = clean.replace(rx, '');
+          if (base.length >= 2) {
+            for (const sf of sufList) {
+              const sub = lookupGrammarToken(base + sf, depth + 1);
+              if (sub.length) {
+                hits.push(...sub.slice(0, 3).map(r => ({ ...r, source: 'derived', definiteness: tag })));
+                break;
+              }
+            }
+          }
+          if (hits.length) break;
+        }
+      }
+    }
+
+    // 6c. Adverbial -liga / -la and Comparative/Superlative -ari / -astr / -ast
+    if (!hits.length && clean.length >= 5) {
+      if (/(liga|la)$/.test(clean)) {
+        const stem = clean.replace(/(liga|la)$/, '');
+        for (const cand of [stem + 'r', stem + 'ligr', stem, stem + 'a', stem + 'i']) {
+          const sub = lookupGrammarToken(cand, depth + 1);
+          if (sub.length) { hits.push({ ...sub, pos: 'adv.', case_name: 'ADV', number: '', definiteness: 'ADV (-liga)', source: 'derived' }); break; }
+        }
+      } else if (/(ari|ara|aru|astr|ast|asta|astu|asti)$/.test(clean)) {
+        const stem = clean.replace(/(ari|ara|aru|astr|ast|asta|astu|asti)$/, '');
+        const deg = /ast/.test(clean) ? 'SUPERL' : 'COMP';
+        for (const cand of [stem + 'r', stem, stem + 'a', stem + 'i']) {
+          const sub = lookupGrammarToken(cand, depth + 1).filter(h => /adj|adv/i.test(h.pos || ''));
+          if (sub.length) { hits.push({ ...sub, definiteness: deg, source: 'derived' }); break; }
+        }
+      }
+    }
+
+    // 6d. Compound decomposition with linking connectors (-s-, -a-, -u-, -i-, or dropped -r)
+    if (!hits.length && clean.length >= 6) {
+      for (let split = 3; split <= clean.length - 3; split++) {
+        const left = clean.slice(0, split);
+        const right = clean.slice(split);
+        const rHits = fastInflected(right, true);
+        const rLem = rHits.length ? null : fastLemmas(right, '', true).shift();
+        if (!rHits.length && !rLem) continue;
+        const leftCands = [left, left + 'r', left + 'a', left + 'i', left + 'u', left.replace(/[saui]$/, ''), left.replace(/[saui]$/, '') + 'r'].filter(x => x.length >= 2);
+        let lHit = null;
+        for (const lc of leftCands) {
+          lHit = fastLemmas(lc, '', true).shift() || fastInflected(lc, true).shift();
+          if (lHit) break;
+        }
+        if (lHit) {
+          if (rHits.length) hits.push(...rHits.slice(0, 3).map(r => ({ ...r, source: 'compound', headword: lHit.headword + ' + ' + r.headword })));
+          else hits.push({ ...rLem, source: 'compound', headword: lHit.headword + ' + ' + rLem.headword });
+          break;
+        }
+      }
+    }
+
+    // 6e. Orthographic normalization (ö/ǫ, ø/œ, æ/ǽ, ð/d, þ/th, unaccented -> accented vowels)
+    if (!hits.length) {
+      const orthoVars = new Set([
+        clean.replace(/ö/g, 'ǫ').replace(/ø/g, 'œ').replace(/ǽ/g, 'æ'),
+        clean.replace(/ǫ/g, 'ö').replace(/œ/g, 'ø'),
+        clean.replace(/th/g, 'þ').replace(/d/g, 'ð'),
+        clean.replace(/j/g, 'i').replace(/v/g, 'u')
+      ]);
+      const accMap = { a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú', y: 'ý' };
+      for (let idx = 0; idx < clean.length; idx++) {
+        if (accMap[clean[idx]]) orthoVars.add(clean.slice(0, idx) + accMap[clean[idx]] + clean.slice(idx + 1));
+      }
+      orthoVars.delete(clean);
+      for (const v of orthoVars) {
+        const sub = lookupGrammarToken(v, depth + 1);
+        if (sub.length) {
+          hits.push(...sub.slice(0, 4).map(r => ({ ...r, source: 'derived' })));
+          break;
+        }
+      }
+    }
+  }
+
 hits.sort((a, b) => {
 const score = x => {
 let sc = (x.source === 'lemma' ? 0 : x.source === 'derived' ? 1 : 2);
