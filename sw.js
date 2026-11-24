@@ -1,5 +1,5 @@
-const UI_CACHE = 'old-norse-ui-v3.03';
-const DB_CACHE = 'old-norse-db-v3.03';
+const UI_CACHE = 'old-norse-ui-v3.05';
+const DB_CACHE = 'old-norse-db-v3.05';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
@@ -17,7 +17,8 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
   if (url.pathname.endsWith('old_norse.db.gz') || url.pathname.endsWith('sql-wasm.wasm')) {
-    e.respondWith(
+    if (e.request.url.includes('nocache=')) { e.respondWith(fetch(e.request, { cache: 'no-store' })); return; }
+  e.respondWith(
       caches.open(DB_CACHE).then(cache =>
         cache.match(e.request).then(hit => hit || fetch(e.request).then(res => {
           cache.put(e.request, res.clone());
