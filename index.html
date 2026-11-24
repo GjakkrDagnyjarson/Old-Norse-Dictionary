@@ -772,13 +772,13 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="listCard" class="card-box" style="display:none"></div>
     <div id="detailCard" class="card-box" style="display:none"></div>
   </div>
-  <div id="cred" class="footer">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary (CC BY-SA 4.0)<br/>Version <span id="appVersion">v3.09</span></div>
+  <div id="cred" class="footer">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary (CC BY-SA 4.0)<br/>Version <span id="appVersion">v3.11</span></div>
 </div>
 <div id="modalOverlay"><div id="modalBox"><h3 style="color:#E8C988;margin-bottom:6px">Lexical Sources &amp; Licenses</h3>Cleasby &amp; Vigfússon (1874), Geir T. Zoëga (1910), Dictionary of Old Norse Prose (ONP, CC BY-SA 4.0), and Wiktionary (CC BY-SA 4.0). All data bundled locally for 100% offline use.<button id="modalClose">Close</button></div></div>
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=109"></script>
+  <script src="app.js?v=111"></script>
 <script>
 const YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
@@ -846,40 +846,64 @@ function toggleYoungerFuthark() {
   }
 }
 
-const RUNE_BRANCHES = {
-  '\u16A0': [[60,65,92,35],[60,105,92,75]],
-  '\u16A2': [[60,30,90,65],[90,65,90,155]],
-  '\u16A6': [[60,55,92,85],[92,85,60,115]],
-  '\u16AC': [[60,45,92,70],[60,80,92,105]],
-  '\u16B1': [[60,35,90,62],[90,62,60,90],[60,90,92,150]],
-  '\u16B4': [[60,85,92,45]],
-  '\u16BC': [[30,60,90,110],[90,60,30,110]],
-  '\u16BE': [[32,68,88,108]],
-  '\u16C1': [],
-  '\u16C5': [[32,108,88,68]],
-  '\u16CB': [[40,35,40,85],[40,85,80,95],[80,95,80,150]],
-  '\u16CF': [[60,32,32,65],[60,32,88,65]],
-  '\u16D2': [[60,32,88,58],[88,58,60,85],[60,85,88,115],[88,115,60,148]],
-  '\u16D8': [[60,75,32,42],[60,75,88,42],[32,42,32,82],[88,42,88,82]],
-  '\u16DA': [[60,32,90,68]],
-  '\u16E6': [[60,142,32,110],[60,142,88,110]]
+const H_RUNES = {
+  '\u16A0': { hasStave: true,  w: 26, segs: [[0,58, 22,22], [0,88, 22,52]] },
+  '\u16A2': { hasStave: true,  w: 26, segs: [[0,22, 22,42], [22,42, 22,88]] },
+  '\u16A6': { hasStave: true,  w: 26, segs: [[0,36, 22,55], [22,55, 0,74]] },
+  '\u16AC': { hasStave: true,  w: 26, segs: [[0,32, 22,52], [0,58, 22,78]] },
+  '\u16B1': { hasStave: true,  w: 26, segs: [[0,22, 22,42], [22,42, 0,58], [0,58, 24,88]] },
+  '\u16B4': { hasStave: true,  w: 26, segs: [[0,58, 22,22]] },
+  '\u16BC': { hasStave: true,  w: 32, segs: [[-14,34, 14,76], [14,34, -14,76]] },
+  '\u16BE': { hasStave: true,  w: 28, segs: [[-12,44, 12,66]] },
+  '\u16C1': { hasStave: true,  w: 16, segs: [] },
+  '\u16C5': { hasStave: true,  w: 28, segs: [[-12,66, 12,44]] },
+  '\u16CB': { hasStave: false, w: 28, segs: [[0,22, 0,55], [0,55, 22,55], [22,55, 22,88]] },
+  '\u16CF': { hasStave: true,  w: 30, segs: [[-14,44, 0,22], [14,44, 0,22]] },
+  '\u16D2': { hasStave: true,  w: 26, segs: [[0,22, 20,38], [20,38, 0,55], [0,55, 20,72], [20,72, 0,88]] },
+  '\u16D8': { hasStave: true,  w: 32, segs: [[0,55, -15,34], [0,55, 15,34], [-15,34, 0,22], [15,34, 0,22]] },
+  '\u16DA': { hasStave: true,  w: 26, segs: [[0,22, 22,48]] },
+  '\u16E6': { hasStave: true,  w: 30, segs: [[0,55, -14,82], [0,55, 14,82]] }
 };
+const RUNE_BRANCHES = H_RUNES;
 
-let activeBindRunes = ['\u16CB', '\u16C1', '\u16B4', '\u16B1'];
+let activeBindRunes = ['\u16CF', '\u16A2', '\u16B1'];
 
 function drawBindrune(runes) {
   const svg = document.getElementById('bindruneSvg');
   const cap = document.getElementById('bindruneCaption');
   if (!svg) return;
-  const uniq = [...new Set(runes.filter(r => r in RUNE_BRANCHES))];
-  let lines = `<line x1="60" y1="22" x2="60" y2="158" stroke="#ffd996" stroke-width="6" stroke-linecap="round" />`;
-  for (const r of uniq) {
-    for (const [x1, y1, x2, y2] of RUNE_BRANCHES[r]) {
-      lines += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#ffd996" stroke-width="5.5" stroke-linecap="round" />`;
+  const list = runes.filter(r => r in H_RUNES);
+  if (!list.length) {
+    svg.innerHTML = '';
+    if (cap) cap.textContent = 'Select runes or type an Old Norse word';
+    return;
+  }
+  const items = [];
+  let x = 24;
+  for (let i = 0; i < list.length; i++) {
+    const r = list[i];
+    const def = H_RUNES[r];
+    const prev = i > 0 ? H_RUNES[list[i - 1]] : null;
+    // Fuse adjacent stave-bearing runes onto the shared vertical stave when branches don't collide
+    const shareStave = prev && def.hasStave && prev.hasStave && prev.segs.every(s => s[0] <= 0 && s[2] <= 0);
+    if (i > 0 && !shareStave) x += prev.w;
+    items.push({ x, def });
+  }
+  const totalW = Math.max(120, x + items[items.length - 1].def.w + 18);
+  svg.setAttribute('viewBox', `0 0 ${totalW} 110`);
+  let out = '';
+  const drawnStaves = new Set();
+  for (const it of items) {
+    if (it.def.hasStave && !drawnStaves.has(it.x)) {
+      drawnStaves.add(it.x);
+      out += `<line x1="${it.x}" y1="20" x2="${it.x}" y2="90" stroke="#ffd996" stroke-width="5.5" stroke-linecap="round" />`;
+    }
+    for (const [dx1, y1, dx2, y2] of it.def.segs) {
+      out += `<line x1="${it.x + dx1}" y1="${y1}" x2="${it.x + dx2}" y2="${y2}" stroke="#ffd996" stroke-width="5" stroke-linecap="round" />`;
     }
   }
-  svg.innerHTML = lines;
-  if (cap) cap.textContent = uniq.length ? uniq.join(' + ') : 'Select runes or type a word';
+  svg.innerHTML = out;
+  if (cap) cap.textContent = list.join(' · ');
 }
 
 function renderBindruneFromText(val) {
