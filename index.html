@@ -744,8 +744,21 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div class="alpha-row"><button class="alpha-btn" onclick="filterByLetter('o')">o</button><button class="alpha-btn" onclick="filterByLetter('ó')">ó</button><button class="alpha-btn" onclick="filterByLetter('p')">p</button><button class="alpha-btn" onclick="filterByLetter('r')">r</button><button class="alpha-btn" onclick="filterByLetter('s')">s</button><button class="alpha-btn" onclick="filterByLetter('t')">t</button><button class="alpha-btn" onclick="filterByLetter('u')">u</button><button class="alpha-btn" onclick="filterByLetter('ú')">ú</button><button class="alpha-btn" onclick="filterByLetter('v')">v</button></div>
 <div class="alpha-row"><button class="alpha-btn" onclick="filterByLetter('y')">y</button><button class="alpha-btn" onclick="filterByLetter('ý')">ý</button><button class="alpha-btn" onclick="filterByLetter('þ')">þ</button><button class="alpha-btn" onclick="filterByLetter('æ')">æ</button><button class="alpha-btn" onclick="filterByLetter('ǽ')">ǽ</button><button class="alpha-btn" onclick="filterByLetter('ø')">ø</button><button class="alpha-btn" onclick="filterByLetter('ǫ')">ǫ</button><button class="alpha-btn" onclick="filterByLetter('œ')">œ</button></div>
 </div>
-    <div style="text-align:center;margin:10px 0 6px;">
-  <button id="youngerFutharkBtn" onclick="toggleYoungerFuthark()" style="padding:8px 18px;border-radius:8px;border:1px solid #8b6331;background:linear-gradient(180deg,#3b2312 0%,#221308 100%);color:#e6c088;font-family:inherit;font-size:15px;font-weight:700;letter-spacing:0.6px;box-shadow:0 2px 6px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,215,150,0.18);cursor:pointer;">ᚠᚢᚦᚬᚱᚴ Younger Futhark</button>
+    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px 0 6px;">
+  <button id="youngerFutharkBtn" onclick="toggleYoungerFuthark()" style="padding:8px 14px;border-radius:8px;border:1px solid #8b6331;background:linear-gradient(180deg,#3b2312 0%,#221308 100%);color:#e6c088;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.5px;box-shadow:0 2px 6px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,215,150,0.18);cursor:pointer;">ᚠᚢᚦᚬᚱᚴ Younger Futhark</button>
+  <button id="bindruneBtn" onclick="toggleBindrune()" style="padding:8px 14px;border-radius:8px;border:1px solid #8b6331;background:linear-gradient(180deg,#3b2312 0%,#221308 100%);color:#e6c088;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.5px;box-shadow:0 2px 6px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,215,150,0.18);cursor:pointer;">ᛟ Bindrune</button>
+</div>
+<div id="bindruneCard" class="card-box" style="display:none;margin-top:8px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <strong style="color:#e6c088;font-size:15px;">Bindrune Forger (Shared Stave)</strong>
+    <button onclick="toggleBindrune()" style="background:transparent;border:1px solid #6e4e26;color:#d6b17a;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button>
+  </div>
+  <input id="bindruneInput" type="text" oninput="renderBindruneFromText(this.value)" placeholder="Type Old Norse word or runes to bind (e.g. sigr, friðr)..." style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:6px;border:1px solid #6e4e26;background:#160d06;color:#f3dcb8;margin-bottom:8px;font-size:14px;" />
+  <div id="bindruneChipBar" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:10px;"></div>
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;border-radius:8px;background:#160d06;border:1px solid #4a3319;">
+    <svg id="bindruneSvg" viewBox="0 0 120 180" width="120" height="180" style="overflow:visible;"></svg>
+    <div id="bindruneCaption" style="margin-top:6px;color:#b8925a;font-size:12px;letter-spacing:1px;"></div>
+  </div>
 </div>
 <div id="futharkCard" class="card-box" style="display:none;margin-top:8px;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -759,13 +772,13 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="listCard" class="card-box" style="display:none"></div>
     <div id="detailCard" class="card-box" style="display:none"></div>
   </div>
-  <div id="cred" class="footer">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary (CC BY-SA 4.0)<br/>Version <span id="appVersion">v3.08</span></div>
+  <div id="cred" class="footer">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary (CC BY-SA 4.0)<br/>Version <span id="appVersion">v3.09</span></div>
 </div>
 <div id="modalOverlay"><div id="modalBox"><h3 style="color:#E8C988;margin-bottom:6px">Lexical Sources &amp; Licenses</h3>Cleasby &amp; Vigfússon (1874), Geir T. Zoëga (1910), Dictionary of Old Norse Prose (ONP, CC BY-SA 4.0), and Wiktionary (CC BY-SA 4.0). All data bundled locally for 100% offline use.<button id="modalClose">Close</button></div></div>
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=108"></script>
+  <script src="app.js?v=109"></script>
 <script>
 const YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
@@ -832,6 +845,80 @@ function toggleYoungerFuthark() {
     renderFutharkTranslit('');
   }
 }
+
+const RUNE_BRANCHES = {
+  '\u16A0': [[60,65,92,35],[60,105,92,75]],
+  '\u16A2': [[60,30,90,65],[90,65,90,155]],
+  '\u16A6': [[60,55,92,85],[92,85,60,115]],
+  '\u16AC': [[60,45,92,70],[60,80,92,105]],
+  '\u16B1': [[60,35,90,62],[90,62,60,90],[60,90,92,150]],
+  '\u16B4': [[60,85,92,45]],
+  '\u16BC': [[30,60,90,110],[90,60,30,110]],
+  '\u16BE': [[32,68,88,108]],
+  '\u16C1': [],
+  '\u16C5': [[32,108,88,68]],
+  '\u16CB': [[40,35,40,85],[40,85,80,95],[80,95,80,150]],
+  '\u16CF': [[60,32,32,65],[60,32,88,65]],
+  '\u16D2': [[60,32,88,58],[88,58,60,85],[60,85,88,115],[88,115,60,148]],
+  '\u16D8': [[60,75,32,42],[60,75,88,42],[32,42,32,82],[88,42,88,82]],
+  '\u16DA': [[60,32,90,68]],
+  '\u16E6': [[60,142,32,110],[60,142,88,110]]
+};
+
+let activeBindRunes = ['\u16CB', '\u16C1', '\u16B4', '\u16B1'];
+
+function drawBindrune(runes) {
+  const svg = document.getElementById('bindruneSvg');
+  const cap = document.getElementById('bindruneCaption');
+  if (!svg) return;
+  const uniq = [...new Set(runes.filter(r => r in RUNE_BRANCHES))];
+  let lines = `<line x1="60" y1="22" x2="60" y2="158" stroke="#ffd996" stroke-width="6" stroke-linecap="round" />`;
+  for (const r of uniq) {
+    for (const [x1, y1, x2, y2] of RUNE_BRANCHES[r]) {
+      lines += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#ffd996" stroke-width="5.5" stroke-linecap="round" />`;
+    }
+  }
+  svg.innerHTML = lines;
+  if (cap) cap.textContent = uniq.length ? uniq.join(' + ') : 'Select runes or type a word';
+}
+
+function renderBindruneFromText(val) {
+  if (!val || !val.trim()) {
+    drawBindrune(activeBindRunes);
+    return;
+  }
+  const runes = [...toYoungerFuthark(val)].filter(ch => ch in RUNE_BRANCHES);
+  activeBindRunes = runes;
+  drawBindrune(runes);
+}
+
+function toggleBindRuneChip(r) {
+  const idx = activeBindRunes.indexOf(r);
+  if (idx >= 0) activeBindRunes.splice(idx, 1);
+  else activeBindRunes.push(r);
+  const inp = document.getElementById('bindruneInput');
+  if (inp) inp.value = activeBindRunes.join('');
+  drawBindrune(activeBindRunes);
+}
+
+function toggleBindrune() {
+  const card = document.getElementById('bindruneCard');
+  const yf = document.getElementById('futharkCard');
+  const bar = document.getElementById('bindruneChipBar');
+  if (!card) return;
+  if (yf) yf.style.display = 'none';
+  const open = card.style.display === 'none';
+  card.style.display = open ? 'block' : 'none';
+  if (open) {
+    if (bar && !bar.children.length) {
+      bar.innerHTML = Object.keys(RUNE_BRANCHES).map(r =>
+        `<button onclick="toggleBindRuneChip('${r}')" style="padding:4px 8px;border-radius:6px;border:1px solid #6e4e26;background:#241409;color:#ffd996;font-size:17px;cursor:pointer;">${r}</button>`
+      ).join('');
+    }
+    drawBindrune(activeBindRunes);
+  }
+}
+
 </script>
 </body>
 </html>
