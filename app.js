@@ -423,7 +423,14 @@ const ON_DETERMINERS = {
   'þessu':  [{ headword: 'þessi', pos: 'pronoun', gender: 'n.', case_name: 'DAT', number: 'SG' }]
 };
 
+function toOldNorseLower(str) {
+  return String(str || '').replace(/[ÁÉÍÓÚÝÆǢØŒǪÖÞÐ]/g, ch => ({
+    'Á':'á','É':'é','Í':'í','Ó':'ó','Ú':'ú','Ý':'ý',
+    'Æ':'æ','Ǣ':'ǣ','Ø':'ø','Œ':'œ','Ǫ':'ǫ','Ö':'ö','Þ':'þ','Ð':'ð'
+  }[ch] || ch.toLowerCase())).toLowerCase();
+}
 function lookupGrammarToken(raw, depth = 0) {
+  raw = toOldNorseLower(raw);
   const __k = (raw || "").toLowerCase().replace(/^[^a-záéíóúýæøǫœþð]+|[^a-záéíóúýæøǫœþð]+$/gi, "");
   for (const __cw of getCraftedWords()) {
     const __fHits = (__cw.forms || []).filter(f => f.form === __k);
@@ -771,14 +778,14 @@ break;
         const stem = clean.replace(/(liga|la)$/, '');
         for (const cand of [stem + 'r', stem + 'ligr', stem, stem + 'a', stem + 'i']) {
           const sub = lookupGrammarToken(cand, depth + 1);
-          if (sub.length) { hits.push({ ...sub, pos: 'adv.', case_name: 'ADV', number: '', definiteness: 'ADV (-liga)', source: 'derived' }); break; }
+          if (sub.length) { hits.push({ ...sub[0], pos: 'adv.', case_name: 'ADV', number: '', definiteness: 'ADV (-liga)', source: 'derived' }); break; }
         }
       } else if (/(ari|ara|aru|astr|ast|asta|astu|asti)$/.test(clean)) {
         const stem = clean.replace(/(ari|ara|aru|astr|ast|asta|astu|asti)$/, '');
         const deg = /ast/.test(clean) ? 'SUPERL' : 'COMP';
         for (const cand of [stem + 'r', stem, stem + 'a', stem + 'i']) {
           const sub = lookupGrammarToken(cand, depth + 1).filter(h => /adj|adv/i.test(h.pos || ''));
-          if (sub.length) { hits.push({ ...sub, definiteness: deg, source: 'derived' }); break; }
+          if (sub.length) { hits.push({ ...sub[0], definiteness: deg, source: 'derived' }); break; }
         }
       }
     }
@@ -823,6 +830,51 @@ break;
         if (sub.length) {
           hits.push(...sub.slice(0, 4).map(r => ({ ...r, source: 'derived' })));
           break;
+        }
+      }
+    }
+  }
+
+  // 6f. Old Norse prefixes + umlaut-reversing inflectional stemmer
+  if (!hits.length && depth === 0 && clean.length >= 4) {
+    const prefixes = ['undir', 'yfir', 'endr', 'full', 'jafn', 'fyri', 'með', 'við', 'for', 'fyr', 'all', 'mis', 'van', 'til', 'um', 'of', 'af', 'at', 'al', 'ó', 'ú'];
+    for (const pfx of prefixes) {
+      if (clean.startsWith(pfx) && clean.length - pfx.length >= 3) {
+        const rest = clean.slice(pfx.length);
+        const sub = lookupGrammarToken(rest, depth + 1);
+        if (sub.length) {
+          hits.push(...sub.slice(0, 3).map(r => ({ ...r, source: 'derived', headword: pfx + '-' + r.headword })));
+          break;
+        }
+      }
+    }
+    if (!hits.length) {
+      const stripSuf = ['', 'um', 'ar', 'ir', 'ur', 'an', 'in', 'un', 'inn', 'it', 'a', 'i', 'u', 's', 'r', 't', 'ði', 'ðu', 'ða', 'aði', 'aðu', 'aðr'];
+      const unUmlaut = s => [
+        s,
+        s.replace(/ǫ/g, 'a'),
+        s.replace(/e/g, 'a'),
+        s.replace(/y/g, 'u'),
+        s.replace(/ý/g, 'ú'),
+        s.replace(/æ/g, 'á'),
+        s.replace(/ø/g, 'o'),
+        s.replace(/œ/g, 'ó'),
+        s.replace(/ey/g, 'au')
+      ];
+      outer: for (const sf of stripSuf) {
+        if (sf && !clean.endsWith(sf)) continue;
+        const base = sf ? clean.slice(0, -sf.length) : clean;
+        if (base.length < 3) continue;
+        for (const uBase of unUmlaut(base)) {
+          for (const end of ['', 'r', 'a', 'i', 'u', 'll', 'nn']) {
+            const cand = uBase + end;
+            if (cand === clean) continue;
+            const lem = fastLemmas(cand, '', true).shift() || fastInflected(cand, true).shift();
+            if (lem) {
+              hits.push({ ...lem, source: 'derived' });
+              break outer;
+            }
+          }
         }
       }
     }
