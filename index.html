@@ -331,8 +331,8 @@ html, body {
   background-image: linear-gradient(180deg, #5a3a1d 10%, #a87b4c 50%, #d4b07e 92%) !important;
 }
 .alpha-btn.upd-ready {
-  background-image: linear-gradient(180deg, #ff3b00 10%, #ff6a00 50%, #ffae33 95%) !important;
-  filter: drop-shadow(0 0 7px rgba(255, 85, 0, 0.98)) drop-shadow(0 0 14px rgba(255, 120, 0, 0.85)) !important;
+  background-image: url('knot_bar.png'), linear-gradient(135deg, #ff3b30 0%, #ff9500 20%, #ffcc00 40%, #34c759 60%, #00c7be 78%, #5856d6 90%, #ff2d55 100%) !important;
+  filter: drop-shadow(0 0 6px #ff3b30) drop-shadow(0 0 10px #ffcc00) drop-shadow(0 0 14px #34c759) drop-shadow(0 0 18px #5856d6) brightness(1.3) !important;
 }
 
 .alpha-btn {
@@ -388,8 +388,7 @@ html, body {
   filter: sepia(1) saturate(7) hue-rotate(-18deg) brightness(1.25) drop-shadow(0 0 8px rgba(255, 85, 0, 0.98)) drop-shadow(0 0 15px rgba(255, 120, 0, 0.9)) !important;
 }
 
-.alpha-btn.upd-ok,
-.alpha-btn.upd-ready {
+.alpha-btn.upd-ok {
   background: transparent !important;
   background-image: none !important;
 }
@@ -434,8 +433,12 @@ html, body {
   background: radial-gradient(circle, rgba(255, 190, 95, 0.28) 0%, transparent 72%) !important;
 }
 .alpha-btn.upd-ready {
-  background: radial-gradient(circle, rgba(255, 95, 0, 0.55) 0%, rgba(255, 60, 0, 0.22) 55%, transparent 78%) !important;
-  box-shadow: 0 0 14px rgba(255, 85, 0, 0.95) !important;
+  background: radial-gradient(circle at 25% 25%, rgba(255,59,48,0.85), transparent 55%),
+              radial-gradient(circle at 75% 25%, rgba(255,204,0,0.85), transparent 55%),
+              radial-gradient(circle at 25% 75%, rgba(52,199,89,0.85), transparent 55%),
+              radial-gradient(circle at 75% 75%, rgba(88,86,214,0.85), transparent 55%) !important;
+  box-shadow: 0 0 8px #ff3b30, 0 0 14px #ffcc00, 0 0 20px #34c759, 0 0 26px #5856d6 !important;
+  border-radius: 10px !important;
 }
 
 footer, .footer, #footer, .credits, #credits {
@@ -744,12 +747,12 @@ footer *, .footer *, #footer *, .credits *, #credits * {
     <div id="listCard" class="card-box" style="display:none"></div>
     <div id="detailCard" class="card-box" style="display:none"></div>
   </div>
-  <div id="cred" class="footer">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary (CC BY-SA 4.0)<br/>Version <span id="appVersion">v3.06</span></div>
+  <div id="cred" class="footer">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary (CC BY-SA 4.0)<br/>Version <span id="appVersion">v3.07</span></div>
 </div>
 <div id="modalOverlay"><div id="modalBox"><h3 style="color:#E8C988;margin-bottom:6px">Lexical Sources &amp; Licenses</h3>Cleasby &amp; Vigfússon (1874), Geir T. Zoëga (1910), Dictionary of Old Norse Prose (ONP, CC BY-SA 4.0), and Wiktionary (CC BY-SA 4.0). All data bundled locally for 100% offline use.<button id="modalClose">Close</button></div></div>
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=106"></script>
+  <script src="app.js?v=107"></script>
 </body>
 </html>
