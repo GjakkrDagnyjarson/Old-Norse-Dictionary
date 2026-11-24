@@ -1,5 +1,5 @@
-const UI_CACHE = 'old-norse-ui-v3.07';
-const DB_CACHE = 'old-norse-db-v3.07';
+const UI_CACHE = 'old-norse-ui-v3.08';
+const DB_CACHE = 'old-norse-db-v3.08';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

@@ -744,15 +744,94 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div class="alpha-row"><button class="alpha-btn" onclick="filterByLetter('o')">o</button><button class="alpha-btn" onclick="filterByLetter('ó')">ó</button><button class="alpha-btn" onclick="filterByLetter('p')">p</button><button class="alpha-btn" onclick="filterByLetter('r')">r</button><button class="alpha-btn" onclick="filterByLetter('s')">s</button><button class="alpha-btn" onclick="filterByLetter('t')">t</button><button class="alpha-btn" onclick="filterByLetter('u')">u</button><button class="alpha-btn" onclick="filterByLetter('ú')">ú</button><button class="alpha-btn" onclick="filterByLetter('v')">v</button></div>
 <div class="alpha-row"><button class="alpha-btn" onclick="filterByLetter('y')">y</button><button class="alpha-btn" onclick="filterByLetter('ý')">ý</button><button class="alpha-btn" onclick="filterByLetter('þ')">þ</button><button class="alpha-btn" onclick="filterByLetter('æ')">æ</button><button class="alpha-btn" onclick="filterByLetter('ǽ')">ǽ</button><button class="alpha-btn" onclick="filterByLetter('ø')">ø</button><button class="alpha-btn" onclick="filterByLetter('ǫ')">ǫ</button><button class="alpha-btn" onclick="filterByLetter('œ')">œ</button></div>
 </div>
-    <div id="listCard" class="card-box" style="display:none"></div>
+    <div style="text-align:center;margin:10px 0 6px;">
+  <button id="youngerFutharkBtn" onclick="toggleYoungerFuthark()" style="padding:8px 18px;border-radius:8px;border:1px solid #8b6331;background:linear-gradient(180deg,#3b2312 0%,#221308 100%);color:#e6c088;font-family:inherit;font-size:15px;font-weight:700;letter-spacing:0.6px;box-shadow:0 2px 6px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,215,150,0.18);cursor:pointer;">ᚠᚢᚦᚬᚱᚴ Younger Futhark</button>
+</div>
+<div id="futharkCard" class="card-box" style="display:none;margin-top:8px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <strong style="color:#e6c088;font-size:15px;">Younger Futhark (16 Runes)</strong>
+    <button onclick="toggleYoungerFuthark()" style="background:transparent;border:1px solid #6e4e26;color:#d6b17a;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button>
+  </div>
+  <input id="futharkInput" type="text" oninput="renderFutharkTranslit(this.value)" placeholder="Type Old Norse to transliterate into runes..." style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:6px;border:1px solid #6e4e26;background:#160d06;color:#f3dcb8;margin-bottom:8px;font-size:14px;" />
+  <div id="futharkOutput" style="min-height:32px;padding:8px 10px;border-radius:6px;background:#1a0f08;border:1px solid #4a3319;color:#ffd996;font-size:22px;letter-spacing:2px;word-break:break-word;margin-bottom:10px;">ᚠᚢᚦᚬᚱᚴ ᚼᚾᛁᛅᛋ ᛏᛒMLᚱ</div>
+  <div id="futharkGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:12px;"></div>
+</div>
+<div id="listCard" class="card-box" style="display:none"></div>
     <div id="detailCard" class="card-box" style="display:none"></div>
   </div>
-  <div id="cred" class="footer">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary (CC BY-SA 4.0)<br/>Version <span id="appVersion">v3.07</span></div>
+  <div id="cred" class="footer">Sources: Cleasby &amp; Vigfússon • Zoëga • ONP • Wiktionary (CC BY-SA 4.0)<br/>Version <span id="appVersion">v3.08</span></div>
 </div>
 <div id="modalOverlay"><div id="modalBox"><h3 style="color:#E8C988;margin-bottom:6px">Lexical Sources &amp; Licenses</h3>Cleasby &amp; Vigfússon (1874), Geir T. Zoëga (1910), Dictionary of Old Norse Prose (ONP, CC BY-SA 4.0), and Wiktionary (CC BY-SA 4.0). All data bundled locally for 100% offline use.<button id="modalClose">Close</button></div></div>
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=107"></script>
+  <script src="app.js?v=108"></script>
+<script>
+const YOUNGER_RUNES = [
+  ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
+  ['ᚦ','ᚦ','þurs','þ / ð'], ['ᚬ','ᚭ','óss','ą / o / ó (nasal)'],
+  ['ᚱ','ᚱ','reið','r'], ['ᚴ','ᚴ','kaun','k / g'],
+  ['ᚼ','ᚽ','hagall','h'], ['ᚾ','ᚿ','nauðr','n'],
+  ['ᛁ','ᛁ','íss','i / í / e / é / j'], ['ᛅ','ᛆ','ár','a / á / æ / ǣ / ǫ / ö'],
+  ['ᛋ','ᛌ','sól','s'], ['ᛏ','ᛐ','týr','t / d'],
+  ['ᛒ','ᛓ','bjarkan','b / p'], ['M','ᛙ','maðr','m'],
+  ['ᛚ','ᛚ','lǫgr','l'], ['ᛦ','ᛧ','ýr','ʀ (palatal r)']
+].map(r => r[0] === 'M' ? ['M','ᛙ','maðr','m'] : r);
+YOUNGER_RUNES[13] = ['M','ᛙ','maðr','m'];
+
+function toYoungerFuthark(txt) {
+  const s = (txt || '').toLowerCase()
+    .replace(/ng/g, 'ᚴ').replace(/nk/g, 'ᚴ')
+    .replace(/ey|au|ei/g, m => m === 'ei' ? 'ᛅᛁ' : 'ᛅᚢ');
+  const map = {
+    'f':'ᚠ','v':'ᚠ','u':'ᚢ','ú':'ᚢ','o':'ᚢ','ó':'ᚢ','y':'ᚢ','ý':'ᚢ','ø':'ᚢ','œ':'ᚢ','w':'ᚢ',
+    'þ':'ᚦ','ð':'ᚦ','ą':'ᚬ','r':'ᚱ','ʀ':'ᛦ','k':'ᚴ','g':'ᚴ','c':'ᚴ','q':'ᚴ',
+    'h':'ᚼ','n':'ᚾ','i':'ᛁ','í':'ᛁ','e':'ᛁ','é':'ᛁ','j':'ᛁ',
+    'a':'ᛅ','á':'ᛅ','æ':'ᛅ','ǣ':'ᛅ','ǫ':'ᛅ','ö':'ᛅ',
+    's':'ᛋ','z':'ᛋ','t':'ᛏ','d':'ᛏ','b':'ᛒ','p':'ᛒ','m':'M','l':'ᛚ'
+  };
+  let out = '';
+  for (const ch of s) {
+    if (ch === ' ') out += ' ᛬ ';
+    else if (map[ch]) out += map[ch];
+    else out += ch;
+  }
+  return out.replace(/M/g, 'M');
+}
+
+function renderFutharkTranslit(val) {
+  const el = document.getElementById('futharkOutput');
+  if (!el) return;
+  el.textContent = val && val.trim() ? toYoungerFuthark(val) : 'ᚠᚢᚦᚬᚱᚴ ᚼᚾᛁᛅᛋ ᛏᛒMᛚᛦ'.replace(/M/g, '\u16D8');
+}
+
+function toggleYoungerFuthark() {
+  const card = document.getElementById('futharkCard');
+  const grid = document.getElementById('futharkGrid');
+  if (!card) return;
+  const open = card.style.display === 'none';
+  card.style.display = open ? 'block' : 'none';
+  if (open && grid && !grid.children.length) {
+    const runes = [
+      ['\u16A0','\u16A1','fé','f, v'], ['\u16A2','\u16A2','úr','u, o, y, ø'],
+      ['\u16A6','\u16A6','þurs','þ, ð'], ['\u16AC','\u16AD','óss','ą, o'],
+      ['\u16B1','\u16B1','reið','r'], ['\u16B4','\u16B4','kaun','k, g'],
+      ['\u16BC','\u16BD','hagall','h'], ['\u16BE','\u16BF','nauðr','n'],
+      ['\u16C1','\u16C1','íss','i, e, j'], ['\u16C5','\u16C6','ár','a, æ, ǫ'],
+      ['\u16CB','\u16CC','sól','s'], ['\u16CF','\u16D0','týr','t, d'],
+      ['\u16D2','\u16D3','bjarkan','b, p'], ['\u16D8','\u16D9','maðr','m'],
+      ['\u16DA','\u16DA','lǫgr','l'], ['\u16E6','\u16E7','ýr','ʀ']
+    ];
+    grid.innerHTML = runes.map(([lb, st, name, sound]) =>
+      `<div style="background:#1c1008;border:1px solid #4a3319;border-radius:6px;padding:6px 4px;text-align:center;">
+        <div style="font-size:20px;color:#ffd996;">${lb} <span style="font-size:15px;color:#b8925a;">${st}</span></div>
+        <div style="color:#e6c088;font-weight:700;">${name}</div>
+        <div style="color:#a8895c;font-size:11px;">${sound}</div>
+      </div>`
+    ).join('');
+    renderFutharkTranslit('');
+  }
+}
+</script>
 </body>
 </html>
