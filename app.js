@@ -336,6 +336,7 @@ const STRONG_2SG_PAST = {
 };
 
 function fastInflected(word, exactOnly = true) {
+  word = toOldNorseLower(word);
   const nf = foldON(word);
   const st = db.prepare(`
     SELECT l.id, l.headword, l.pos, l.gender, l.prep_cases, l.zoega_def,
