@@ -698,20 +698,19 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 </style>
 
 <style id="carvedAlphaStyle">
-@keyframes bifrostRainbow {
-  0%   { box-shadow: 0 0 10px rgba(255, 65, 65, 0.85), inset 0 0 8px rgba(255, 190, 0, 0.6); border-color: #ff5252; }
-  20%  { box-shadow: 0 0 11px rgba(255, 215, 40, 0.85), inset 0 0 8px rgba(80, 230, 100, 0.6); border-color: #ffd740; }
-  40%  { box-shadow: 0 0 11px rgba(60, 230, 130, 0.85), inset 0 0 8px rgba(50, 190, 255, 0.6); border-color: #69f0ae; }
-  60%  { box-shadow: 0 0 11px rgba(65, 165, 255, 0.85), inset 0 0 8px rgba(175, 95, 255, 0.6); border-color: #448aff; }
-  80%  { box-shadow: 0 0 11px rgba(205, 85, 255, 0.85), inset 0 0 8px rgba(255, 75, 155, 0.6); border-color: #e040fb; }
-  100% { box-shadow: 0 0 10px rgba(255, 65, 65, 0.85), inset 0 0 8px rgba(255, 190, 0, 0.6); border-color: #ff5252; }
+@keyframes bifrostUpdateGlow {
+  0%   { box-shadow: 0 0 10px #ff3b30, 0 0 18px #ff9500; }
+  25%  { box-shadow: 0 0 12px #ffcc00, 0 0 20px #34c759; }
+  50%  { box-shadow: 0 0 12px #00c7be, 0 0 20px #007aff; }
+  75%  { box-shadow: 0 0 12px #af52de, 0 0 20px #ff2d55; }
+  100% { box-shadow: 0 0 10px #ff3b30, 0 0 18px #ff9500; }
 }
 #carvedAlphaOverlay {
   position: fixed;
   left: 11.5%;
   right: 11.5%;
-  top: 39.2%;
-  height: 41.5%;
+  top: 36.6%;
+  height: 42.2%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -723,7 +722,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  height: 15.2%;
+  height: 14.8%;
 }
 .carved-row.last-row {
   justify-content: space-evenly;
@@ -734,23 +733,27 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   width: 14.5%;
   height: 100%;
   background: transparent;
-  border: 1.5px solid transparent;
+  border: none;
   border-radius: 50%;
   cursor: pointer;
   padding: 0;
   color: transparent;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.1s ease, box-shadow 0.15s ease;
+  transition: transform 0.1s ease;
 }
 .carved-hit:active {
   transform: scale(0.92);
-  box-shadow: 0 0 10px rgba(240, 211, 162, 0.65);
-  border-color: rgba(240, 211, 162, 0.6);
 }
 #bifrostGridBtn {
-  background: radial-gradient(circle, rgba(255,255,255,0.05) 30%, rgba(255,0,128,0.18) 65%, rgba(0,210,255,0.24) 100%);
-  border: 1.8px solid #ffd740;
-  animation: bifrostRainbow 4.5s linear infinite;
+  background: conic-gradient(from 210deg, #ff3b30, #ff9500, #ffcc00, #34c759, #00c7be, #007aff, #af52de, #ff2d55, #ff3b30);
+  mix-blend-mode: color;
+  opacity: 0.92;
+  box-shadow: none;
+}
+#bifrostGridBtn.update-ready {
+  mix-blend-mode: normal;
+  background: radial-gradient(circle, rgba(255,255,255,0.12) 25%, rgba(255,59,48,0.35) 55%, rgba(0,122,255,0.45) 100%);
+  animation: bifrostUpdateGlow 2.4s linear infinite;
 }
 </style>
 </head>
@@ -901,6 +904,26 @@ function renderFutharkTranslit(val) {
   el.textContent = val && val.trim() ? toYoungerFuthark(val) : 'ᚠᚢᚦᚬᚱᚴ ᚼᚾᛁᛅᛋ ᛏᛒMᛚᛦ'.replace(/M/g, '\u16D8');
 }
 
+
+
+function enableBifrostGlow() {
+  const b = document.getElementById('bifrostGridBtn');
+  if (b) b.classList.add('update-ready');
+}
+if (typeof markUpdateReady === 'function') {
+  const _origMarkUpdateReady = markUpdateReady;
+  markUpdateReady = function() {
+    enableBifrostGlow();
+    return _origMarkUpdateReady.apply(this, arguments);
+  };
+} else {
+  window.markUpdateReady = enableBifrostGlow;
+}
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    if (regs.some(r => r.waiting)) enableBifrostGlow();
+  }).catch(() => {});
+}
 
 async function triggerBifrostUpdate() {
   const t = document.getElementById('toast');
