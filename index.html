@@ -727,6 +727,10 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   cursor: pointer !important;
 }
 </style>
+<style>
+#runeToolsRow { position: relative !important; z-index: 5 !important; margin: 10px auto 14px !important; }
+#alphaGrid { position: relative !important; margin-top: 22px !important; padding-top: 8px !important; }
+</style>
 </head>
 <body>
 <div id="root">
@@ -763,7 +767,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
     <div id="bindruneCaption" style="margin-top:6px;color:#b8925a;font-size:12px;letter-spacing:1px;"></div>
   </div>
 </div>
-<div id="alphaGrid" style="margin-top:16px;">
+<div id="alphaGrid">
 <div class="alpha-row"><button id="updateBtn" class="alpha-btn upd-ok" onclick="handleUpdateClick()" title="App is up to date">↻</button><button class="alpha-btn" onclick="filterByLetter('a')">a</button><button class="alpha-btn" onclick="filterByLetter('á')">á</button><button class="alpha-btn" onclick="filterByLetter('b')">b</button><button class="alpha-btn" onclick="filterByLetter('d')">d</button><button class="alpha-btn" onclick="filterByLetter('ð')">ð</button><button class="alpha-btn" onclick="filterByLetter('e')">e</button><button class="alpha-btn" onclick="filterByLetter('é')">é</button><button class="alpha-btn" onclick="filterByLetter('f')">f</button></div>
 <div class="alpha-row"><button class="alpha-btn" onclick="filterByLetter('g')">g</button><button class="alpha-btn" onclick="filterByLetter('h')">h</button><button class="alpha-btn" onclick="filterByLetter('i')">i</button><button class="alpha-btn" onclick="filterByLetter('í')">í</button><button class="alpha-btn" onclick="filterByLetter('j')">j</button><button class="alpha-btn" onclick="filterByLetter('k')">k</button><button class="alpha-btn" onclick="filterByLetter('l')">l</button><button class="alpha-btn" onclick="filterByLetter('m')">m</button><button class="alpha-btn" onclick="filterByLetter('n')">n</button></div>
 <div class="alpha-row"><button class="alpha-btn" onclick="filterByLetter('o')">o</button><button class="alpha-btn" onclick="filterByLetter('ó')">ó</button><button class="alpha-btn" onclick="filterByLetter('p')">p</button><button class="alpha-btn" onclick="filterByLetter('r')">r</button><button class="alpha-btn" onclick="filterByLetter('s')">s</button><button class="alpha-btn" onclick="filterByLetter('t')">t</button><button class="alpha-btn" onclick="filterByLetter('u')">u</button><button class="alpha-btn" onclick="filterByLetter('ú')">ú</button><button class="alpha-btn" onclick="filterByLetter('v')">v</button></div>
@@ -775,7 +779,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=120"></script>
+  <script src="app.js?v=121"></script>
 <script>
 const YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
