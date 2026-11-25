@@ -858,7 +858,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.12</div>
+<div id="homeVersionFooter">ver 4.13</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1916,7 +1916,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.12</div>
+<div id="homeVersionFooter">ver 4.13</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -2639,7 +2639,7 @@ function buildGlossMapFromDb() {
     Object.keys(core).forEach(function(k) { normOn[k] = core[k]; normEn[core[k].toLowerCase()] = k; });
     window._glossMap = { on: normOn, en: normEn };
   } catch (e) { console.error(e); }
-} });
+}
 
 function ensureTranslateUI() {
   var tc = document.getElementById('translateCard');
