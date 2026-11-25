@@ -859,7 +859,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.14</div>
+<div id="homeVersionFooter">ver 4.15</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1917,7 +1917,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.14</div>
+<div id="homeVersionFooter">ver 4.15</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -2766,7 +2766,7 @@ function analyzeOnToken(orig, map, prevIsPrep, afterVerb) {
 }
 
 function translateLineOrdered(line, isOnEn, map) {
-  if (!isOnEn && typeof translateEnToOnGrammar === 'function') return translateEnToOnGrammar(line, map);
+  if (window._transDir !== 'on-en' && typeof translateEnToOnGrammar === 'function') return translateEnToOnGrammar(line, map);
   var parts = line.split(/([\p{L}\p{M}']+)/u);
   var wordIdx = [];
   for (var i = 0; i < parts.length; i++) {
