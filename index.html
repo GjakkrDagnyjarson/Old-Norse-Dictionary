@@ -774,7 +774,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=116"></script>
+  <script src="app.js?v=118"></script>
 <script>
 const YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
@@ -814,33 +814,46 @@ function renderFutharkTranslit(val) {
   el.textContent = val && val.trim() ? toYoungerFuthark(val) : 'ᚠᚢᚦᚬᚱᚴ ᚼᚾᛁᛅᛋ ᛏᛒMᛚᛦ'.replace(/M/g, '\u16D8');
 }
 
-function closeRuneCards(restoreGrid = true) {
+function setMainView(view) {
+  const ag = document.getElementById('alphaGrid');
+  const lc = document.getElementById('listCard');
+  const dc = document.getElementById('detailCard');
   const fc = document.getElementById('futharkCard');
   const bc = document.getElementById('bindruneCard');
-  const ag = document.getElementById('alphaGrid');
   const hb = document.getElementById('homeBtn');
-  if (fc) fc.style.display = 'none';
-  if (bc) bc.style.display = 'none';
-  if (restoreGrid) {
-    if (ag) ag.style.display = '';
-    if (hb) hb.style.display = 'none';
+  const sb = document.getElementById('searchBox');
+  if (fc) fc.style.setProperty('display', view === 'futhark' ? 'block' : 'none', 'important');
+  if (bc) bc.style.setProperty('display', view === 'bindrune' ? 'block' : 'none', 'important');
+  if (view === 'futhark' || view === 'bindrune') {
+    if (ag) ag.style.setProperty('display', 'none', 'important');
+    if (lc) lc.style.setProperty('display', 'none', 'important');
+    if (dc) dc.style.setProperty('display', 'none', 'important');
+    if (hb) hb.style.setProperty('display', 'inline-block', 'important');
+  } else if (view === 'home') {
+    if (ag) ag.style.removeProperty('display');
+    if (lc) lc.style.setProperty('display', 'none', 'important');
+    if (dc) dc.style.setProperty('display', 'none', 'important');
+    if (hb) hb.style.setProperty('display', 'none', 'important');
+    if (sb) sb.value = '';
+  } else if (view === 'grammar') {
+    if (ag) ag.style.setProperty('display', 'none', 'important');
+    if (hb) hb.style.setProperty('display', 'inline-block', 'important');
   }
 }
+function closeRuneCards() { setMainView('home'); }
 document.addEventListener('click', e => {
-  if (e.target && (e.target.id === 'grammarBtn' || e.target.id === 'homeBtn')) {
-    closeRuneCards(e.target.id === 'homeBtn');
-  }
+  const btn = e.target && e.target.closest ? e.target.closest('button') : e.target;
+  if (!btn) return;
+  if (btn.id === 'grammarBtn') setMainView('grammar');
+  else if (btn.id === 'homeBtn') setMainView('home');
 }, true);
 function toggleYoungerFuthark() {
   const card = document.getElementById('futharkCard');
   const grid = document.getElementById('futharkGrid');
   if (!card) return;
   const open = card.style.display === 'none';
-  closeRuneCards(!open);
-  if (!open) return;
-  card.style.display = 'block';
-  const ag = document.getElementById('alphaGrid'); if (ag) ag.style.display = 'none';
-  const hb = document.getElementById('homeBtn'); if (hb) hb.style.display = 'inline-block';
+  if (!open) { setMainView('home'); return; }
+  setMainView(card.id === 'futharkCard' ? 'futhark' : 'bindrune');
   if (open && grid && !grid.children.length) {
     const runes = [
       ['\u16A0','\u16A1','fé','f, v'], ['\u16A2','\u16A2','úr','u, o, y, ø'],
@@ -951,11 +964,8 @@ function toggleBindrune() {
   if (!card) return;
   if (yf) yf.style.display = 'none';
   const open = card.style.display === 'none';
-  closeRuneCards(!open);
-  if (!open) return;
-  card.style.display = 'block';
-  const ag = document.getElementById('alphaGrid'); if (ag) ag.style.display = 'none';
-  const hb = document.getElementById('homeBtn'); if (hb) hb.style.display = 'inline-block';
+  if (!open) { setMainView('home'); return; }
+  setMainView(card.id === 'futharkCard' ? 'futhark' : 'bindrune');
   if (open) {
     if (bar && !bar.children.length) {
       bar.innerHTML = Object.keys(RUNE_BRANCHES).map(r =>
