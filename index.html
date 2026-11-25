@@ -743,6 +743,12 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   #alphaGrid { position: relative !important; top: 0 !important; transform: none !important; margin-top: 16px !important; padding-top: 10px !important; }
 }
 </style>
+<style>
+@media (max-width: 768px) {
+  #runeToolsRow { margin-bottom: 22px !important; }
+  #mainArea { padding-top: 12px !important; }
+}
+</style>
 </head>
 <body>
 <div id="root">
@@ -787,11 +793,12 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="listCard" class="card-box" style="display:none"></div>
     <div id="detailCard" class="card-box" style="display:none"></div>
   </div>
-  </div>
+  <div id="creditFooter" style="text-align:center;margin:14px auto 8px;color:#b8925a;font-size:12px;letter-spacing:0.6px;opacity:0.9;">Gjakkr Dagnýjarsson &middot; Version <span id="appVersion">v3.25</span></div>
+</div>
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=124"></script>
+  <script src="app.js?v=125"></script>
 <script>
 const YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
@@ -888,8 +895,6 @@ function toggleYoungerFuthark() {
         <div style="color:#e6c088;font-weight:700;">${name}</div>
         <div style="color:#a8895c;font-size:11px;">${sound}</div>
       
-
-<div id="creditFooter" style="text-align:center;margin:14px auto 6px;color:#b8925a;font-size:12px;letter-spacing:0.6px;opacity:0.85;">Gjakkr Dagnýjarsson &middot; Version <span id="appVersion">v3.24</span></div>
 </div>`
     ).join('');
     renderFutharkTranslit('');
