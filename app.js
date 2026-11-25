@@ -249,9 +249,9 @@ $('searchBox').addEventListener('input', e => {
   renderList(results);
 });
 
-$('homeBtn').onclick = () => { $('searchBox').value = ''; renderHome(); };
+if ($('homeBtn')) $('homeBtn').onclick = () => { $('searchBox').value = ''; renderHome(); };
 if ($('cred')) $('cred').onclick = () => { $('modalOverlay').style.display = 'flex'; };
-$('modalClose').onclick = () => { $('modalOverlay').style.display = 'none'; };
+if ($('modalClose')) $('modalClose').onclick = () => { $('modalOverlay').style.display = 'none'; };
 
 window.onerror = (m, u, l) => { const st = $("subStatus"); if (st) { st.style.display = "block"; st.textContent = "JS ERR L" + l + ": " + m; } };
 (async function init() {
@@ -1405,7 +1405,7 @@ function openGrammarTool() {
   if (LAST_GRAMMAR_TEXT) runGrammarAnalysis();
 }
 
-$('grammarBtn').onclick = openGrammarTool;
+if ($('grammarBtn')) $('grammarBtn').onclick = openGrammarTool;
 
 
 async function handleUpdateClick() {
