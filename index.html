@@ -858,7 +858,1065 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 3.80</div>
+<div id="homeVersionFooter">ver 3.81</div>
+<div id="fullScreenPage">
+  <div id="fsTopBar">
+    <span id="fsTitle">Old Norse</span>
+    <button id="fsHomeBtn" onclick="openFullScreenView('home')">← Home</button>
+  </div>
+  <div id="fsBody"></div>
+</div>
+<div id="carvedAlphaOverlay" aria-label="Old Norse Alphabet and Bifröst Update">
+  <div class="carved-row">
+    <button id="bifrostGridBtn" class="carved-hit" aria-label="Bifröst Update" title="Bifröst — Update & Reload" onclick="triggerBifrostUpdate()"></button>
+    <button class="carved-hit" aria-label="a" onclick="openCarvedLetter('a')"></button>
+    <button class="carved-hit" aria-label="á" onclick="openCarvedLetter('á')"></button>
+    <button class="carved-hit" aria-label="b" onclick="openCarvedLetter('b')"></button>
+    <button class="carved-hit" aria-label="d" onclick="openCarvedLetter('d')"></button>
+    <button class="carved-hit" aria-label="ð" onclick="openCarvedLetter('ð')"></button>
+  </div>
+  <div class="carved-row">
+    <button class="carved-hit" aria-label="e" onclick="openCarvedLetter('e')"></button>
+    <button class="carved-hit" aria-label="é" onclick="openCarvedLetter('é')"></button>
+    <button class="carved-hit" aria-label="f" onclick="openCarvedLetter('f')"></button>
+    <button class="carved-hit" aria-label="g" onclick="openCarvedLetter('g')"></button>
+    <button class="carved-hit" aria-label="h" onclick="openCarvedLetter('h')"></button>
+    <button class="carved-hit" aria-label="i" onclick="openCarvedLetter('i')"></button>
+  </div>
+  <div class="carved-row">
+    <button class="carved-hit" aria-label="í" onclick="openCarvedLetter('í')"></button>
+    <button class="carved-hit" aria-label="j" onclick="openCarvedLetter('j')"></button>
+    <button class="carved-hit" aria-label="k" onclick="openCarvedLetter('k')"></button>
+    <button class="carved-hit" aria-label="l" onclick="openCarvedLetter('l')"></button>
+    <button class="carved-hit" aria-label="m" onclick="openCarvedLetter('m')"></button>
+    <button class="carved-hit" aria-label="n" onclick="openCarvedLetter('n')"></button>
+  </div>
+  <div class="carved-row">
+    <button class="carved-hit" aria-label="o" onclick="openCarvedLetter('o')"></button>
+    <button class="carved-hit" aria-label="ó" onclick="openCarvedLetter('ó')"></button>
+    <button class="carved-hit" aria-label="p" onclick="openCarvedLetter('p')"></button>
+    <button class="carved-hit" aria-label="r" onclick="openCarvedLetter('r')"></button>
+    <button class="carved-hit" aria-label="s" onclick="openCarvedLetter('s')"></button>
+    <button class="carved-hit" aria-label="t" onclick="openCarvedLetter('t')"></button>
+  </div>
+  <div class="carved-row">
+    <button class="carved-hit" aria-label="u" onclick="openCarvedLetter('u')"></button>
+    <button class="carved-hit" aria-label="ú" onclick="openCarvedLetter('ú')"></button>
+    <button class="carved-hit" aria-label="v" onclick="openCarvedLetter('v')"></button>
+    <button class="carved-hit" aria-label="y" onclick="openCarvedLetter('y')"></button>
+    <button class="carved-hit" aria-label="ý" onclick="openCarvedLetter('ý')"></button>
+    <button class="carved-hit" aria-label="þ" onclick="openCarvedLetter('þ')"></button>
+  </div>
+  <div class="carved-row last-row">
+    <button class="carved-hit" aria-label="æ" onclick="openCarvedLetter('æ')"></button>
+    <button class="carved-hit" aria-label="ø" onclick="openCarvedLetter('ø')"></button>
+    <button class="carved-hit" aria-label="ǫ" onclick="openCarvedLetter('ǫ')"></button>
+    <button class="carved-hit" aria-label="œ" onclick="openCarvedLetter('œ')"></button>
+  </div>
+</div>
+<div id="root">
+  <div class="title"><span>GJAKKR DAGNÝJARSON'S</span>OLD NORSE DICTIONARY</div>
+  <div class="top-bar" style="display:grid;grid-template-columns:repeat(3,1fr);row-gap:18px;column-gap:10px;margin-bottom:10px;width:100%;box-sizing:border-box;">
+  <button id="topHomeBtn" class="nav-btn" onclick="if(typeof closeRuneCards==='function')closeRuneCards();if(typeof renderHome==='function')renderHome();" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">Home</button>
+  <button id="searchToggleBtn" class="nav-btn" onclick="toggleSearchBar()" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">Search</button>
+  <button id="grammarBtn" class="nav-btn" onclick="setMainView('grammar')" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">Grammar</button>
+  <button id="youngerFutharkBtn" class="nav-btn" onclick="toggleYoungerFuthark()" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">ᚠ Fuþark</button>
+  <button id="bindruneBtn" class="nav-btn" onclick="toggleBindrune()" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">ᛉ Bindrunes</button>
+  <button id="helpBtn" class="nav-btn" onclick="toggleHelpCard()" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">Help</button>
+</div>
+<div id="searchBarDrawer" style="display:none;align-items:center;gap:6px;width:100%;margin:6px auto 2px;box-sizing:border-box;"><button id="homeBtn" class="nav-btn" style="display:none">Home</button><input id="searchBox" type="search" placeholder="Search Old Norse..." autocomplete="off" /><button class="nav-btn" onclick="toggleSearchBar(false)" style="padding:6px 10px;font-size:13px;">✕</button></div>
+  <div id="subStatus" style="display:none">Loading Old Norse database...</div>
+  <div id="mainArea">
+<div id="futharkCard" class="card-box" style="display:none;margin-top:8px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <strong style="color:#e6c088;font-size:15px;">Younger Futhark (16 Runes)</strong>
+    <button onclick="setMainView('home')" style="background:transparent;border:1px solid #6e4e26;color:#d6b17a;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button>
+  </div>
+  <input id="futharkInput" type="text" oninput="renderFutharkTranslit(this.value)" placeholder="Type Old Norse to transliterate into runes..." style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:6px;border:1px solid #6e4e26;background:#160d06;color:#f3dcb8;margin-bottom:8px;font-size:14px;" />
+  <div id="futharkOutput" style="min-height:32px;padding:8px 10px;border-radius:6px;background:#1a0f08;border:1px solid #4a3319;color:#ffd996;font-size:22px;letter-spacing:2px;word-break:break-word;margin-bottom:10px;">ᚠᚢᚦᚬᚱᚴ ᚼᚾᛁᛅᛋ ᛏᛒMLᚱ</div>
+  <div id="futharkGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:12px;"></div>
+</div>
+
+
+    <div id="bindruneCard" class="card-box" style="display:none;margin-top:8px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <strong style="color:#e6c088;font-size:15px;">Bindrune Forger (Horizontal Ligature)</strong>
+    <button onclick="setMainView('home')" style="background:transparent;border:1px solid #6e4e26;color:#d6b17a;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button>
+  </div>
+  <p style="margin:0 0 8px;padding:6px 8px;border-left:2px solid #8b6331;background:rgba(26,15,8,0.75);color:#c9a673;font-size:12px;line-height:1.4;">Historical Note: This tool does not generate modern mystical or magical sigil-style bindrunes. It writes historically accurate bindrunes (<em>bandrúnir</em>) as horizontal ligatures sharing staves—the way Viking Age carvers genuinely wrote personal names, maker signatures, and space-saving inscriptions on wood, bone, and stone.</p>
+  <input id="bindruneInput" type="text" oninput="renderBindruneFromText(this.value)" placeholder="Type Old Norse word or pick runes (e.g. sigr, friðr, þórr)..." style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:6px;border:1px solid #6e4e26;background:#160d06;color:#f3dcb8;margin-bottom:8px;font-size:14px;" />
+  <div id="bindruneChipBar" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:10px;"></div>
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;border-radius:8px;background:#160d06;border:1px solid #4a3319;">
+    <svg id="bindruneSvg" viewBox="0 0 320 110" style="width:100%;max-width:340px;height:110px;overflow:visible;"></svg>
+    <div id="bindruneCaption" style="margin-top:6px;color:#b8925a;font-size:12px;letter-spacing:1px;"></div>
+  </div>
+</div>
+
+<div id="helpCard" class="card-box" style="display:none;margin-top:8px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <strong style="color:#e6c088;font-size:15px;">Guide &amp; Help</strong>
+    <button onclick="setMainView('home')" style="background:transparent;border:1px solid #6e4e26;color:#d6b17a;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button>
+  </div>
+  <div style="font-size:13px;line-height:1.55;color:#f3dcb8;">
+    <p style="margin:0 0 8px;"><strong>Search:</strong> Look up Old Norse headwords or English meanings. Standard ASCII spellings (like <code>th</code>, <code>dh</code>, <code>ae</code>, <code>oe</code>, <code>o</code>) automatically match Old Norse characters (<code>þ</code>, <code>ð</code>, <code>æ</code>, <code>œ</code>, <code>ǫ</code>).</p>
+    <p style="margin:0 0 8px;"><strong>Grammar:</strong> Paste or type an Old Norse sentence to analyze word forms, parts of speech, cases, and dictionary roots.</p>
+    <p style="margin:0 0 8px;"><strong>ᚠ Fuþark:</strong> Transliterate Old Norse or Latin text into Younger Futhark (16-rune Viking Age alphabet).</p>
+    <p style="margin:0;"><strong>ᛉ Bindrunes:</strong> Forge historically styled horizontal stave-sharing bindrunes from Old Norse words or individual runes.</p>
+  </div>
+</div>
+<div id="listCard" class="card-box" style="display:none;flex:1;min-height:0;overflow-y:auto;"></div>
+    <div id="detailCard" class="card-box" style="display:none;flex:1;min-height:0;overflow-y:auto;"></div>
+  </div>
+  
+</div>
+<div id="toast"></div>
+<script src="sql-wasm.js"></script>
+<script src="on_grammar_data.js?v=72"></script>
+  <script src="app.js?v=143"></script>
+<script>
+var YOUNGER_RUNES = [
+  ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
+  ['ᚦ','ᚦ','þurs','þ / ð'], ['ᚬ','ᚭ','óss','ą / o / ó (nasal)'],
+  ['ᚱ','ᚱ','reið','r'], ['ᚴ','ᚴ','kaun','k / g'],
+  ['ᚼ','ᚽ','hagall','h'], ['ᚾ','ᚿ','nauðr','n'],
+  ['ᛁ','ᛁ','íss','i / í / e / é / j'], ['ᛅ','ᛆ','ár','a / á / æ / ǣ / ǫ / ö'],
+  ['ᛋ','ᛌ','sól','s'], ['ᛏ','ᛐ','týr','t / d'],
+  ['ᛒ','ᛓ','bjarkan','b / p'], ['M','ᛙ','maðr','m'],
+  ['ᛚ','ᛚ','lǫgr','l'], ['ᛦ','ᛧ','ýr','ʀ (palatal r)']
+].map(r => r[0] === 'M' ? ['M','ᛙ','maðr','m'] : r);
+YOUNGER_RUNES[13] = ['M','ᛙ','maðr','m'];
+
+function toYoungerFuthark(txt) {
+  var s = (txt || '').toLowerCase()
+    .replace(/ng/g, 'ᚴ').replace(/nk/g, 'ᚴ')
+    .replace(/ey|au|ei/g, m => m === 'ei' ? 'ᛅᛁ' : 'ᛅᚢ');
+  var map = {
+    'f':'ᚠ','v':'ᚠ','u':'ᚢ','ú':'ᚢ','o':'ᚢ','ó':'ᚢ','y':'ᚢ','ý':'ᚢ','ø':'ᚢ','œ':'ᚢ','w':'ᚢ',
+    'þ':'ᚦ','ð':'ᚦ','ą':'ᚬ','r':'ᚱ','ʀ':'ᛦ','k':'ᚴ','g':'ᚴ','c':'ᚴ','q':'ᚴ',
+    'h':'ᚼ','n':'ᚾ','i':'ᛁ','í':'ᛁ','e':'ᛁ','é':'ᛁ','j':'ᛁ',
+    'a':'ᛅ','á':'ᛅ','æ':'ᛅ','ǣ':'ᛅ','ǫ':'ᛅ','ö':'ᛅ',
+    's':'ᛋ','z':'ᛋ','t':'ᛏ','d':'ᛏ','b':'ᛒ','p':'ᛒ','m':'M','l':'ᛚ'
+  };
+  var out = '';
+  for (const ch of s) {
+    if (ch === ' ') out += ' ᛬ ';
+    else if (map[ch]) out += map[ch];
+    else out += ch;
+  }
+  return out.replace(/M/g, 'M');
+}
+
+function renderFutharkTranslit(val) {
+  var el = document.getElementById('futharkOutput');
+  if (!el) return;
+  el.textContent = val && val.trim() ? toYoungerFuthark(val) : 'ᚠᚢᚦᚬᚱᚴ ᚼᚾᛁᛅᛋ ᛏᛒMᛚᛦ'.replace(/M/g, '\u16D8');
+}
+
+
+
+function enableBifrostGlow() {
+  window._bifrostUpdatePending = true;
+  var b = document.getElementById('bifrostGridBtn');
+  if (b) b.classList.add('update-ready');
+}
+function disableBifrostGlow() {
+  window._bifrostUpdatePending = false;
+  var b = document.getElementById('bifrostGridBtn');
+  if (b) b.classList.remove('update-ready');
+}
+if (window._bifrostUpdatePending) enableBifrostGlow();
+
+window._bifrostBaseline = window._bifrostBaseline || {};
+window._bifrostTracked = [window.location.pathname || './', './app.js'];
+
+async function getBifrostStamp(url) {
+  try {
+    var res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+    return (res.headers.get('etag') || '') + '|' + (res.headers.get('last-modified') || '');
+  } catch (e) {
+    return '';
+  }
+}
+
+async function checkBifrostUpdates() {
+  var found = false;
+  if ('serviceWorker' in navigator) {
+    try {
+      var regs = await navigator.serviceWorker.getRegistrations();
+      for (const r of regs) {
+        if (r.waiting) found = true;
+        r.update().catch(() => {});
+      }
+    } catch (e) {}
+  }
+  for (const url of window._bifrostTracked) {
+    var stamp = await getBifrostStamp(url);
+    if (!stamp) continue;
+    if (!window._bifrostBaseline[url]) {
+      window._bifrostBaseline[url] = stamp;
+    } else if (window._bifrostBaseline[url] !== stamp) {
+      found = true;
+    }
+  }
+  if (found) enableBifrostGlow();
+  return found;
+}
+
+(function initBifrostWatcher() {
+  window.addEventListener('load', () => setTimeout(checkBifrostUpdates, 1500));
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') checkBifrostUpdates();
+  });
+  setInterval(checkBifrostUpdates, 60000);
+})();
+
+async function triggerBifrostUpdate() {
+  var t = document.getElementById('toast');
+  var showToast = (msg) => {
+    if (!t) return;
+    t.textContent = msg;
+    t.style.display = 'block';
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => { t.style.display = 'none'; }, 2600);
+  };
+
+  showToast('Crossing Bifrǫst… checking for updates');
+
+  try {
+    // 1. Clear cached UI/app-shell entries without reloading
+    if ('caches' in window) {
+      var keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    if ('serviceWorker' in navigator) {
+      var regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.update().catch(() => {})));
+    }
+
+    // 2. Clear any stale status banner and load the fresh page cleanly
+    const st = document.getElementById('subStatus');
+    if (st) { st.textContent = ''; st.style.display = 'none'; }
+    disableBifrostGlow();
+    showToast('Bifrǫst crossed — loading update…');
+    setTimeout(() => {
+      window.location.replace(window.location.pathname + '?v=' + Date.now());
+    }, 250);
+  } catch (e) {}
+  window.location.reload();
+}
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', markUpdateReady);
+  navigator.serviceWorker.getRegistration().then(reg => {
+    if (!reg) return;
+    if (reg.waiting) markUpdateReady();
+    reg.addEventListener('updatefound', () => {
+      var nw = reg.installing;
+      if (nw) nw.addEventListener('statechange', () => {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) markUpdateReady();
+      });
+    });
+  });
+}
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<title>Old Norse Dictionary</title>
+<link rel="manifest" href="./manifest.json" />
+<script src="./sql-wasm.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: #140d08 url('./bg_norse.jpg?v=68') center/100% 100% no-repeat;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #F8F1E5;
+}
+#root.open { padding: 6vh 9vw 6vh 9vw !important; }
+#root {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  padding: 6vh 9vw 6vh 9vw;
+}
+.title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: 1.2px;
+  background: linear-gradient(180deg, #6e4724 10%, #c4935e 50%, #edd0a3 92%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.98)) drop-shadow(0 1px 0 rgba(225, 180, 125, 0.42));
+  margin-bottom: 7px;
+  flex-shrink: 0;
+}
+.title span {
+  display: block;
+  font-size: 15px;
+  letter-spacing: 1.2px;
+  background: linear-gradient(180deg, #6e4724 10%, #c4935e 50%, #edd0a3 92%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.top-bar { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; flex-shrink: 0; }
+.nav-btn {
+  background: linear-gradient(180deg, #4b2d16 0%, #2a170a 100%);
+  color: #f0d3a2;
+  border: 1.5px solid #9c6b39;
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 224, 178, 0.25);
+  text-shadow: 0 1px 2px #000;
+  padding: 7px 11px; font-size: 12.5px; font-weight: bold; cursor: pointer;
+  font-family: inherit; flex-shrink: 0;
+}
+.nav-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  filter: brightness(1.12);
+}
+#searchBox {
+  flex: 1; min-width: 0;
+  background: rgba(10, 5, 2, 0.72);
+  border: 1px solid rgba(18, 10, 4, 0.95);
+  border-bottom: 1px solid rgba(216, 171, 121, 0.32);
+  border-radius: 7px;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.95), inset 0 1px 2px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(216, 171, 121, 0.22);
+  color: #F8F1E5; font-size: 11px; padding: 6px 9px; outline: none; font-family: inherit;
+}
+#searchBox::placeholder { color: #B8A382; }
+#subStatus {
+  text-align: center; color: #E8C988; font-size: 11.5px;
+  margin-bottom: 6px; text-shadow: 0 1px 3px #000; flex-shrink: 0;
+}
+#mainArea { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+
+.alpha-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.alpha-row:last-child {
+  justify-content: space-evenly;
+}
+.alpha-btn {
+  width: 44px;
+  height: 46px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 25px;
+  font-weight: 900;
+  font-family: inherit;
+  cursor: pointer;
+  flex: 0 0 auto;
+  background-image: linear-gradient(180deg, #6e4724 10%, #c4935e 50%, #edd0a3 92%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.98)) drop-shadow(0 1px 0 rgba(225, 180, 125, 0.42));
+  transition: transform 0.1s ease, filter 0.2s ease;
+}
+.alpha-btn:active {
+  transform: scale(0.9);
+  filter: drop-shadow(0 0 5px rgba(237, 208, 163, 0.75));
+}
+.upd-ok {
+  background-image: linear-gradient(180deg, #5a3a1d 10%, #a87b4c 50%, #d4b07e 92%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+.upd-ready {
+  background-image: linear-gradient(180deg, #ff3b00 10%, #ff6a00 50%, #ffae33 95%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  filter: drop-shadow(0 0 7px rgba(255, 85, 0, 0.98)) drop-shadow(0 0 14px rgba(255, 120, 0, 0.85)) !important;
+}
+
+html, body {
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+}
+#root {
+  height: 100dvh !important;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+#mainArea {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.card-box {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 10px;
+}
+
+.card-box {
+  flex: 1; min-height: 0; overflow-y: auto;
+  background: rgba(20, 14, 10, 0.86); border: 1.5px solid rgba(218, 184, 118, 0.5);
+  border-radius: 10px; padding: 6px 12px;
+}
+.word-row {
+  padding: 8px 2px; border-bottom: 1px solid rgba(218, 184, 118, 0.16);
+  cursor: pointer; display: flex; align-items: baseline; gap: 6px;
+}
+.word-row:last-child { border-bottom: none; }
+.word-row:active { background: rgba(232, 201, 136, 0.15); }
+.wr-hw { color: #E8C988; font-size: 15px; font-weight: bold; }
+.wr-sub { color: #C4B5A0; font-size: 12px; font-style: italic; }
+.det-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-top: 2px; }
+.det-hw { color: #E8C988; font-size: 21px; font-weight: bold; line-height: 1.15; }
+.det-pos { color: #D4C3A3; font-size: 13px; font-weight: bold; margin-left: 4px; }
+.back-pill {
+  background: rgba(34, 24, 16, 0.9); color: #E8C988; border: 1px solid rgba(218, 184, 118, 0.5);
+  border-radius: 8px; padding: 4px 10px; font-size: 12px; cursor: pointer; flex-shrink: 0;
+}
+.det-yf { color: #E6D5B8; font-size: 14px; margin: 3px 0 6px; letter-spacing: 0.4px; }
+.match-badge { color: #98E0A8; font-size: 11.5px; margin-bottom: 6px; font-weight: bold; }
+.tbl-title {
+  color: #E8C988; font-size: 11px; font-weight: bold; letter-spacing: 0.5px;
+  text-transform: uppercase; margin: 8px 0 5px;
+}
+
+.tbl-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid #6b4723;
+  border-radius: 8px;
+  background: rgba(30, 17, 8, 0.78);
+  margin-bottom: 10px;
+}
+.tbl-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  line-height: 1.25;
+}
+.tbl-wrap th {
+  color: #e8c988;
+  font-weight: bold;
+  text-align: left;
+  background: rgba(45, 26, 12, 0.85);
+}
+.tbl-wrap th,
+.tbl-wrap td {
+  padding: 6px 8px;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(138, 94, 50, 0.35);
+  border-right: 1px solid rgba(138, 94, 50, 0.25);
+  vertical-align: middle;
+}
+.tbl-wrap tr:last-child td {
+  border-bottom: none;
+}
+.tbl-wrap th:last-child,
+.tbl-wrap td:last-child {
+  border-right: none;
+}
+
+.alpha-btn {
+  position: relative;
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: transform 0.12s ease, filter 0.2s ease;
+}
+.alpha-btn svg.knot-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.95)) drop-shadow(0 1px 0 rgba(225, 180, 125, 0.35));
+}
+.alpha-btn .knot-char {
+  position: relative;
+  z-index: 1;
+  font-size: 21px;
+  font-weight: 900;
+  font-family: Georgia, 'Times New Roman', serif;
+  background-image: linear-gradient(180deg, #6e4724 10%, #c4935e 50%, #edd0a3 92%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.98)) drop-shadow(0 1px 0 rgba(225, 180, 125, 0.45));
+}
+.alpha-btn.upd-ok .knot-char {
+  background-image: linear-gradient(180deg, #5a3a1d 10%, #a87b4c 50%, #d4b07e 92%);
+}
+.alpha-btn.upd-ready .knot-char {
+  background-image: linear-gradient(180deg, #ff3b00 10%, #ff6a00 50%, #ffae33 95%);
+  filter: drop-shadow(0 0 7px rgba(255, 85, 0, 0.98)) drop-shadow(0 0 14px rgba(255, 120, 0, 0.85));
+}
+.alpha-btn.upd-ready svg.knot-bg {
+  filter: drop-shadow(0 0 6px rgba(255, 95, 0, 0.85));
+}
+
+
+.alpha-btn {
+  width: 44px !important;
+  height: 42px !important;
+  font-size: 24px !important;
+  font-weight: 900 !important;
+  font-family: Georgia, 'Times New Roman', serif !important;
+  background-image: linear-gradient(180deg, #6e4724 10%, #c4935e 50%, #edd0a3 92%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.98)) drop-shadow(0 1px 0 rgba(225, 180, 125, 0.42));
+}
+.alpha-btn.upd-ok {
+  background-image: linear-gradient(180deg, #5a3a1d 10%, #a87b4c 50%, #d4b07e 92%) !important;
+}
+.alpha-btn.upd-ready {
+  background-image: url('knot_bar.png'), linear-gradient(135deg, #ff3b30 0%, #ff9500 20%, #ffcc00 40%, #34c759 60%, #00c7be 78%, #5856d6 90%, #ff2d55 100%) !important;
+  filter: drop-shadow(0 0 6px #ff3b30) drop-shadow(0 0 10px #ffcc00) drop-shadow(0 0 14px #34c759) drop-shadow(0 0 18px #5856d6) brightness(1.3) !important;
+}
+
+.alpha-btn {
+  width: 46px !important;
+  height: 46px !important;
+  font-size: 30px !important;
+  font-weight: 900 !important;
+  font-family: 'Georgia', 'Times New Roman', serif !important;
+  background-image: url('knot_bar.png') !important;
+  background-size: 38px auto !important;
+  background-repeat: repeat !important;
+  background-position: center !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  filter: brightness(1.45) contrast(1.25) drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.98)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.95));
+}
+.alpha-btn.upd-ok {
+  background-image: url('knot_bar.png') !important;
+  filter: brightness(1.35) contrast(1.2) drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.98)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.95));
+}
+.alpha-btn.upd-ready {
+  background-image: linear-gradient(180deg, #ff3b00 10%, #ff6a00 50%, #ffae33 95%) !important;
+  filter: drop-shadow(0 0 7px rgba(255, 85, 0, 0.98)) drop-shadow(0 0 14px rgba(255, 120, 0, 0.85)) !important;
+}
+
+.alpha-btn {
+  width: 48px !important;
+  height: 54px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: transparent !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.alpha-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: normal !important;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.95));
+  transition: transform 0.12s ease, filter 0.25s ease;
+}
+.alpha-btn:active img {
+  transform: scale(0.9);
+}
+.alpha-btn.upd-ready img {
+  filter: sepia(1) saturate(7) hue-rotate(-18deg) brightness(1.25) drop-shadow(0 0 8px rgba(255, 85, 0, 0.98)) drop-shadow(0 0 15px rgba(255, 120, 0, 0.9)) !important;
+}
+
+.alpha-btn.upd-ok {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+
+.alpha-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 15% !important;
+}
+.alpha-row:last-child {
+  width: 78% !important;
+  margin: 0 auto !important;
+  justify-content: space-between !important;
+}
+.alpha-btn {
+  width: 15% !important;
+  height: 100% !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  color: transparent !important;
+  font-size: 0 !important;
+}
+.alpha-row:last-child .alpha-btn {
+  width: 20% !important;
+}
+.alpha-btn:active {
+  background: radial-gradient(circle, rgba(255, 190, 95, 0.28) 0%, transparent 72%) !important;
+}
+.alpha-btn.upd-ready {
+  background: radial-gradient(circle at 25% 25%, rgba(255,59,48,0.85), transparent 55%),
+              radial-gradient(circle at 75% 25%, rgba(255,204,0,0.85), transparent 55%),
+              radial-gradient(circle at 25% 75%, rgba(52,199,89,0.85), transparent 55%),
+              radial-gradient(circle at 75% 75%, rgba(88,86,214,0.85), transparent 55%) !important;
+  box-shadow: 0 0 8px #ff3b30, 0 0 14px #ffcc00, 0 0 20px #34c759, 0 0 26px #5856d6 !important;
+  border-radius: 10px !important;
+}
+
+footer, .footer, #footer, .credits, #credits {
+  font-size: 9px !important;
+  line-height: 1.2 !important;
+  padding: 2px 12px 4px 12px !important;
+  margin-top: 2px !important;
+  opacity: 0.85;
+}
+footer *, .footer *, #footer *, .credits *, #credits * {
+  font-size: 9px !important;
+  line-height: 1.2 !important;
+}
+
+
+.alpha-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 15% !important;
+}
+.alpha-row:last-child {
+  width: 72% !important;
+  margin: 0 auto !important;
+  justify-content: space-between !important;
+}
+.alpha-btn {
+  width: 15% !important;
+  height: 100% !important;
+}
+.alpha-row:last-child .alpha-btn {
+  width: 21% !important;
+}
+
+
+.alpha-row, .alpha-btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+
+
+
+.alpha-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 15.5% !important;
+}
+.alpha-row:last-child {
+  width: 76% !important;
+  margin: 0 auto !important;
+  justify-content: space-between !important;
+}
+.alpha-btn {
+  width: 15.5% !important;
+  height: 100% !important;
+  outline: none !important;
+  background: transparent !important;
+}
+.alpha-row:last-child .alpha-btn {
+  width: 21% !important;
+}
+.alpha-btn:active {
+  background: radial-gradient(circle, rgba(255, 190, 95, 0.25) 0%, transparent 72%) !important;
+}
+
+/* Hide HTML text title since it is now carved directly into bg_norse.jpg */
+.title {
+  display: none !important;
+}
+.top-bar {
+  margin-top: 17.5% !important;
+}
+
+
+.top-bar {
+  margin-top: 21.5% !important;
+}
+
+
+.top-bar {
+  margin-top: 25.5% !important;
+}
+
+
+
+
+.alpha-row {
+  height: 15.5% !important;
+}
+.alpha-row:last-child {
+  width: 70% !important;
+  margin: 0 auto !important;
+}
+.alpha-btn {
+  width: 15.5% !important;
+  height: 100% !important;
+  outline: none !important;
+  background: transparent !important;
+}
+.alpha-row:last-child .alpha-btn {
+  width: 21% !important;
+}
+.alpha-btn:active {
+  background: radial-gradient(circle, rgba(255, 190, 95, 0.25) 0%, transparent 72%) !important;
+}
+
+#root {
+  position: relative !important;
+}
+
+
+.top-bar, #listCard, #detailCard, #cred, #modalOverlay {
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+
+
+
+
+/* Carved Dark-Oak Theme for List, Detail, and Grammar & Syntax Analyzer */
+#listCard, #detailCard {
+  background: rgba(20, 11, 5, 0.94) !important;
+  border: 1.5px solid #8a5e32 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85), inset 0 0 18px rgba(0, 0, 0, 0.7) !important;
+  color: #edd8b4 !important;
+  padding: 12px !important;
+  margin-top: 8px !important;
+}
+.det-top {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 10px !important;
+  padding-bottom: 6px !important;
+  border-bottom: 1px solid rgba(168, 120, 68, 0.35) !important;
+}
+.det-hw {
+  color: #e8c48e !important;
+  font-weight: 700 !important;
+}
+.back-pill {
+  background: linear-gradient(180deg, #3b2312 0%, #221308 100%) !important;
+  color: #e8c48e !important;
+  border: 1px solid #8a5e32 !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+.gram-area {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: 78px !important;
+  background: rgba(14, 8, 3, 0.92) !important;
+  color: #f3e2c3 !important;
+  border: 1.5px solid #7c532b !important;
+  border-radius: 8px !important;
+  padding: 10px !important;
+  font-family: Georgia, serif !important;
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+  margin-bottom: 8px !important;
+  resize: vertical !important;
+}
+.gram-area::placeholder {
+  color: rgba(216, 184, 136, 0.52) !important;
+}
+.gram-area:focus {
+  outline: none !important;
+  border-color: #cfa063 !important;
+  box-shadow: 0 0 8px rgba(207, 160, 99, 0.35) !important;
+}
+.gram-run {
+  display: block !important;
+  width: 100% !important;
+  background: linear-gradient(180deg, #4b2d16 0%, #2a170a 100%) !important;
+  color: #f0d3a2 !important;
+  border: 1.5px solid #9c6b39 !important;
+  border-radius: 8px !important;
+  padding: 9px 14px !important;
+  font-family: Georgia, serif !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.4px !important;
+  text-shadow: 0 1px 2px #000 !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.65) !important;
+  margin-bottom: 10px !important;
+  cursor: pointer !important;
+}
+.gram-run:active {
+  transform: translateY(1px) !important;
+  filter: brightness(1.12) !important;
+}
+.g-tok {
+  background: rgba(34, 19, 9, 0.88) !important;
+  border: 1px solid rgba(156, 107, 57, 0.45) !important;
+  border-left: 3px solid #b88246 !important;
+  border-radius: 7px !important;
+  padding: 8px 10px !important;
+  margin-bottom: 8px !important;
+}
+.g-word {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #f4dcb2 !important;
+  margin-bottom: 4px !important;
+}
+.g-parse {
+  font-size: 12.5px !important;
+  line-height: 1.35 !important;
+  color: #dec69e !important;
+  padding: 3px 0 !important;
+  border-top: 1px dashed rgba(156, 107, 57, 0.25) !important;
+}
+.g-link {
+  color: #f0c987 !important;
+  font-weight: 700 !important;
+  text-decoration: underline dotted rgba(240, 201, 135, 0.6) !important;
+  cursor: pointer !important;
+}
+
+@media (max-width: 768px) {
+  #mainArea { position: relative !important; top: 0 !important; transform: none !important; margin-top: 8px !important; }
+  
+}
+</style>
+<style>
+#runeToolsRow { position: relative !important; z-index: 5 !important; margin: 10px auto 14px !important; }
+
+</style>
+<style>
+#root {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100dvh !important;
+  overflow: hidden !important;
+}
+#mainArea {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+#cred.footer {
+  flex: 0 0 auto !important;
+  margin: 4px auto 8px !important;
+}
+</style>
+
+<style id="desktopBtnScale">
+@media (min-width: 769px) {
+  .top-bar {
+    row-gap: 48px !important;
+    column-gap: 26px !important;
+    margin-bottom: 26px !important;
+  }
+  .top-bar .nav-btn {
+    padding: 26px 15px !important;
+    font-size: 36px !important;
+    border-radius: 18px !important;
+    border-width: 3px !important;
+  }
+}
+</style>
+
+<style id="carvedAlphaStyle">
+@keyframes bifrostUpdateGlow {
+  0%, 100% {
+    backdrop-filter: brightness(1.05) saturate(1.1);
+    -webkit-backdrop-filter: brightness(1.05) saturate(1.1);
+  }
+  50% {
+    backdrop-filter: brightness(1.65) saturate(1.85) contrast(1.15);
+    -webkit-backdrop-filter: brightness(1.65) saturate(1.85) contrast(1.15);
+  }
+}
+#carvedAlphaOverlay {
+  position: fixed;
+  left: 12.2%;
+  right: 12.2%;
+  top: 37.5%;
+  height: 41.2%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 50;
+  pointer-events: auto;
+}
+.carved-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 14.8%;
+}
+.carved-row.last-row {
+  justify-content: space-evenly;
+  padding: 0 6%;
+  box-sizing: border-box;
+}
+.carved-hit {
+  width: 14.5%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  color: transparent;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease;
+}
+.carved-hit:active {
+  transform: scale(0.92);
+}
+#bifrostGridBtn {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 50% !important;
+}
+#bifrostGridBtn.update-ready {
+  background: transparent !important;
+  box-shadow: none !important;
+  animation: bifrostUpdateGlow 1.8s ease-in-out infinite;
+}
+</style>
+</head>
+<body>
+<style id="fullPageViewStyle">
+#fullScreenPage {
+  display: none !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  background: #140b05 !important;
+  z-index: 9999 !important;
+  flex-direction: column !important;
+  padding: 14px 14px 18px 14px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+#fullScreenPage.active {
+  display: flex !important;
+}
+#fsTopBar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding-bottom: 10px !important;
+  margin-bottom: 10px !important;
+  border-bottom: 1.5px solid #7d562b !important;
+  flex-shrink: 0 !important;
+}
+#fsTitle {
+  color: #f0d3a2 !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  letter-spacing: 0.5px !important;
+}
+#fsHomeBtn {
+  background: rgba(45, 26, 12, 0.96) !important;
+  color: #f0d3a2 !important;
+  border: 1.5px solid #8a5e32 !important;
+  border-radius: 8px !important;
+  padding: 6px 14px !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+}
+#fsBody {
+  flex: 1 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+#fsBody #searchBarDrawer {
+  margin-bottom: 10px !important;
+  flex-shrink: 0 !important;
+}
+#fsBody #futharkCard,
+#fsBody #bindruneCard,
+#fsBody #helpCard,
+#fsBody #listCard,
+#fsBody #detailCard {
+  flex: 1 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+</style>
+<style id="homeVerStyle">
+#homeVersionFooter {
+  position: fixed;
+  left: 10%;
+  right: 10%;
+  top: 93.4%;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(11px, 3.35vw, 14px);
+  font-weight: bold;
+  letter-spacing: 0.4px;
+  color: #e8cfa0;
+  text-shadow: 0 1px 2px #000, 0 2px 4px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+  z-index: 20;
+}
+</style>
+<div id="homeVersionFooter">ver 3.81</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
