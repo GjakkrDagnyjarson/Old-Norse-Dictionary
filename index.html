@@ -1064,8 +1064,11 @@ window.addEventListener('load', () => {
 function openCarvedLetter(letter) {
   setMainView('letter');
   const lc = document.getElementById('listCard');
-  if (lc) lc.style.display = 'block';
   const sb = document.getElementById('searchBox');
+  if (lc) {
+    lc.style.display = 'block';
+    lc.innerHTML = '<div style="color:#e6c088;padding:14px;text-align:center;">Searching for "' + letter + '"…</div>';
+  }
   if (sb) {
     sb.value = letter;
     sb.dispatchEvent(new Event('input'));
@@ -1271,13 +1274,7 @@ function toggleBindRuneChip(r) {
 }
 
 
-function toggleHelpCard() {
-  const hc = document.getElementById('helpCard');
-  if (!hc) return;
-  const open = hc.style.display === 'none';
-  if (typeof closeRuneCards === 'function') closeRuneCards();
-  hc.style.display = open ? 'block' : 'none';
-}
+
 
 function toggleBindrune() {
   const card = document.getElementById('bindruneCard');
