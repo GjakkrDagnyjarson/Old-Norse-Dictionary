@@ -700,11 +700,11 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 
 <style id="carvedAlphaStyle">
 @keyframes bifrostUpdateGlow {
-  0%   { box-shadow: 0 0 10px #ff3b30, 0 0 18px #ff9500; }
-  25%  { box-shadow: 0 0 12px #ffcc00, 0 0 20px #34c759; }
-  50%  { box-shadow: 0 0 12px #00c7be, 0 0 20px #007aff; }
-  75%  { box-shadow: 0 0 12px #af52de, 0 0 20px #ff2d55; }
-  100% { box-shadow: 0 0 10px #ff3b30, 0 0 18px #ff9500; }
+  0%   { filter: drop-shadow(0 0 5px #ff3b30) drop-shadow(0 0 11px #ff9500) brightness(1.2); }
+  25%  { filter: drop-shadow(0 0 6px #ffcc00) drop-shadow(0 0 12px #34c759) brightness(1.25); }
+  50%  { filter: drop-shadow(0 0 6px #00c7be) drop-shadow(0 0 12px #007aff) brightness(1.25); }
+  75%  { filter: drop-shadow(0 0 6px #af52de) drop-shadow(0 0 12px #ff2d55) brightness(1.25); }
+  100% { filter: drop-shadow(0 0 5px #ff3b30) drop-shadow(0 0 11px #ff9500) brightness(1.2); }
 }
 #carvedAlphaOverlay {
   position: fixed;
@@ -746,11 +746,14 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   transform: scale(0.92);
 }
 #bifrostGridBtn {
-  background: transparent;
-  box-shadow: none;
+  background: url('./bifrost_arrow.png?v=1') center/92% 92% no-repeat;
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
 }
 #bifrostGridBtn.update-ready {
-  background: radial-gradient(circle, rgba(255,255,255,0.08) 30%, rgba(255,59,48,0.28) 65%, rgba(0,122,255,0.35) 100%);
+  background: url('./bifrost_arrow.png?v=1') center/92% 92% no-repeat;
+  box-shadow: none !important;
   animation: bifrostUpdateGlow 2.4s linear infinite;
 }
 </style>
