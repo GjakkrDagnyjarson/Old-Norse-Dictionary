@@ -27,23 +27,39 @@ function getGloss(r) {
   rw = String(rw).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   if (!rw) return '(no definition)';
   var parts = rw.split(/[;\n]/);
-  var sg = (parts || '').trim();
+  var sg = (parts[0] || '').trim();
   return sg.length > 95 ? sg.slice(0, 92) + '…' : sg;
 }
 
 function lkON(w) {
   if (typeof db === 'undefined' || !db) return null;
-  var l = w.toLowerCase(), h = [];
+  var l = w.toLowerCase(), h = [], byId = {};
   var s1 = db.prepare("SELECT * FROM lemmas WHERE LOWER(headword) = ? LIMIT 3");
   s1.bind([l]);
-  while (s1.step()) h.push({ l: s1.getAsObject(), f: '' });
+  while (s1.step()) {
+    var r1 = s1.getAsObject();
+    if (!byId[r1.id]) {
+      byId[r1.id] = { l: r1, forms: [] };
+      h.push(byId[r1.id]);
+    }
+  }
   s1.free();
   if (h.length) return h;
-  var s2 = db.prepare("SELECT l.*, wf.case_name, wf.number, wf.definiteness FROM wordforms wf JOIN lemmas l ON wf.lemma_id = l.id WHERE LOWER(wf.form) = ? LIMIT 3");
+
+  var s2 = db.prepare("SELECT l.*, wf.case_name, wf.number, wf.definiteness FROM wordforms wf JOIN lemmas l ON wf.lemma_id = l.id WHERE LOWER(wf.form) = ? LIMIT 12");
   s2.bind([l]);
-  while (s2.step()) { var r = s2.getAsObject(); h.push({ l: r, f: [r.case_name, r.number, r.definiteness].filter(Boolean).join(' ') }); }
+  while (s2.step()) {
+    var r2 = s2.getAsObject();
+    var tag = [r2.case_name, r2.number, r2.definiteness].filter(Boolean).join(' ');
+    if (!byId[r2.id]) {
+      byId[r2.id] = { l: r2, forms: tag ? [tag] : [] };
+      h.push(byId[r2.id]);
+    } else if (tag && byId[r2.id].forms.indexOf(tag) === -1) {
+      byId[r2.id].forms.push(tag);
+    }
+  }
   s2.free();
-  return h.length ? h : null;
+  return h.length ? h.slice(0, 3) : null;
 }
 
 function lkEN(w) {
@@ -54,8 +70,14 @@ function lkEN(w) {
     "ORDER BY CASE WHEN LOWER(COALESCE(zoega_def,'')) LIKE ? THEN 0 WHEN LOWER(COALESCE(wiki_def,'')) LIKE ? THEN 1 WHEN LOWER(COALESCE(zoega_def,'') || ' ' || COALESCE(wiki_def,'')) LIKE ? THEN 2 ELSE 3 END, LENGTH(headword) ASC LIMIT 4";
   var st = db.prepare(sql);
   st.bind(['%' + l + '%', l + '%', l + '%', '% ' + l + '%']);
-  var h = [], rx = new RegExp('\\b' + l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
-  while (st.step()) { var r = st.getAsObject(); if (rx.test(getGloss(r).toLowerCase()) || !h.length) h.push(r); }
+  var h = [], byId = {}, rx = new RegExp('\\b' + l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+  while (st.step()) {
+    var r = st.getAsObject();
+    if (!byId[r.id] && (rx.test(getGloss(r).toLowerCase()) || !h.length)) {
+      byId[r.id] = true;
+      h.push(r);
+    }
+  }
   st.free();
   return h.length ? h : null;
 }
@@ -64,15 +86,22 @@ function setTransDir(d) {
   window._transDir = d;
   var pairs = [['tModeAuto','auto'],['tModeOnEn','on-en'],['tModeEnOn','en-on']];
   for (var idx = 0; idx < pairs.length; idx++) {
-    var e = document.getElementById(pairs[idx]);
+    var e = document.getElementById(pairs[idx][0]);
     if (!e) continue;
-    var a = d === pairs[idx];
+    var a = d === pairs[idx][1];
     e.style.borderColor = a ? '#b88446' : '#4a3319';
     e.style.background = a ? '#3a2210' : '#1c1008';
     e.style.color = a ? '#ffe2b0' : '#a8875a';
   }
   var i = document.getElementById('translateInput');
   if (i) runOnEngTranslate(i.value);
+}
+
+function renderCardHtml(l, fNote) {
+  var m = [l.pos, l.gender, fNote].filter(Boolean).join(' • ');
+  return '<div onclick="if(typeof openEntry===\'function\')openEntry(' + l.id + ')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:8px 10px;cursor:pointer;">' +
+    '<strong style="color:#ffd096;">' + l.headword + '</strong> <span style="color:#a8895c;font-size:11px;">' + m + '</span>' +
+    '<div style="color:#e6c088;font-size:13px;margin-top:2px;">' + getGloss(l) + '</div></div>';
 }
 
 function runOnEngTranslate(t) {
@@ -87,23 +116,23 @@ function runOnEngTranslate(t) {
     var on = dir !== 'en-on' ? lkON(tk) : null;
     var en = (dir !== 'on-en' && (!on || dir === 'en-on' || !hasON)) ? lkEN(tk) : null;
     var preferON = (dir === 'on-en') || (dir === 'auto' && hasON && on);
-    if (preferON && on && on) {
-      gl.push(getGloss(on.l).split(',').trim());
+    if (preferON && on && on[0]) {
+      gl.push(getGloss(on[0].l).split(',')[0].trim());
       if (typeof toYoungerFuthark === 'function') rl.push(toYoungerFuthark(tk));
-      cd.push(on.map(function(x){ var l = x.l, m = [l.pos, l.gender, x.f].filter(Boolean).join(' • '); return '<div onclick="if(typeof openEntry===\'function\')openEntry(' + l.id + ')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:8px 10px;cursor:pointer;"><strong style="color:#ffd096;">' + l.headword + '</strong> <span style="color:#a8895c;font-size:11px;">' + m + '</span><div style="color:#e6c088;font-size:13px;">' + getGloss(l) + '</div></div>'; }).join(''));
-    } else if (en && en) {
-      gl.push(en.headword);
-      if (typeof toYoungerFuthark === 'function') rl.push(toYoungerFuthark(en.headword));
-      cd.push(en.map(function(l){ var m = [l.pos, l.gender].filter(Boolean).join(' • '); return '<div onclick="if(typeof openEntry===\'function\')openEntry(' + l.id + ')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:8px 10px;cursor:pointer;"><strong style="color:#ffd096;">' + l.headword + '</strong> <span style="color:#a8895c;font-size:11px;">' + m + '</span><div style="color:#e6c088;font-size:13px;">' + getGloss(l) + '</div></div>'; }).join(''));
-    } else if (on && on) {
-      gl.push(getGloss(on.l).split(',').trim());
+      cd.push(on.map(function(x){ return renderCardHtml(x.l, x.forms.join(' / ')); }).join(''));
+    } else if (en && en[0]) {
+      gl.push(en[0].headword);
+      if (typeof toYoungerFuthark === 'function') rl.push(toYoungerFuthark(en[0].headword));
+      cd.push(en.map(function(l){ return renderCardHtml(l, ''); }).join(''));
+    } else if (on && on[0]) {
+      gl.push(getGloss(on[0].l).split(',')[0].trim());
       if (typeof toYoungerFuthark === 'function') rl.push(toYoungerFuthark(tk));
-      cd.push(on.map(function(x){ var l = x.l, m = [l.pos, l.gender, x.f].filter(Boolean).join(' • '); return '<div onclick="if(typeof openEntry===\'function\')openEntry(' + l.id + ')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:8px 10px;cursor:pointer;"><strong style="color:#ffd096;">' + l.headword + '</strong> <span style="color:#a8895c;font-size:11px;">' + m + '</span><div style="color:#e6c088;font-size:13px;">' + getGloss(l) + '</div></div>'; }).join(''));
+      cd.push(on.map(function(x){ return renderCardHtml(x.l, x.forms.join(' / ')); }).join(''));
     } else {
       gl.push('[' + tk + ']');
     }
   });
-  sb.innerHTML = '<div style="font-weight:bold;color:#f3d6a8;">' + gl.join(' ') + '</div>' + (rl.length ? '<div style="color:#ffd096;font-size:17px;margin-top:6px;">' + rl.join(' · ') + '</div>' : '');
+  sb.innerHTML = '<div style="font-weight:bold;color:#f3d6a8;">' + gl.join(' · ') + '</div>' + (rl.length ? '<div style="color:#ffd096;font-size:17px;margin-top:6px;">' + rl.join(' · ') + '</div>' : '');
   bb.innerHTML = cd.join('');
 }
 
