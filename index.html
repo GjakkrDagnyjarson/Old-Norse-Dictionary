@@ -726,6 +726,11 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   text-decoration: underline dotted rgba(240, 201, 135, 0.6) !important;
   cursor: pointer !important;
 }
+
+@media (max-width: 768px) {
+  #mainArea { position: relative !important; top: 0 !important; transform: none !important; margin-top: 8px !important; }
+  #alphaGrid { position: relative !important; top: 0 !important; transform: none !important; margin-top: 18px !important; padding-top: 8px !important; }
+}
 </style>
 <style>
 #runeToolsRow { position: relative !important; z-index: 5 !important; margin: 10px auto 14px !important; }
@@ -779,7 +784,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=121"></script>
+  <script src="app.js?v=122"></script>
 <script>
 const YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
