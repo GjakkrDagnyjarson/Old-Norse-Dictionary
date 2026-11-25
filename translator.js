@@ -47,11 +47,12 @@ function ensureTranslateUI() {
 function cleanGlossText(r) {
   var cols = getDefCols(), rw = '';
   for (var i = 0; i < cols.length; i++) {
-    if (r[cols[i]]) { rw = String(r[cols[i]]); break; }
+    var colName = cols.slice(i, i + 1).shift();
+    if (r[colName]) { rw = String(r[colName]); break; }
   }
   rw = rw.replace(/<[^>]+>/g, ' ').replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
   if (!rw) return '';
-  var first = rw.split(/[;,\n]/).trim();
+  var first = rw.split(/[;,\n]/).shift().trim();
   return first.replace(/^(to|a|an|the)\s+/i, '').trim();
 }
 
@@ -80,7 +81,8 @@ function translateEnWord(w) {
   var cols = getDefCols(), l = w.toLowerCase().replace(/[^a-z']/g, '');
   if (!cols.length || !l) return w;
   var concat = cols.map(function(c) { return "COALESCE(" + c + ",'')"; }).join(" || ' ' || ");
-  var firstCol = "COALESCE(" + cols + ",'')";
+  var primaryCol = cols.slice(0, 1).shift();
+  var firstCol = "COALESCE(" + primaryCol + ",'')";
   var sql = "SELECT headword FROM lemmas WHERE LOWER(" + concat + ") LIKE ? ORDER BY CASE WHEN LOWER(" + firstCol + ") LIKE ? THEN 0 WHEN LOWER(" + firstCol + ") LIKE ? THEN 1 ELSE 2 END, LENGTH(headword) ASC LIMIT 1";
   var st = db.prepare(sql);
   st.bind(['%' + l + '%', l + '%', '% ' + l + '%']);
