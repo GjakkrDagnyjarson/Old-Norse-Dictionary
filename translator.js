@@ -1,5 +1,4 @@
 window._transDir = 'auto';
-var _lemmaCols = null;
 
 function ensureTranslateUI() {
   var tc = document.getElementById('translateCard');
@@ -23,27 +22,13 @@ function ensureTranslateUI() {
   return tc;
 }
 
-function getLemmaCols() {
-  if (_lemmaCols) return _lemmaCols;
-  if (typeof db === 'undefined' || !db) return null;
-  var st = db.prepare("PRAGMA table_info(lemmas)"), cols = [];
-  while (st.step()) cols.push(st.getAsObject().name);
-  st.free();
-  _lemmaCols = cols;
-  return cols;
-}
-
 function getGloss(r) {
-  var c = getLemmaCols() || Object.keys(r);
-  var pr = ['gloss','definition','definitions','meaning','meanings','defn','english','text','body','sense','senses'];
-  var rw = '';
-  for (var i = 0; i < pr.length; i++) if (r[pr[i]]) { rw = String(r[pr[i]]); break; }
-  if (!rw) for (var j = 0; j < c.length; j++) if (['id','headword','pos','gender','sort_key','source','sources'].indexOf(c[j]) === -1 && r[c[j]]) { rw = String(r[c[j]]); break; }
-  rw = rw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  var rw = r.zoega_def || r.wiki_def || r.cleasby_def || r.onp_def || '';
+  rw = String(rw).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   if (!rw) return '(no definition)';
   var parts = rw.split(/[;\n]/);
-  var sg = (parts[0] || '').trim();
-  return sg.length > 90 ? sg.slice(0, 87) + '…' : sg;
+  var sg = (parts || '').trim();
+  return sg.length > 95 ? sg.slice(0, 92) + '…' : sg;
 }
 
 function lkON(w) {
@@ -63,12 +48,12 @@ function lkON(w) {
 
 function lkEN(w) {
   if (typeof db === 'undefined' || !db) return null;
-  var c = (getLemmaCols() || []).filter(function(x){ return ['id','headword','pos','gender','sort_key','source','sources'].indexOf(x) === -1; });
-  if (!c.length) return null;
-  var col = c[0], l = w.toLowerCase().replace(/[^a-z']/g, '');
+  var l = w.toLowerCase().replace(/[^a-z']/g, '');
   if (!l) return null;
-  var st = db.prepare("SELECT * FROM lemmas WHERE LOWER(" + col + ") LIKE ? ORDER BY CASE WHEN LOWER(" + col + ") LIKE ? THEN 0 WHEN LOWER(" + col + ") LIKE ? THEN 1 ELSE 2 END, LENGTH(headword) ASC LIMIT 4");
-  st.bind(['%' + l + '%', l + '%', '% ' + l + '%']);
+  var sql = "SELECT * FROM lemmas WHERE LOWER(COALESCE(zoega_def,'') || ' ' || COALESCE(wiki_def,'') || ' ' || COALESCE(cleasby_def,'')) LIKE ? " +
+    "ORDER BY CASE WHEN LOWER(COALESCE(zoega_def,'')) LIKE ? THEN 0 WHEN LOWER(COALESCE(wiki_def,'')) LIKE ? THEN 1 WHEN LOWER(COALESCE(zoega_def,'') || ' ' || COALESCE(wiki_def,'')) LIKE ? THEN 2 ELSE 3 END, LENGTH(headword) ASC LIMIT 4";
+  var st = db.prepare(sql);
+  st.bind(['%' + l + '%', l + '%', l + '%', '% ' + l + '%']);
   var h = [], rx = new RegExp('\\b' + l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
   while (st.step()) { var r = st.getAsObject(); if (rx.test(getGloss(r).toLowerCase()) || !h.length) h.push(r); }
   st.free();
@@ -79,9 +64,9 @@ function setTransDir(d) {
   window._transDir = d;
   var pairs = [['tModeAuto','auto'],['tModeOnEn','on-en'],['tModeEnOn','en-on']];
   for (var idx = 0; idx < pairs.length; idx++) {
-    var e = document.getElementById(pairs[idx][0]);
+    var e = document.getElementById(pairs[idx]);
     if (!e) continue;
-    var a = d === pairs[idx][1];
+    var a = d === pairs[idx];
     e.style.borderColor = a ? '#b88446' : '#4a3319';
     e.style.background = a ? '#3a2210' : '#1c1008';
     e.style.color = a ? '#ffe2b0' : '#a8875a';
@@ -102,16 +87,16 @@ function runOnEngTranslate(t) {
     var on = dir !== 'en-on' ? lkON(tk) : null;
     var en = (dir !== 'on-en' && (!on || dir === 'en-on' || !hasON)) ? lkEN(tk) : null;
     var preferON = (dir === 'on-en') || (dir === 'auto' && hasON && on);
-    if (preferON && on && on[0]) {
-      gl.push(getGloss(on[0].l).split(',')[0].trim());
+    if (preferON && on && on) {
+      gl.push(getGloss(on.l).split(',').trim());
       if (typeof toYoungerFuthark === 'function') rl.push(toYoungerFuthark(tk));
       cd.push(on.map(function(x){ var l = x.l, m = [l.pos, l.gender, x.f].filter(Boolean).join(' • '); return '<div onclick="if(typeof openEntry===\'function\')openEntry(' + l.id + ')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:8px 10px;cursor:pointer;"><strong style="color:#ffd096;">' + l.headword + '</strong> <span style="color:#a8895c;font-size:11px;">' + m + '</span><div style="color:#e6c088;font-size:13px;">' + getGloss(l) + '</div></div>'; }).join(''));
-    } else if (en && en[0]) {
-      gl.push(en[0].headword);
-      if (typeof toYoungerFuthark === 'function') rl.push(toYoungerFuthark(en[0].headword));
+    } else if (en && en) {
+      gl.push(en.headword);
+      if (typeof toYoungerFuthark === 'function') rl.push(toYoungerFuthark(en.headword));
       cd.push(en.map(function(l){ var m = [l.pos, l.gender].filter(Boolean).join(' • '); return '<div onclick="if(typeof openEntry===\'function\')openEntry(' + l.id + ')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:8px 10px;cursor:pointer;"><strong style="color:#ffd096;">' + l.headword + '</strong> <span style="color:#a8895c;font-size:11px;">' + m + '</span><div style="color:#e6c088;font-size:13px;">' + getGloss(l) + '</div></div>'; }).join(''));
-    } else if (on && on[0]) {
-      gl.push(getGloss(on[0].l).split(',')[0].trim());
+    } else if (on && on) {
+      gl.push(getGloss(on.l).split(',').trim());
       if (typeof toYoungerFuthark === 'function') rl.push(toYoungerFuthark(tk));
       cd.push(on.map(function(x){ var l = x.l, m = [l.pos, l.gender, x.f].filter(Boolean).join(' • '); return '<div onclick="if(typeof openEntry===\'function\')openEntry(' + l.id + ')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:8px 10px;cursor:pointer;"><strong style="color:#ffd096;">' + l.headword + '</strong> <span style="color:#a8895c;font-size:11px;">' + m + '</span><div style="color:#e6c088;font-size:13px;">' + getGloss(l) + '</div></div>'; }).join(''));
     } else {
