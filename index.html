@@ -858,7 +858,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 3.99</div>
+<div id="homeVersionFooter">ver 4.00</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1916,7 +1916,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 3.99</div>
+<div id="homeVersionFooter">ver 4.00</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -2661,19 +2661,34 @@ function cleanGlossText(r) {
   var cols = getDefCols(), rw = '';
   for (var i = 0; i < cols.length; i++) {
     var colName = cols.slice(i, i + 1).shift();
-    if (r[colName]) { rw = String(r[colName]); break; }
+    if (r[colName] && !/ONP corpus citations:/i.test(String(r[colName]))) {
+      rw = String(r[colName]);
+      break;
+    }
   }
-  rw = rw.replace(/<[^>]+>/g, ' ').replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!rw) {
+    for (var j = 0; j < cols.length; j++) {
+      var cn = cols.slice(j, j + 1).shift();
+      if (r[cn]) { rw = String(r[cn]); break; }
+    }
+  }
+  rw = rw.replace(/<[^>]+>/g, ' ')
+    .replace(/ONP corpus citations:.*$/i, '')
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/\b(pron|pers|neut|masc|fem|adj|adv|prep|conj|verb|v|m|f|n|pl|sg|nom|acc|dat|gen|indef|def|comp|sup|part|pp|imp|pret|pres|refl|with|from|see)\.\b/gi, ' ')
+    .replace(/\b[IVX]+\)|\b\d+\)/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
   if (!rw) return '';
-  var first = rw.split(/[;,\n]/).shift().trim();
-  return first.replace(/^(to|a|an|the)\s+/i, '').trim();
+  var segs = rw.split(/[;,\n]/).map(function(s) { return s.replace(/^[^a-zA-Z]+|[^a-zA-Z]+$/g, '').trim(); }).filter(Boolean);
+  var best = segs.length ? segs.shift() : '';
+  return best.replace(/^(to|a|an|the)\s+/i, '').trim();
 }
 
-function translateOnWord(w) {
-  if (typeof db === 'undefined' || !db) return w;
+function queryLemmaGloss(l) {
   var cols = getDefCols();
-  if (!cols.length) return w;
-  var sel = cols.join(', '), l = w.toLowerCase();
+  if (!cols.length) return '';
+  var sel = cols.join(', ');
   var s1 = db.prepare("SELECT " + sel + " FROM lemmas WHERE LOWER(headword) = ? LIMIT 1");
   s1.bind([l]);
   var row = s1.step() ? s1.getAsObject() : null;
@@ -2685,8 +2700,32 @@ function translateOnWord(w) {
     row = s2.step() ? s2.getAsObject() : null;
     s2.free();
   }
-  if (!row) return w;
-  return cleanGlossText(row) || w;
+  return row ? cleanGlossText(row) : '';
+}
+
+function translateOnWord(w) {
+  if (typeof db === 'undefined' || !db) return w;
+  var l = w.toLowerCase();
+  var g = queryLemmaGloss(l);
+  if (g) return g;
+  // Strip enclitic negation/reflexive suffixes (-t, -a, -at, -sk, -st)
+  var stems = [l.replace(/t$/, ''), l.replace(/skt$/, 'sk'), l.replace(/st$/, 'sk'), l.replace(/at$/, ''), l.replace(/a$/, '')];
+  for (var i = 0; i < stems.length; i++) {
+    var st = stems.slice(i, i + 1).shift();
+    if (st && st !== l) {
+      g = queryLemmaGloss(st);
+      if (g) return g;
+    }
+  }
+  // Try compound word split (e.g. stórsalar -> stór + salr)
+  if (l.length >= 6) {
+    for (var k = 3; k <= l.length - 3; k++) {
+      var p1 = queryLemmaGloss(l.slice(0, k));
+      var p2 = queryLemmaGloss(l.slice(k));
+      if (p1 && p2) return p1 + ' ' + p2;
+    }
+  }
+  return w;
 }
 
 function translateEnWord(w) {
