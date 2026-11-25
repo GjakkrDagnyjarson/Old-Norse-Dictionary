@@ -243,7 +243,7 @@ $('searchBox').addEventListener('input', e => {
 });
 
 $('homeBtn').onclick = () => { $('searchBox').value = ''; renderHome(); };
-$('cred').onclick = () => { $('modalOverlay').style.display = 'flex'; };
+if ($('cred')) $('cred').onclick = () => { $('modalOverlay').style.display = 'flex'; };
 $('modalClose').onclick = () => { $('modalOverlay').style.display = 'none'; };
 
 window.onerror = (m, u, l) => { const st = $("subStatus"); if (st) { st.style.display = "block"; st.textContent = "JS ERR L" + l + ": " + m; } };
