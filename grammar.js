@@ -1,7 +1,7 @@
 function buildGlossMapFromDb() {
   if ((window._glossMap && window._glossMap.meta) || typeof db === 'undefined' || !db) return;
   try {
-    var stop = {a:1,an:1,the:1,to:1,of:1,in:1,on:1,at:1,by:1,for:1,with:1,from:1,as:1,or:1,and:1,be:1,is:1,are:1,was:1,were:1,it:1,that:1,this:1,m:1,f:1,n:1,v:1,adj:1,adv:1,prep:1,conj:1,pron:1,pl:1,sg:1,nom:1,acc:1,dat:1,gen:1,pp:1,imp:1,pret:1,pres:1};
+    var stop = {a:1,an:1,the:1,to:1,of:1,in:1,on:1,at:1,by:1,for:1,with:1,from:1,as:1,or:1,and:1,be:1,is:1,are:1,was:1,were:1,it:1,that:1,this:1,m:1,f:1,n:1,v:1,adj:1,adv:1,prep:1,conj:1,pron:1,det:1,num:1,part:1,interj:1,verb:1,noun:1,adjective:1,adverb:1,preposition:1,conjunction:1,pronoun:1,determiner:1,numeral:1,particle:1,interjection:1,pl:1,sg:1,nom:1,acc:1,dat:1,gen:1,pp:1,imp:1,pret:1,pres:1,strong:1,weak:1,masculine:1,feminine:1,neuter:1,transitive:1,intransitive:1,reflexive:1,archaic:1,poetic:1,obsolete:1};
     var normOn = {}, normEn = {}, enMeta = {}, prepGov = {};
     var st = db.prepare("SELECT id, headword, pos, gender, zoega_def, cleasby_def, wikt_def, prep_cases FROM lemmas");
     while (st.step()) {
@@ -9,7 +9,11 @@ function buildGlossMapFromDb() {
       if (!r.headword) continue;
       var hw = String(r.headword).normalize('NFC').toLowerCase();
       if (r.prep_cases) prepGov[hw] = String(r.prep_cases).toUpperCase();
-      var raw = [r.wikt_def, r.zoega_def, r.cleasby_def].filter(Boolean).join(' ').replace(/<[^>]*>/g, ' ').replace(/\([^)]*\)/g, ' ');
+      var raw = [r.wikt_def, r.zoega_def, r.cleasby_def].filter(Boolean).join(' ')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\([^)]*\)/g, ' ')
+        .replace(/\[[^\]]*\]/g, ' ')
+        .replace(/\b(?:noun|verb|adjective|adverb|pronoun|determiner|preposition|conjunction|numeral|particle|interjection)\s*:/gi, ' ');
       var words = raw.match(/[a-zA-Z]{2,}/g) || [];
       for (var i = 0; i < words.length; i++) {
         var wl = words.at(i).toLowerCase();
@@ -34,11 +38,22 @@ function buildGlossMapFromDb() {
       }
       wf.free();
     } catch (e2) {}
-    var core = {'ek':'I','mik':'me','mér':'me','mín':'my','minn':'my','þú':'you','þik':'you','þér':'you','þinn':'your','hann':'he','hon':'she','þat':'it','þeir':'they','þá':'then','en':'but','eða':'or','ef':'if','í':'in','á':'on','til':'to','af':'of','frá':'from','með':'with','við':'against','um':'about','eptir':'after','fyrir':'for','er':'is','var':'was','váru':'were','vera':'be','hafa':'have','hafði':'had','eigi':'not','ekki':'not','faðir':'father','móðir':'mother','bróðir':'brother','systir':'sister','sonr':'son','dóttir':'daughter','konungr':'king','hestr':'horse','skip':'ship','maðr':'man','kona':'woman','land':'land','sverð':'sword'};
+    var core = {
+      'ek':'I','mik':'me','mér':'me','mín':'my','minn':'my','mínum':'my','minni':'my','mínar':'my','mitt':'my',
+      'þú':'you','þik':'you','þér':'you','þín':'your','þinn':'your','þínum':'your','þinni':'your','þínar':'your','þitt':'your',
+      'sinn':'his','sínum':'his','sinni':'his','sínar':'his','sitt':'his',
+      'hann':'he','hon':'she','þat':'it','þetta':'this','allt':'all','allr':'all','allir':'all','ǫll':'all',
+      'þeir':'they','þær':'they','þau':'they','þá':'then','en':'but','eða':'or','ef':'if','at':'that','sem':'as',
+      'í':'in','á':'on','til':'to','af':'of','frá':'from','með':'with','við':'against','um':'about','eptir':'after','fyrir':'for',
+      'er':'is','var':'was','váru':'were','vera':'be','hafa':'have','hefir':'has','hafði':'had','eigi':'not','ekki':'not',
+      'hǫggva':'hew','stendr':'stands','standa':'stand','gata':'path','gǫtu':'path',
+      'faðir':'father','móðir':'mother','bróðir':'brother','systir':'sister','sonr':'son','dóttir':'daughter',
+      'konungr':'king','hestr':'horse','skip':'ship','maðr':'man','kona':'woman','land':'land','sverð':'sword'
+    };
     Object.keys(core).forEach(function(k) {
       normOn[k] = core[k];
       var enK = core[k].toLowerCase();
-      normEn[enK] = k;
+      if (!normEn[enK]) normEn[enK] = k;
     });
     window._glossMap = { on: normOn, en: normEn, meta: enMeta, prepGov: prepGov };
   } catch (e) { console.error(e); }
@@ -55,14 +70,10 @@ function resolveOnToken(lw, map) {
   for (var i = 0; i < stems.length; i++) {
     var st = stems.at(i);
     if (!st || st.length < 2) continue;
-    if (gm.on[st]) return gm.on[st];
-    if (gm.on[st + 'r']) return gm.on[st + 'r'];
-    if (gm.on[st + 'a']) return gm.on[st + 'a'];
-    var unUmlaut = st.replace(/ǫ/g, 'a').replace(/ö/g, 'a');
-    if (unUmlaut !== st) {
-      if (gm.on[unUmlaut]) return gm.on[unUmlaut];
-      if (gm.on[unUmlaut + 'r']) return gm.on[unUmlaut + 'r'];
-      if (gm.on[unUmlaut + 'a']) return gm.on[unUmlaut + 'a'];
+    var cands = [st, st + 'r', st + 'a', st.replace(/ǫ/g, 'a').replace(/ö/g, 'a'), st.replace(/ǫ/g, 'a') + 'a', st.replace(/e/g, 'a') + 'a', st.replace(/ø/g, 'o') + 'a', st.replace(/y/g, 'u') + 'a'];
+    for (var j = 0; j < cands.length; j++) {
+      var c = cands.at(j);
+      if (gm.on[c]) return gm.on[c];
     }
   }
   return null;
