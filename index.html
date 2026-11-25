@@ -700,11 +700,14 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 
 <style id="carvedAlphaStyle">
 @keyframes bifrostUpdateGlow {
-  0%   { filter: drop-shadow(0 0 5px #ff3b30) drop-shadow(0 0 11px #ff9500) brightness(1.2); }
-  25%  { filter: drop-shadow(0 0 6px #ffcc00) drop-shadow(0 0 12px #34c759) brightness(1.25); }
-  50%  { filter: drop-shadow(0 0 6px #00c7be) drop-shadow(0 0 12px #007aff) brightness(1.25); }
-  75%  { filter: drop-shadow(0 0 6px #af52de) drop-shadow(0 0 12px #ff2d55) brightness(1.25); }
-  100% { filter: drop-shadow(0 0 5px #ff3b30) drop-shadow(0 0 11px #ff9500) brightness(1.2); }
+  0%, 100% {
+    backdrop-filter: brightness(1.05) saturate(1.1);
+    -webkit-backdrop-filter: brightness(1.05) saturate(1.1);
+  }
+  50% {
+    backdrop-filter: brightness(1.65) saturate(1.85) contrast(1.15);
+    -webkit-backdrop-filter: brightness(1.65) saturate(1.85) contrast(1.15);
+  }
 }
 #carvedAlphaOverlay {
   position: fixed;
@@ -749,12 +752,12 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   background: transparent !important;
   box-shadow: none !important;
   border: none !important;
-  border-radius: 0 !important;
+  border-radius: 50% !important;
 }
 #bifrostGridBtn.update-ready {
-  background: url('./bifrost_arrow.png?v=6') center/100% 100% no-repeat !important;
+  background: transparent !important;
   box-shadow: none !important;
-  animation: bifrostUpdateGlow 2.4s linear infinite;
+  animation: bifrostUpdateGlow 1.8s ease-in-out infinite;
 }
 </style>
 </head>
