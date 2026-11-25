@@ -1065,7 +1065,11 @@ function openCarvedLetter(letter) {
   setMainView('letter');
   const lc = document.getElementById('listCard');
   if (lc) lc.style.display = 'block';
-  if (typeof filterByLetter === 'function') filterByLetter(letter);
+  const sb = document.getElementById('searchBox');
+  if (sb) {
+    sb.value = letter;
+    sb.dispatchEvent(new Event('input'));
+  }
 }
 
 function setMainView(view) {
