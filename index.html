@@ -846,7 +846,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   position: fixed;
   left: 10%;
   right: 10%;
-  top: 89.4%;
+  top: 91.6%;
   text-align: center;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(11px, 3.35vw, 14px);
@@ -858,7 +858,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 3.71</div>
+<div id="homeVersionFooter">ver 3.72</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1403,5 +1403,6 @@ function toggleBindrune() {
 }
 
 </script>
+<script>window.addEventListener("load",function(){if(typeof window.renderList==="function"){const o=window.renderList;window.renderList=function(){const r=o.apply(this,arguments),s=document.getElementById("searchBox"),q=s&&s.value?s.value.trim():"";openFullScreenView("letter",q?"Matches for \""+q+"\"":"Dictionary Entries");return r}};if(typeof window.openEntry==="function"){const o=window.openEntry;window.openEntry=function(){const r=o.apply(this,arguments),d=document.getElementById("detailCard"),w=d?d.querySelector(".det-hw"):null;openFullScreenView("entry",w?w.textContent:"Dictionary Entry");return r}}});</script>
 </body>
 </html>
