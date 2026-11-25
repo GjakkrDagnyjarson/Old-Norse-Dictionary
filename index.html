@@ -765,14 +765,10 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <body>
 <div id="root">
   <div class="title"><span>GJAKKR DAGNÝJARSON'S</span>OLD NORSE DICTIONARY</div>
-  <div class="top-bar">
-    <button id="homeBtn" class="nav-btn" style="display:none">Home</button>
-    <input id="searchBox" type="search" placeholder="Search Old Norse..." autocomplete="off" />
-    
-  </div>
+  <div class="top-bar" style="display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:nowrap;width:100%;box-sizing:border-box;"><button id="searchToggleBtn" class="nav-btn" onclick="toggleSearchBar()" style="flex:1;padding:7px 4px;font-size:12.5px;white-space:nowrap;">Search</button><button id="grammarBtn" class="nav-btn"  style="flex:1;padding:7px 4px;font-size:12.5px;white-space:nowrap;">Grammar</button><button id="youngerFutharkBtn" class="nav-btn" onclick="toggleYoungerFuthark()" style="flex:1;padding:7px 4px;font-size:12.5px;white-space:nowrap;">ᚠᚢᚦ Fuþark</button><button id="bindruneBtn" class="nav-btn" onclick="toggleBindrune()" style="flex:1;padding:7px 4px;font-size:12.5px;white-space:nowrap;">ᛘ Bindrune</button></div>
+<div id="searchBarDrawer" style="display:none;align-items:center;gap:6px;width:100%;margin:6px auto 2px;box-sizing:border-box;"><button id="homeBtn" class="nav-btn" style="display:none">Home</button><input id="searchBox" type="search" placeholder="Search Old Norse..." autocomplete="off" /><button class="nav-btn" onclick="toggleSearchBar(false)" style="padding:6px 10px;font-size:13px;">✕</button></div>
   <div id="subStatus" style="display:none">Loading Old Norse database...</div>
-  <div id="runeToolsRow" style="display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:nowrap;margin:8px auto 12px;padding:0 10px;max-width:460px;width:100%;box-sizing:border-box;"><button id="grammarBtn" class="nav-btn"  style="flex:1;padding:7px 8px;font-size:13px;white-space:nowrap;">Grammar</button><button id="youngerFutharkBtn" class="nav-btn" onclick="toggleYoungerFuthark()" style="flex:1;padding:7px 8px;font-size:13px;white-space:nowrap;">ᚠᚢᚦ Fuþark</button><button id="bindruneBtn" class="nav-btn" onclick="toggleBindrune()" style="flex:1;padding:7px 8px;font-size:13px;white-space:nowrap;">ᛘ Bindrune</button></div>
-<div id="mainArea">
+  <div id="mainArea">
 <div id="futharkCard" class="card-box" style="display:none;margin-top:8px;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
     <strong style="color:#e6c088;font-size:15px;">Younger Futhark (16 Runes)</strong>
@@ -805,12 +801,12 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="listCard" class="card-box" style="display:none"></div>
     <div id="detailCard" class="card-box" style="display:none"></div>
   </div>
-  <div id="cred" class="footer" style="width:100%;margin:16px auto 6px;padding:0 16px;box-sizing:border-box;text-align:center;"><div style="width:100%;white-space:nowrap;font-size:clamp(9px,2.65vw,12px);margin-bottom:10px;">Sources: Cleasby &amp; Vigfússon · Zoëga · ONP · Wiktionary (CC BY-SA 4.0)</div><div style="font-size:12px;">Ver. <span id="appVersion">3.30</span></div></div>
+  <div id="cred" class="footer" style="width:100%;margin:16px auto 6px;padding:0 16px;box-sizing:border-box;text-align:center;"><div style="width:100%;white-space:nowrap;font-size:clamp(9px,2.65vw,12px);margin-bottom:10px;">Sources: Cleasby &amp; Vigfússon · Zoëga · ONP · Wiktionary (CC BY-SA 4.0)</div><div style="font-size:12px;">Ver. <span id="appVersion">3.31</span></div></div>
 </div>
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=130"></script>
+  <script src="app.js?v=131"></script>
 <script>
 const YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
@@ -850,6 +846,14 @@ function renderFutharkTranslit(val) {
   el.textContent = val && val.trim() ? toYoungerFuthark(val) : 'ᚠᚢᚦᚬᚱᚴ ᚼᚾᛁᛅᛋ ᛏᛒMᛚᛦ'.replace(/M/g, '\u16D8');
 }
 
+function toggleSearchBar(force) {
+  const d = document.getElementById('searchBarDrawer');
+  const inp = document.getElementById('searchBox');
+  if (!d) return;
+  const show = typeof force === 'boolean' ? force : d.style.display === 'none';
+  d.style.display = show ? 'flex' : 'none';
+  if (show && inp) setTimeout(() => inp.focus(), 40);
+}
 function setMainView(view) {
   const ag = document.getElementById('alphaGrid');
   const lc = document.getElementById('listCard');
