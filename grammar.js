@@ -86,3 +86,30 @@ function translateEnToOnGrammar(line, map) {
   }
   return out.map(function(x) { return (x.c && x.t ? x.t.charAt(0).toUpperCase() + x.t.slice(1) : x.t) + (x.p || ''); }).join(' ');
 }
+
+function resolveOnToken(lw, map) {
+  if (!lw || !map || !map.on) return null;
+  var w = String(lw).normalize('NFC').toLowerCase();
+  if (map.on[w]) return map.on[w];
+  var strip = w.replace(/(inn|in|it|num|nar|nna|sk|st)$/, '');
+  if (strip && map.on[strip]) return map.on[strip];
+  var stems = [
+    w.replace(/(um|ar|ir|ur|an|na)$/, ''),
+    w.replace(/(r|s|i|u|a)$/, ''),
+    strip.replace(/(um|ar|ir|ur|r|s|i|u|a)$/, '')
+  ];
+  for (var i = 0; i < stems.length; i++) {
+    var st = stems.at(i);
+    if (!st || st.length < 2) continue;
+    if (map.on[st]) return map.on[st];
+    if (map.on[st + 'r']) return map.on[st + 'r'];
+    if (map.on[st + 'a']) return map.on[st + 'a'];
+    var unUmlaut = st.replace(/ǫ/g, 'a').replace(/ö/g, 'a');
+    if (unUmlaut !== st) {
+      if (map.on[unUmlaut]) return map.on[unUmlaut];
+      if (map.on[unUmlaut + 'r']) return map.on[unUmlaut + 'r'];
+      if (map.on[unUmlaut + 'a']) return map.on[unUmlaut + 'a'];
+    }
+  }
+  return null;
+}
