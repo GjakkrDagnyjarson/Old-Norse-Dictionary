@@ -681,7 +681,14 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <body>
 <div id="root">
   <div class="title"><span>GJAKKR DAGNÝJARSON'S</span>OLD NORSE DICTIONARY</div>
-  <div class="top-bar" style="display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:nowrap;width:100%;box-sizing:border-box;"><button id="searchToggleBtn" class="nav-btn" onclick="toggleSearchBar()" style="flex:1;padding:7px 4px;font-size:12.5px;white-space:nowrap;">Search</button><button id="grammarBtn" class="nav-btn"  style="flex:1;padding:7px 4px;font-size:12.5px;white-space:nowrap;">Grammar</button><button id="youngerFutharkBtn" class="nav-btn" onclick="toggleYoungerFuthark()" style="flex:1;padding:7px 4px;font-size:12.5px;white-space:nowrap;">ᚠᚢᚦ Fuþark</button><button id="bindruneBtn" class="nav-btn" onclick="toggleBindrune()" style="flex:1;padding:7px 4px;font-size:12.5px;white-space:nowrap;">ᛘ Bindrune</button></div>
+  <div class="top-bar" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;box-sizing:border-box;">
+  <button id="topHomeBtn" class="nav-btn" onclick="if(typeof closeRuneCards==='function')closeRuneCards();if(typeof renderHome==='function')renderHome();" style="width:100%;padding:7px 4px;font-size:12.5px;white-space:nowrap;">Home</button>
+  <button id="searchToggleBtn" class="nav-btn" onclick="toggleSearchBar()" style="width:100%;padding:7px 4px;font-size:12.5px;white-space:nowrap;">Search</button>
+  <button id="grammarBtn" class="nav-btn" style="width:100%;padding:7px 4px;font-size:12.5px;white-space:nowrap;">Grammar</button>
+  <button id="youngerFutharkBtn" class="nav-btn" onclick="toggleYoungerFuthark()" style="width:100%;padding:7px 4px;font-size:12.5px;white-space:nowrap;">ᚠ Fuþark</button>
+  <button id="bindruneBtn" class="nav-btn" onclick="toggleBindrune()" style="width:100%;padding:7px 4px;font-size:12.5px;white-space:nowrap;">ᛉ Bindrunes</button>
+  <button id="helpBtn" class="nav-btn" onclick="toggleHelpCard()" style="width:100%;padding:7px 4px;font-size:12.5px;white-space:nowrap;">Help</button>
+</div>
 <div id="searchBarDrawer" style="display:none;align-items:center;gap:6px;width:100%;margin:6px auto 2px;box-sizing:border-box;"><button id="homeBtn" class="nav-btn" style="display:none">Home</button><input id="searchBox" type="search" placeholder="Search Old Norse..." autocomplete="off" /><button class="nav-btn" onclick="toggleSearchBar(false)" style="padding:6px 10px;font-size:13px;">✕</button></div>
   <div id="subStatus" style="display:none">Loading Old Norse database...</div>
   <div id="mainArea">
@@ -707,6 +714,19 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;border-radius:8px;background:#160d06;border:1px solid #4a3319;">
     <svg id="bindruneSvg" viewBox="0 0 320 110" style="width:100%;max-width:340px;height:110px;overflow:visible;"></svg>
     <div id="bindruneCaption" style="margin-top:6px;color:#b8925a;font-size:12px;letter-spacing:1px;"></div>
+  </div>
+</div>
+
+<div id="helpCard" class="card-box" style="display:none;margin-top:8px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <strong style="color:#e6c088;font-size:15px;">Guide &amp; Help</strong>
+    <button onclick="document.getElementById('helpCard').style.display='none'" style="background:transparent;border:1px solid #6e4e26;color:#d6b17a;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button>
+  </div>
+  <div style="font-size:13px;line-height:1.55;color:#f3dcb8;">
+    <p style="margin:0 0 8px;"><strong>Search:</strong> Look up Old Norse headwords or English meanings. Standard ASCII spellings (like <code>th</code>, <code>dh</code>, <code>ae</code>, <code>oe</code>, <code>o</code>) automatically match Old Norse characters (<code>þ</code>, <code>ð</code>, <code>æ</code>, <code>œ</code>, <code>ǫ</code>).</p>
+    <p style="margin:0 0 8px;"><strong>Grammar:</strong> Paste or type an Old Norse sentence to analyze word forms, parts of speech, cases, and dictionary roots.</p>
+    <p style="margin:0 0 8px;"><strong>ᚠ Fuþark:</strong> Transliterate Old Norse or Latin text into Younger Futhark (16-rune Viking Age alphabet).</p>
+    <p style="margin:0;"><strong>ᛉ Bindrunes:</strong> Forge historically styled horizontal stave-sharing bindrunes from Old Norse words or individual runes.</p>
   </div>
 </div>
 <div id="listCard" class="card-box" style="display:none"></div>
@@ -901,6 +921,15 @@ function toggleBindRuneChip(r) {
   const inp = document.getElementById('bindruneInput');
   if (inp) inp.value = activeBindRunes.join('');
   drawBindrune(activeBindRunes);
+}
+
+
+function toggleHelpCard() {
+  const hc = document.getElementById('helpCard');
+  if (!hc) return;
+  const open = hc.style.display === 'none';
+  if (typeof closeRuneCards === 'function') closeRuneCards();
+  hc.style.display = open ? 'block' : 'none';
 }
 
 function toggleBindrune() {
