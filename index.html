@@ -858,7 +858,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.03</div>
+<div id="homeVersionFooter">ver 4.07</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1916,7 +1916,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.03</div>
+<div id="homeVersionFooter">ver 4.07</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -2670,6 +2670,136 @@ function copyVerticalTrans() {
   if (btn) { btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1200); }
 }
 
+
+var ON_POSS = {'minn':'my','mín':'my','mitt':'my','mínum':'my','mínir':'my','mínar':'my','mína':'my','míns':'my','minnar':'my','þinn':'your','þín':'your','þitt':'your','þínum':'your','sinn':'his','sín':'his','sitt':'his','sínum':'his','várr':'our','vár':'our','várt':'our','várum':'our'};
+var ON_DEM = {'þessi':'this','þetta':'this','þessir':'these','þessar':'these','þessu':'this','þessum':'these','sá':'that','sú':'that','þat':'that','þeir':'those','þær':'those','þau':'those'};
+var EN_POSS_TO_ON = {'my':'minn','your':'þinn','thy':'þinn','his':'sinn','her':'hennar','our':'várr','their':'þeirra'};
+var ON_PAST_VERBS = {'sagði':'said','sögðu':'said','mælti':'spoke','mæltu':'spoke','skreið':'crept','skriðu':'crept','var':'was','váru':'were','hafði':'had','höfðu':'had','fór':'went','fóru':'went','kom':'came','kómu':'came','sá':'saw','sáu':'saw','tók':'took','tóku':'took','gaf':'gave','gáfu':'gave','féll':'fell','féllu':'fell','dó':'died','dóu':'died','reið':'rode','riðu':'rode','bar':'bore','báru':'bore','drakk':'drank','drukku':'drank','fann':'found','fundu':'found','gekk':'walked','gengu':'walked','hét':'was called','hétu':'were called','leit':'looked','litu':'looked','nam':'took','námu':'took','stóð':'stood','stóðu':'stood','varð':'became','urðu':'became','vissi':'knew','vissu':'knew','þótti':'seemed','þóttu':'seemed','mátti':'might','skyldi':'should','vildi':'would'};
+var ON_SUBJ_MODALS = {'megi':'may','má':'may','skal':'shall','skulu':'shall','skalt':'shall','vil':'will','vili':'will','vilja':'will'};
+var ON_DAT_PRON = {'mér':'to me','þér':'to you','honum':'to him','henni':'to her','oss':'to us','yðr':'to you','þeim':'to them'};
+var ON_NOM_PRON = {'ek':'I','þú':'you','hann':'he','hon':'she','þat':'it','vér':'we','þér':'you','þeir':'they','þær':'they','þau':'they'};
+var ON_ACC_PRON = {'mik':'me','þik':'you','hann':'him','hana':'her','þat':'it','oss':'us','yðr':'you','þá':'them','þær':'them','þau':'them'};
+var ON_PREPS = {'í':1,'á':1,'til':1,'af':1,'frá':1,'með':1,'við':1,'um':1,'eptir':1,'fyrir':1,'undir':1,'yfir':1,'hjá':1,'ór':1,'úr':1,'at':1};
+var ON_V2_ADV = {'þá':'then','nú':'now','hér':'here','þar':'there','svá':'so','eigi':'not','aldri':'never','opt':'often'};
+
+function pluralizeEnWord(w) {
+  if (!w || /s$/.test(w)) return w;
+  if (/(sh|ch|x|z)$/.test(w)) return w + 'es';
+  if (/[^aeiou]y$/.test(w)) return w.slice(0, -1) + 'ies';
+  if (/fe$/.test(w)) return w.slice(0, -2) + 'ves';
+  if (/f$/.test(w)) return w.slice(0, -1) + 'ves';
+  return w + 's';
+}
+
+function getWordGrammar(lw) {
+  if (typeof db === 'undefined' || !db) return null;
+  try {
+    var st = db.prepare("SELECT l.pos, l.gender, wf.case_name, wf.number, wf.definiteness FROM wordforms wf JOIN lemmas l ON wf.lemma_id = l.id WHERE LOWER(wf.form) = ? LIMIT 1");
+    st.bind([lw]);
+    var r = st.step() ? st.getAsObject() : null;
+    st.free();
+    return r;
+  } catch (e) { return null; }
+}
+
+function analyzeOnToken(orig, map, prevIsPrep, afterVerb) {
+  var lw = orig.toLowerCase();
+  var g = getWordGrammar(lw);
+  var pos = g && g.pos ? g.pos.toLowerCase() : '';
+  var cas = g && g.case_name ? g.case_name.toUpperCase() : '';
+  var num = g && g.number ? g.number.toUpperCase() : '';
+  var def = g && g.definiteness ? g.definiteness.toUpperCase() : '';
+
+  if (ON_POSS[lw]) return { lw: lw, text: ON_POSS[lw], role: 'poss', pos: 'pron', cas: cas };
+  if (ON_PAST_VERBS[lw]) return { lw: lw, text: ON_PAST_VERBS[lw], role: 'verb', pos: 'verb', cas: '' };
+  if (ON_SUBJ_MODALS[lw]) return { lw: lw, text: ON_SUBJ_MODALS[lw], role: 'verb', pos: 'verb', cas: '' };
+  if (ON_NOM_PRON[lw]) return { lw: lw, text: ON_NOM_PRON[lw], role: 'subj', pos: 'pron', cas: 'NOM' };
+  if (ON_DAT_PRON[lw]) return { lw: lw, text: prevIsPrep ? ON_DAT_PRON[lw].replace(/^to /, '') : ON_DAT_PRON[lw], role: 'obj', pos: 'pron', cas: 'DAT' };
+  if (ON_ACC_PRON[lw]) return { lw: lw, text: ON_ACC_PRON[lw], role: 'obj', pos: 'pron', cas: 'ACC' };
+
+  var base = resolveOnToken(lw, map) || orig;
+  if (!g && /(ði|ti|ðu|tu)$/.test(lw) && lw.length > 4) {
+    var vStem = lw.replace(/(ði|ti|ðu|tu)$/, '');
+    var vBase = resolveOnToken(vStem + 'a', map) || resolveOnToken(vStem, map);
+    if (vBase) {
+      base = /e$/.test(vBase) ? vBase + 'd' : vBase + 'ed';
+      pos = 'verb';
+    }
+  }
+
+  if (pos.indexOf('noun') !== -1 || (!pos && (cas || def || num))) {
+    if (num === 'PL') base = pluralizeEnWord(base);
+    if (def === 'DEF') base = 'the ' + base;
+    if (cas === 'GEN') {
+      base = /s$/.test(base) ? base + "'" : base + "'s";
+    } else if (cas === 'DAT' && !prevIsPrep && afterVerb) {
+      base = 'to ' + base;
+    }
+  }
+  return { lw: lw, text: base, role: pos.indexOf('verb') !== -1 ? 'verb' : (cas === 'NOM' ? 'subj' : 'other'), pos: pos, cas: cas };
+}
+
+function translateLineOrdered(line, isOnEn, map) {
+  var parts = line.split(/([\p{L}\p{M}']+)/u);
+  var wordIdx = [];
+  for (var i = 0; i < parts.length; i++) {
+    if (/^[\p{L}\p{M}']+$/u.test(parts[i])) wordIdx.push(i);
+  }
+  var outWords = [];
+  var sawVerb = false;
+  for (var wi = 0; wi < wordIdx.length; wi++) {
+    var orig = parts[wordIdx[wi]].normalize('NFC');
+    var lw = orig.toLowerCase();
+    var prevLw = wi > 0 ? parts[wordIdx[wi - 1]].normalize('NFC').toLowerCase() : '';
+    var prevIsPrep = !!ON_PREPS[prevLw];
+    var isCap = orig.charAt(0) === orig.charAt(0).toUpperCase() && orig.charAt(0) !== orig.charAt(0).toLowerCase();
+    if (isOnEn) {
+      var tokObj = analyzeOnToken(orig, map, prevIsPrep, sawVerb);
+      if (tokObj.role === 'verb') sawVerb = true;
+      tokObj.isCap = isCap;
+      outWords.push(tokObj);
+    } else {
+      var res = EN_POSS_TO_ON[lw] || resolveEnToken(lw, map) || orig;
+      outWords.push({ lw: lw, text: res, role: EN_POSS_TO_ON[lw] ? 'poss' : 'other', isCap: isCap });
+    }
+  }
+
+  for (var j = 0; j < outWords.length - 1; j++) {
+    var cur = outWords[j], nxt = outWords[j + 1];
+    if (isOnEn && (nxt.role === 'poss' || ON_DEM[nxt.lw]) && cur.role !== 'verb' && cur.role !== 'poss') {
+      var mPoss = ON_DEM[nxt.lw] || nxt.text;
+      var mNoun = cur.text.replace(/^the /, '');
+      if (cur.isCap) mPoss = mPoss.charAt(0).toUpperCase() + mPoss.slice(1);
+      outWords[j] = { text: mPoss, isCap: false, role: 'poss' };
+      outWords[j + 1] = { text: mNoun.toLowerCase(), isCap: false, role: 'noun' };
+      j++;
+    } else if (!isOnEn && cur.role === 'poss' && nxt.role !== 'poss') {
+      var mOnNoun = nxt.text;
+      var mOnPoss = cur.text.toLowerCase();
+      if (cur.isCap) mOnNoun = mOnNoun.charAt(0).toUpperCase() + mOnNoun.slice(1);
+      outWords[j] = { text: mOnNoun, isCap: false };
+      outWords[j + 1] = { text: mOnPoss, isCap: false };
+      j++;
+    }
+  }
+
+  if (isOnEn && outWords.length >= 3 && ON_V2_ADV[outWords[0].lw]) {
+    var w1 = outWords[1], w2 = outWords[2];
+    if (w1.role === 'verb' && (w2.role === 'subj' || w2.cas === 'NOM')) {
+      outWords[1] = w2;
+      outWords[2] = w1;
+    }
+  }
+
+  for (var m = 0; m < wordIdx.length; m++) {
+    var item = outWords[m];
+    var finalTxt = item.text;
+    if (item.isCap && finalTxt) finalTxt = finalTxt.charAt(0).toUpperCase() + finalTxt.slice(1);
+    parts[wordIdx[m]] = finalTxt;
+  }
+  return parts.join('');
+}
+
 function runVerticalTranslate(raw) {
   var out = document.getElementById('translateOutputBox'), st = document.getElementById('subStatus');
   if (st) { st.textContent = ''; st.style.display = 'none'; }
@@ -2685,28 +2815,7 @@ function runVerticalTranslate(raw) {
   }
   out.style.color = '#ffd096';
   var map = (window._transDir === 'on-en') ? window._glossMap.on : window._glossMap.en;
-  var lines = txt.split('\n').map(function(line) {
-    return line.replace(/[A-Za-záéíóúýæœøǫþðʀÁÉÍÓÚÝÆŒØǪÞÐƦ']+/g, function(tok) {
-      var lw = tok.toLowerCase(), res = map[lw];
-      if (!res && window._transDir === 'on-en') {
-        var stems = [lw.replace(/t$/, ''), lw.replace(/skt$/, 'sk'), lw.replace(/st$/, 'sk'), lw.replace(/að$/, 'a'), lw.replace(/r$/, '')];
-        for (var si = 0; si < stems.length; si++) {
-          var stw = stems.slice(si, si + 1).shift();
-          if (stw && map[stw]) { res = map[stw]; break; }
-        }
-        if (!res && lw.length >= 6) {
-          for (var k = 3; k <= lw.length - 3; k++) {
-            var p1 = map[lw.slice(0, k)], p2 = map[lw.slice(k)];
-            if (p1 && p2) { res = p1 + '-' + p2; break; }
-          }
-        }
-      }
-      res = res || tok;
-      if (tok && tok.charAt(0) === tok.charAt(0).toUpperCase() && tok.charAt(0) !== tok.charAt(0).toLowerCase() && res) {
-        res = res.charAt(0).toUpperCase() + res.slice(1);
-      }
-      return res;
-    });
+  var lines = txt.split('\n').map(function(line) { return translateLineOrdered(line, isOnEn, map); });
   });
   out.textContent = lines.join('\n');
 }
