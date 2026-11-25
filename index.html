@@ -712,12 +712,12 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="listCard" class="card-box" style="display:none"></div>
     <div id="detailCard" class="card-box" style="display:none"></div>
   </div>
-  <div id="cred" class="footer" style="width:100%;margin:16px auto 6px;padding:0 16px;box-sizing:border-box;text-align:center;"><div style="width:100%;white-space:nowrap;font-size:clamp(9px,2.65vw,12px);margin-bottom:10px;">Sources: Cleasby &amp; Vigfússon · Zoëga · ONP · Wiktionary (CC BY-SA 4.0)</div><div style="font-size:12px;">Ver. <span id="appVersion">3.38</span></div></div>
+  <div id="cred" class="footer" style="width:100%;margin:16px auto 6px;padding:0 16px;box-sizing:border-box;text-align:center;"><div style="width:100%;white-space:nowrap;font-size:clamp(9px,2.65vw,12px);margin-bottom:10px;">Sources: Cleasby &amp; Vigfússon · Zoëga · ONP · Wiktionary (CC BY-SA 4.0)</div><div style="font-size:12px;">Ver. <span id="appVersion">3.39</span></div></div>
 </div>
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=138"></script>
+  <script src="app.js?v=139"></script>
 <script>
 const YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
@@ -766,7 +766,6 @@ function toggleSearchBar(force) {
   if (show && inp) setTimeout(() => inp.focus(), 40);
 }
 function setMainView(view) {
-  const ag = document.getElementById('alphaGrid');
   const lc = document.getElementById('listCard');
   const dc = document.getElementById('detailCard');
   const fc = document.getElementById('futharkCard');
@@ -776,18 +775,15 @@ function setMainView(view) {
   if (fc) fc.style.setProperty('display', view === 'futhark' ? 'block' : 'none', 'important');
   if (bc) bc.style.setProperty('display', view === 'bindrune' ? 'block' : 'none', 'important');
   if (view === 'futhark' || view === 'bindrune') {
-    if (ag) ag.style.setProperty('display', 'none', 'important');
     if (lc) lc.style.setProperty('display', 'none', 'important');
     if (dc) dc.style.setProperty('display', 'none', 'important');
     if (hb) hb.style.setProperty('display', 'inline-block', 'important');
   } else if (view === 'home') {
-    if (ag) ag.style.removeProperty('display');
     if (lc) lc.style.setProperty('display', 'none', 'important');
     if (dc) dc.style.setProperty('display', 'none', 'important');
     if (hb) hb.style.setProperty('display', 'none', 'important');
     if (sb) sb.value = '';
   } else if (view === 'grammar') {
-    if (ag) ag.style.setProperty('display', 'none', 'important');
     if (hb) hb.style.setProperty('display', 'inline-block', 'important');
   }
 }

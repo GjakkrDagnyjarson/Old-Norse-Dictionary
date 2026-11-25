@@ -24,32 +24,13 @@ function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function renderAlphaGrid() {
-  const grid = document.getElementById('alphaGrid');
-  if (!grid) return;
+function renderHome() {
   if ($('listCard')) $('listCard').style.display = 'none';
   if ($('detailCard')) $('detailCard').style.display = 'none';
   if ($('homeBtn')) $('homeBtn').style.display = 'none';
   if ($('subStatus')) { $('subStatus').style.display = 'none'; $('subStatus').textContent = ''; }
   if ($('root')) $('root').classList.remove('open');
-  grid.style.display = 'block';
-  const pts = [{"k": "UPD", "x": 18.21, "y": 28.37}, {"k": "a", "x": 31.37, "y": 28.37}, {"k": "á", "x": 43.77, "y": 28.37}, {"k": "b", "x": 56.4, "y": 28.37}, {"k": "d", "x": 69.62, "y": 28.37}, {"k": "ð", "x": 82.78, "y": 28.37}, {"k": "e", "x": 17.63, "y": 36.14}, {"k": "é", "x": 31.02, "y": 36.14}, {"k": "f", "x": 43.3, "y": 36.14}, {"k": "g", "x": 56.82, "y": 36.14}, {"k": "h", "x": 69.8, "y": 36.14}, {"k": "i", "x": 82.73, "y": 36.14}, {"k": "í", "x": 17.45, "y": 44.07}, {"k": "j", "x": 30.02, "y": 44.07}, {"k": "k", "x": 44.3, "y": 44.07}, {"k": "l", "x": 56.64, "y": 44.07}, {"k": "m", "x": 69.1, "y": 44.07}, {"k": "n", "x": 80.67, "y": 44.07}, {"k": "o", "x": 17.51, "y": 51.25}, {"k": "ó", "x": 30.49, "y": 51.25}, {"k": "p", "x": 43.36, "y": 51.25}, {"k": "r", "x": 57.23, "y": 51.25}, {"k": "s", "x": 69.92, "y": 51.25}, {"k": "t", "x": 82.84, "y": 51.25}, {"k": "u", "x": 18.04, "y": 58.8}, {"k": "ú", "x": 31.14, "y": 58.8}, {"k": "v", "x": 44.01, "y": 58.8}, {"k": "y", "x": 57.23, "y": 58.8}, {"k": "ý", "x": 70.39, "y": 58.8}, {"k": "þ", "x": 83.14, "y": 58.8}, {"k": "æ", "x": 24.85, "y": 65.67}, {"k": "ø", "x": 42.6, "y": 65.67}, {"k": "ǫ", "x": 58.58, "y": 65.67}, {"k": "œ", "x": 75.91, "y": 65.67}];
-  grid.innerHTML = pts.map(p => {
-    if (p.k === 'UPD') {
-      const cls = window.__updReady ? 'upd-ready' : 'upd-ok';
-      return '<button id="updateBtn" type="button" class="alpha-btn ' + cls + '" data-action="upd" style="left:' + p.x + '%;top:' + p.y + '%;" aria-label="Update"></button>';
-    }
-    return '<button type="button" class="alpha-btn" data-letter="' + p.k + '" style="left:' + p.x + '%;top:' + p.y + '%;" aria-label="' + p.k + '"></button>';
-  }).join('');
-  grid.onclick = function(e) {
-    const btn = e.target.closest('.alpha-btn');
-    if (!btn) return;
-    if (btn.dataset.action === 'upd') {
-      if (typeof handleUpdateClick === 'function') handleUpdateClick();
-      return;
-    }
-    if (btn.dataset.letter) filterByLetter(btn.dataset.letter);
-  };
+  if (typeof setMainView === 'function') setMainView('home');
 }
 
 function filterByLetter(letter) {
@@ -83,7 +64,6 @@ function appendMoreRows() {
 function renderList(rows) {
   CURRENT_ROWS = rows;
   RENDERED_COUNT = 0;
-  $('alphaGrid').style.display = 'none';
   $('detailCard').style.display = 'none';
   $('homeBtn').style.display = 'inline-block';
   $('root').classList.add('open');
@@ -175,8 +155,6 @@ function openEntry(id, matchedForm = '') {
   const r = stmt.step() ? stmt.getAsObject() : null;
   stmt.free();
   if (!r) return;
-
-  $('alphaGrid').style.display = 'none';
   $('listCard').style.display = 'none';
   $('homeBtn').style.display = 'inline-block';
   $('root').classList.add('open'); $('detailCard').style.display = 'block';
@@ -187,7 +165,7 @@ function openEntry(id, matchedForm = '') {
   $('detailCard').innerHTML = `
     <div class="det-top">
       <div><span class="det-hw">${esc(r.headword)}${meta ? `<span class="det-pos">${esc(meta)}` : ''}</div>
-      <button class="back-pill" onclick="RETURN_TO_GRAMMAR ? openGrammarTool() : renderAlphaGrid()">←</button>
+      <button class="back-pill" onclick="RETURN_TO_GRAMMAR ? openGrammarTool() : renderHome()">←</button>
     </div>
     <div class="det-yf">Younger Futhark: ${toYoungerFuthark(r.headword)}</div>
     ${matchedForm ? `<div class="match-badge">Matched inflected form: ${esc(matchedForm)}</div>` : ''}
@@ -201,7 +179,7 @@ function openEntry(id, matchedForm = '') {
 
 $('searchBox').addEventListener('input', e => {
   const q = e.target.value.trim().toLowerCase();
-  if (!q) return renderAlphaGrid();
+  if (!q) return renderHome();
   if (!db) return showToast("Loading dictionary database...");
 
   const seen = new Set();
@@ -264,7 +242,7 @@ $('searchBox').addEventListener('input', e => {
   renderList(results);
 });
 
-$('homeBtn').onclick = () => { $('searchBox').value = ''; renderAlphaGrid(); };
+$('homeBtn').onclick = () => { $('searchBox').value = ''; renderHome(); };
 $('cred').onclick = () => { $('modalOverlay').style.display = 'flex'; };
 $('modalClose').onclick = () => { $('modalOverlay').style.display = 'none'; };
 
@@ -284,7 +262,7 @@ window.onerror = (m, u, l) => { const st = $("subStatus"); if (st) { st.style.di
     }
     db = new SQL.Database(new Uint8Array(buf));
     st.style.display = 'none'; st.textContent = '';
-    renderAlphaGrid();
+    renderHome();
   } catch (err) {
     $('subStatus').style.display = 'block'; $('subStatus').textContent = 'Error loading database: ' + err.message;
   }
@@ -1354,7 +1332,7 @@ function getCraftedWords() {
 function deleteCraftedWord(word) {
   const list = getCraftedWords().filter(x => x.headword !== word);
   localStorage.setItem('on_crafted_words', JSON.stringify(list));
-  renderAlphaGrid();
+  renderHome();
 }
 function saveCraftedCompound(word, roots, pos, gender, autoGloss) {
   const clean = (word || '').toLowerCase().replace(/^[^a-záéíóúýæøǫœþð]+|[^a-záéíóúýæøǫœþð]+$/gi, '');
@@ -1378,7 +1356,6 @@ function saveCraftedCompound(word, roots, pos, gender, autoGloss) {
 function openCraftedEntry(word) {
   const item = getCraftedWords().find(x => x.headword === word || (x.forms || []).some(f => f.form === word));
   if (!item) return;
-  $('alphaGrid').style.display = 'none';
   $('listCard').style.display = 'none';
   $('homeBtn').style.display = 'inline-block';
   $('subStatus').style.display = 'block';
@@ -1390,12 +1367,11 @@ function openCraftedEntry(word) {
     `<tr><td style="padding:4px 8px;color:#E8C988">${esc(f.form)}</td><td style="padding:4px 8px;opacity:.85">${esc([f.case_name, f.number, f.definiteness].filter(Boolean).join(' · '))}</td></tr>`
   ).join('');
   const tableHTML = rows ? `<div class="dict-sec"><h4>Inflected Variants (${item.forms.length} forms)</h4><table style="width:100%;border-collapse:collapse;font-size:13px">${rows}</table></div>` : '';
-  $('detailCard').innerHTML = `<div class="det-top"><div><div class="det-word">${esc(item.headword)}</div><div class="det-meta">${esc([item.pos, item.gender].filter(Boolean).join(' · '))} · <span style="color:#E8C988">Crafted Coinage</span></div></div><button class="back-btn" onclick="renderAlphaGrid()">← Back</button></div><div class="dict-sec"><h4>Crafted Coinage (${esc(item.roots)})</h4><p>${esc(item.zoega_def)}</p></div>${tableHTML}<button onclick="deleteCraftedWord('${esc(item.headword)}')" style="margin-top:10px;padding:6px 12px;font-size:12px;background:#3a1815;color:#ff8a75;border:1px solid #7a352c;border-radius:6px;cursor:pointer">Delete Crafted Word</button>`;
+  $('detailCard').innerHTML = `<div class="det-top"><div><div class="det-word">${esc(item.headword)}</div><div class="det-meta">${esc([item.pos, item.gender].filter(Boolean).join(' · '))} · <span style="color:#E8C988">Crafted Coinage</span></div></div><button class="back-btn" onclick="renderHome()">← Back</button></div><div class="dict-sec"><h4>Crafted Coinage (${esc(item.roots)})</h4><p>${esc(item.zoega_def)}</p></div>${tableHTML}<button onclick="deleteCraftedWord('${esc(item.headword)}')" style="margin-top:10px;padding:6px 12px;font-size:12px;background:#3a1815;color:#ff8a75;border:1px solid #7a352c;border-radius:6px;cursor:pointer">Delete Crafted Word</button>`;
 }
 
 function openGrammarTool() {
   RETURN_TO_GRAMMAR = false;
-  $('alphaGrid').style.display = 'none';
   $('listCard').style.display = 'none';
   $('homeBtn').style.display = 'inline-block';
   $('subStatus').style.display = 'block';
@@ -1406,7 +1382,7 @@ function openGrammarTool() {
   $('detailCard').innerHTML = `
     <div class="det-top">
       <span class="det-hw" style="font-size:18px">Grammar &amp; Syntax Analyzer
-      <button class="back-pill" onclick="renderAlphaGrid()">←</button>
+      <button class="back-pill" onclick="renderHome()">←</button>
     </div>
     <textarea id="gramInput" class="gram-area" placeholder="Enter Old Norse text (e.g. Ek held hinu fornu blóði)...">${esc(LAST_GRAMMAR_TEXT)}</textarea>
     <button class="gram-run" onclick="runGrammarAnalysis()">Analyze Sentence</button>
