@@ -909,71 +909,126 @@ function enableBifrostGlow() {
   const b = document.getElementById('bifrostGridBtn');
   if (b) b.classList.add('update-ready');
 }
+function disableBifrostGlow() {
+  window._bifrostUpdatePending = false;
+  const b = document.getElementById('bifrostGridBtn');
+  if (b) b.classList.remove('update-ready');
+}
 if (window._bifrostUpdatePending) enableBifrostGlow();
 
-// Check both Service Worker updates and deployed asset headers (ETag / Last-Modified)
-(function initBifrostWatcher() {
-  const tracked = [window.location.pathname || './', './app.js'];
-  const baseline = {};
+window._bifrostBaseline = window._bifrostBaseline || {};
+window._bifrostTracked = [window.location.pathname || './', './app.js'];
 
-  async function getStamp(url) {
+async function getBifrostStamp(url) {
+  try {
+    const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+    return (res.headers.get('etag') || '') + '|' + (res.headers.get('last-modified') || '');
+  } catch (e) {
+    return '';
+  }
+}
+
+async function checkBifrostUpdates() {
+  let found = false;
+  if ('serviceWorker' in navigator) {
     try {
-      const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
-      return (res.headers.get('etag') || '') + '|' + (res.headers.get('last-modified') || '');
-    } catch (e) {
-      return '';
-    }
-  }
-
-  async function checkUpdates() {
-    if ('serviceWorker' in navigator) {
-      try {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        for (const r of regs) {
-          if (r.waiting) enableBifrostGlow();
-          r.update().catch(() => {});
-        }
-      } catch (e) {}
-    }
-    for (const url of tracked) {
-      const stamp = await getStamp(url);
-      if (!stamp) continue;
-      if (!baseline[url]) {
-        baseline[url] = stamp;
-      } else if (baseline[url] !== stamp) {
-        enableBifrostGlow();
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const r of regs) {
+        if (r.waiting) found = true;
+        r.update().catch(() => {});
       }
+    } catch (e) {}
+  }
+  for (const url of window._bifrostTracked) {
+    const stamp = await getBifrostStamp(url);
+    if (!stamp) continue;
+    if (!window._bifrostBaseline[url]) {
+      window._bifrostBaseline[url] = stamp;
+    } else if (window._bifrostBaseline[url] !== stamp) {
+      found = true;
     }
   }
+  if (found) enableBifrostGlow();
+  return found;
+}
 
-  window.addEventListener('load', () => setTimeout(checkUpdates, 1500));
+(function initBifrostWatcher() {
+  window.addEventListener('load', () => setTimeout(checkBifrostUpdates, 1500));
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') checkUpdates();
+    if (document.visibilityState === 'visible') checkBifrostUpdates();
   });
-  setInterval(checkUpdates, 60000);
+  setInterval(checkBifrostUpdates, 60000);
 })();
 
 async function triggerBifrostUpdate() {
   const t = document.getElementById('toast');
-  if (t) {
-    t.textContent = 'Crossing Bifröst… updating to latest version';
+  const showToast = (msg) => {
+    if (!t) return;
+    t.textContent = msg;
     t.style.display = 'block';
-  }
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => { t.style.display = 'none'; }, 2600);
+  };
+
+  showToast('Crossing Bifrǫst… checking for updates');
+
   try {
+    // 1. Clear cached UI/app-shell entries without reloading
     if ('caches' in window) {
       const keys = await caches.keys();
       await Promise.all(keys.map(k => caches.delete(k)));
     }
     if ('serviceWorker' in navigator) {
       const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(r => r.update()));
+      await Promise.all(regs.map(r => r.update().catch(() => {})));
     }
-  } catch (e) {}
-  setTimeout(() => {
-    window.location.href = window.location.pathname + '?bifrost=' + Date.now();
-  }, 350);
-}
 
+    // 2. Fetch fresh index.html and app.js in background
+    const [htmlRes, jsRes] = await Promise.all([
+      fetch(window.location.pathname || './', { cache: 'no-store' }),
+      fetch('./app.js?t=' + Date.now(), { cache: 'no-store' })
+    ]);
+
+    if (htmlRes.ok) {
+      const freshHtml = await htmlRes.text();
+      const doc = new DOMParser().parseFromString(freshHtml, 'text/html');
+
+      // Hot-swap body content & inline scripts in place (zero page reload)
+      if (doc.body) {
+        const inlineScripts = Array.from(doc.body.querySelectorAll('script')).map(s => s.textContent);
+        doc.body.querySelectorAll('script').forEach(s => s.remove());
+        document.body.innerHTML = doc.body.innerHTML;
+
+        for (const code of inlineScripts) {
+          if (code && code.trim()) {
+            const s = document.createElement('script');
+            s.textContent = code;
+            document.body.appendChild(s);
+          }
+        }
+      }
+    }
+
+    if (jsRes.ok) {
+      const freshJs = await jsRes.text();
+      const oldApp = document.querySelector('script[src*="app.js"]');
+      if (oldApp) oldApp.remove();
+      const s = document.createElement('script');
+      s.textContent = freshJs;
+      document.body.appendChild(s);
+    }
+
+    // 3. Refresh baseline stamps and turn off glow
+    for (const url of window._bifrostTracked) {
+      const stamp = await getBifrostStamp(url);
+      if (stamp) window._bifrostBaseline[url] = stamp;
+    }
+    disableBifrostGlow();
+    showToast('Bifrǫst crossed — updated without reload!');
+  } catch (e) {
+    showToast('Update check failed — check connection');
+  }
+}
 
 function openCarvedLetter(letter) {
   setMainView('letter');
