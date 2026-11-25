@@ -237,30 +237,39 @@ html, body {
 
 .tbl-wrap {
   width: 100%;
-  overflow: visible;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid #6b4723;
+  border-radius: 8px;
+  background: rgba(30, 17, 8, 0.78);
+  margin-bottom: 10px;
 }
 .tbl-wrap table {
   width: 100%;
-  table-layout: fixed;
   border-collapse: collapse;
-  font-size: 9.5px;
-  line-height: 1.2;
+  font-size: 11px;
+  line-height: 1.25;
 }
-.tbl-wrap th:first-child,
-.tbl-wrap td:first-child {
-  width: 13%;
-}
-.tbl-wrap th:not(:first-child),
-.tbl-wrap td:not(:first-child) {
-  width: 21.75%;
+.tbl-wrap th {
+  color: #e8c988;
+  font-weight: bold;
+  text-align: left;
+  background: rgba(45, 26, 12, 0.85);
 }
 .tbl-wrap th,
 .tbl-wrap td {
-  padding: 3px 2px;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  vertical-align: top;
+  padding: 6px 8px;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(138, 94, 50, 0.35);
+  border-right: 1px solid rgba(138, 94, 50, 0.25);
+  vertical-align: middle;
+}
+.tbl-wrap tr:last-child td {
+  border-bottom: none;
+}
+.tbl-wrap th:last-child,
+.tbl-wrap td:last-child {
+  border-right: none;
 }
 
 .alpha-btn {
@@ -1049,7 +1058,8 @@ window.addEventListener('load', () => {
           ma.style.background = 'rgba(18, 10, 5, 0.96)';
           ma.style.border = '1.5px solid #7d562b';
           ma.style.borderRadius = '12px';
-          ma.style.padding = '12px';
+          ma.style.padding = '10px';
+    ma.style.marginTop = '-10px';
           ma.style.boxSizing = 'border-box';
         }
         return orig.apply(this, arguments);
@@ -1104,6 +1114,7 @@ function setMainView(view) {
       ma.style.background = 'transparent';
       ma.style.border = 'none';
       ma.style.padding = '';
+      ma.style.marginTop = '';
     }
     return;
   }
@@ -1116,7 +1127,8 @@ function setMainView(view) {
     ma.style.background = 'rgba(18, 10, 5, 0.96)';
     ma.style.border = '1.5px solid #7d562b';
     ma.style.borderRadius = '12px';
-    ma.style.padding = '12px';
+    ma.style.padding = '10px';
+    ma.style.marginTop = '-10px';
     ma.style.boxSizing = 'border-box';
   }
 
