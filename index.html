@@ -757,8 +757,15 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <style>
 @media (max-width: 768px) {
   #runeToolsRow { margin: 8px auto 6px !important; }
-  #alphaGrid { justify-content: flex-start !important; padding-top: 22px !important; gap: 8px !important; }
+  #alphaGrid { justify-content: flex-end !important; padding-top: 12px !important; padding-bottom: 10px !important; gap: 10px !important; }
   #alphaGrid .alpha-row:first-child { margin-top: 0 !important; }
+}
+</style>
+<style>
+#alphaGrid {
+  justify-content: flex-end !important;
+  padding-bottom: 10px !important;
+  gap: 10px !important;
 }
 </style>
 </head>
@@ -801,12 +808,12 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="listCard" class="card-box" style="display:none"></div>
     <div id="detailCard" class="card-box" style="display:none"></div>
   </div>
-  <div id="cred" class="footer" style="width:100%;margin:16px auto 6px;padding:0 16px;box-sizing:border-box;text-align:center;"><div style="width:100%;white-space:nowrap;font-size:clamp(9px,2.65vw,12px);margin-bottom:10px;">Sources: Cleasby &amp; Vigfússon · Zoëga · ONP · Wiktionary (CC BY-SA 4.0)</div><div style="font-size:12px;">Ver. <span id="appVersion">3.31</span></div></div>
+  <div id="cred" class="footer" style="width:100%;margin:16px auto 6px;padding:0 16px;box-sizing:border-box;text-align:center;"><div style="width:100%;white-space:nowrap;font-size:clamp(9px,2.65vw,12px);margin-bottom:10px;">Sources: Cleasby &amp; Vigfússon · Zoëga · ONP · Wiktionary (CC BY-SA 4.0)</div><div style="font-size:12px;">Ver. <span id="appVersion">3.32</span></div></div>
 </div>
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=131"></script>
+  <script src="app.js?v=132"></script>
 <script>
 const YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
