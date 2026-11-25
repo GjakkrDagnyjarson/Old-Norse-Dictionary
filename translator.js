@@ -1,6 +1,28 @@
 window._transDir = 'auto';
 var _lemmaCols = null;
 
+function ensureTranslateUI() {
+  var tc = document.getElementById('translateCard');
+  if (!tc) {
+    tc = document.createElement('div');
+    tc.id = 'translateCard';
+    tc.style.cssText = 'display:none;flex-direction:column;gap:10px;';
+    tc.innerHTML = '<div style="display:flex;gap:6px;">' +
+      '<button type="button" id="tModeAuto" onclick="setTransDir(\'auto\')" style="flex:1;padding:8px;border-radius:6px;border:1.5px solid #b88446;background:#3a2210;color:#ffe2b0;font-weight:bold;font-size:12px;">Auto</button>' +
+      '<button type="button" id="tModeOnEn" onclick="setTransDir(\'on-en\')" style="flex:1;padding:8px;border-radius:6px;border:1px solid #4a3319;background:#1c1008;color:#a8875a;font-weight:bold;font-size:12px;">ON → Eng</button>' +
+      '<button type="button" id="tModeEnOn" onclick="setTransDir(\'en-on\')" style="flex:1;padding:8px;border-radius:6px;border:1px solid #4a3319;background:#1c1008;color:#a8875a;font-weight:bold;font-size:12px;">Eng → ON</button>' +
+      '</div>' +
+      '<div style="position:relative;display:flex;align-items:center;">' +
+      '<input id="translateInput" type="text" oninput="runOnEngTranslate(this.value)" placeholder="Type Old Norse or English..." style="width:100%;box-sizing:border-box;padding:10px 64px 10px 10px;border-radius:8px;border:1.5px solid #7d562b;background:#160d06;color:#f3d6a8;font-size:15px;">' +
+      '<button type="button" onclick="document.getElementById(\'translateInput\').value=\'\';runOnEngTranslate(\'\')" style="position:absolute;right:8px;background:#2b190c;border:1px solid #6e4e26;border-radius:6px;color:#e6c088;font-size:12px;padding:4px 8px;">Clear</button>' +
+      '</div>' +
+      '<div id="translateSummaryBox" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px;min-height:48px;color:#f3d6a8;font-size:15px;line-height:1.45;">Type any Old Norse or English word or phrase above.</div>' +
+      '<div id="translateBreakdown" style="display:flex;flex-direction:column;gap:8px;"></div>';
+    document.body.appendChild(tc);
+  }
+  return tc;
+}
+
 function getLemmaCols() {
   if (_lemmaCols) return _lemmaCols;
   if (typeof db === 'undefined' || !db) return null;
@@ -19,7 +41,8 @@ function getGloss(r) {
   if (!rw) for (var j = 0; j < c.length; j++) if (['id','headword','pos','gender','sort_key','source','sources'].indexOf(c[j]) === -1 && r[c[j]]) { rw = String(r[c[j]]); break; }
   rw = rw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   if (!rw) return '(no definition)';
-  var sg = rw.split(/[;\n]/)[0].trim();
+  var parts = rw.split(/[;\n]/);
+  var sg = (parts[0] || '').trim();
   return sg.length > 90 ? sg.slice(0, 87) + '…' : sg;
 }
 
@@ -54,14 +77,15 @@ function lkEN(w) {
 
 function setTransDir(d) {
   window._transDir = d;
-  [['tModeAuto','auto'],['tModeOnEn','on-en'],['tModeEnOn','en-on']].forEach(function(x) {
-    var e = document.getElementById(x[0]);
-    if (!e) return;
-    var a = d === x[1];
+  var pairs = [['tModeAuto','auto'],['tModeOnEn','on-en'],['tModeEnOn','en-on']];
+  for (var idx = 0; idx < pairs.length; idx++) {
+    var e = document.getElementById(pairs[idx][0]);
+    if (!e) continue;
+    var a = d === pairs[idx][1];
     e.style.borderColor = a ? '#b88446' : '#4a3319';
     e.style.background = a ? '#3a2210' : '#1c1008';
     e.style.color = a ? '#ffe2b0' : '#a8875a';
-  });
+  }
   var i = document.getElementById('translateInput');
   if (i) runOnEngTranslate(i.value);
 }
@@ -78,17 +102,18 @@ function runOnEngTranslate(t) {
     var on = dir !== 'en-on' ? lkON(tk) : null;
     var en = (dir !== 'on-en' && (!on || dir === 'en-on' || !hasON)) ? lkEN(tk) : null;
     var preferON = (dir === 'on-en') || (dir === 'auto' && hasON && on);
-    if (preferON && on) {
+    if (preferON && on && on[0]) {
       gl.push(getGloss(on[0].l).split(',')[0].trim());
       if (typeof toYoungerFuthark === 'function') rl.push(toYoungerFuthark(tk));
       cd.push(on.map(function(x){ var l = x.l, m = [l.pos, l.gender, x.f].filter(Boolean).join(' • '); return '<div onclick="if(typeof openEntry===\'function\')openEntry(' + l.id + ')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:8px 10px;cursor:pointer;"><strong style="color:#ffd096;">' + l.headword + '</strong> <span style="color:#a8895c;font-size:11px;">' + m + '</span><div style="color:#e6c088;font-size:13px;">' + getGloss(l) + '</div></div>'; }).join(''));
-    } else if (en && en.length) {
+    } else if (en && en[0]) {
       gl.push(en[0].headword);
       if (typeof toYoungerFuthark === 'function') rl.push(toYoungerFuthark(en[0].headword));
       cd.push(en.map(function(l){ var m = [l.pos, l.gender].filter(Boolean).join(' • '); return '<div onclick="if(typeof openEntry===\'function\')openEntry(' + l.id + ')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:8px 10px;cursor:pointer;"><strong style="color:#ffd096;">' + l.headword + '</strong> <span style="color:#a8895c;font-size:11px;">' + m + '</span><div style="color:#e6c088;font-size:13px;">' + getGloss(l) + '</div></div>'; }).join(''));
-    } else if (on && on.length) {
+    } else if (on && on[0]) {
       gl.push(getGloss(on[0].l).split(',')[0].trim());
       if (typeof toYoungerFuthark === 'function') rl.push(toYoungerFuthark(tk));
+      cd.push(on.map(function(x){ var l = x.l, m = [l.pos, l.gender, x.f].filter(Boolean).join(' • '); return '<div onclick="if(typeof openEntry===\'function\')openEntry(' + l.id + ')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:8px 10px;cursor:pointer;"><strong style="color:#ffd096;">' + l.headword + '</strong> <span style="color:#a8895c;font-size:11px;">' + m + '</span><div style="color:#e6c088;font-size:13px;">' + getGloss(l) + '</div></div>'; }).join(''));
     } else {
       gl.push('[' + tk + ']');
     }
@@ -100,7 +125,7 @@ function runOnEngTranslate(t) {
 (function(){
   var oFS = window.openFullScreenView;
   window.openFullScreenView = function(v, t) {
-    var tc = document.getElementById('translateCard'), fb = document.getElementById('fsBody');
+    var tc = ensureTranslateUI(), fb = document.getElementById('fsBody');
     if (tc && fb && tc.parentElement !== fb) fb.appendChild(tc);
     if (tc) tc.style.display = 'none';
     if (typeof oFS === 'function') oFS(v, t);
