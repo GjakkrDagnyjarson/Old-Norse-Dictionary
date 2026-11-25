@@ -1,4 +1,4 @@
-const UI_CACHE = 'old-norse-ui-v4.23';
+const UI_CACHE = 'old-norse-ui-v4.24';
 const CORE = ['./', './index.html', './grammar.js', './manifest.json'];
 
 self.addEventListener('install', e => {

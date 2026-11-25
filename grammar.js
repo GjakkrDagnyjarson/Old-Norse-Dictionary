@@ -1,62 +1,17 @@
+window._glossLoading = false;
 function buildGlossMapFromDb() {
-  if ((window._glossMap && window._glossMap.meta) || typeof db === 'undefined' || !db) return;
-  try {
-    var stop = {a:1,an:1,the:1,to:1,of:1,in:1,on:1,at:1,by:1,for:1,with:1,from:1,as:1,or:1,and:1,be:1,is:1,are:1,was:1,were:1,it:1,that:1,this:1,m:1,f:1,n:1,v:1,adj:1,adv:1,prep:1,conj:1,pron:1,det:1,num:1,part:1,interj:1,verb:1,noun:1,adjective:1,adverb:1,preposition:1,conjunction:1,pronoun:1,determiner:1,numeral:1,particle:1,interjection:1,pl:1,sg:1,nom:1,acc:1,dat:1,gen:1,pp:1,imp:1,pret:1,pres:1,strong:1,weak:1,masculine:1,feminine:1,neuter:1,transitive:1,intransitive:1,reflexive:1,archaic:1,poetic:1,obsolete:1};
-    var normOn = {}, normEn = {}, enMeta = {}, prepGov = {};
-    var st = db.prepare("SELECT id, headword, pos, gender, zoega_def, cleasby_def, wikt_def, prep_cases FROM lemmas");
-    while (st.step()) {
-      var r = st.getAsObject();
-      if (!r.headword) continue;
-      var hw = String(r.headword).normalize('NFC').toLowerCase();
-      if (r.prep_cases) prepGov[hw] = String(r.prep_cases).toUpperCase();
-      var raw = [r.wikt_def, r.zoega_def, r.cleasby_def].filter(Boolean).join(' ')
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/\([^)]*\)/g, ' ')
-        .replace(/\[[^\]]*\]/g, ' ')
-        .replace(/\b(?:noun|verb|adjective|adverb|pronoun|determiner|preposition|conjunction|numeral|particle|interjection)\s*:/gi, ' ');
-      var words = raw.match(/[a-zA-Z]{2,}/g) || [];
-      for (var i = 0; i < words.length; i++) {
-        var wl = words.at(i).toLowerCase();
-        if (!stop[wl]) {
-          if (!normOn[hw]) normOn[hw] = wl;
-          if (!normEn[wl] || hw.length < normEn[wl].length) {
-            normEn[wl] = hw;
-            enMeta[wl] = { id: r.id, hw: hw, pos: String(r.pos || '').toLowerCase(), gender: String(r.gender || '').toLowerCase() };
-          }
-          break;
-        }
-      }
-    }
-    st.free();
-    try {
-      var wf = db.prepare("SELECT wf.form, l.headword FROM wordforms wf JOIN lemmas l ON wf.lemma_id = l.id");
-      while (wf.step()) {
-        var wr = wf.getAsObject();
-        var fLow = String(wr.form || '').normalize('NFC').toLowerCase();
-        var hLow = String(wr.headword || '').normalize('NFC').toLowerCase();
-        if (fLow && !normOn[fLow] && normOn[hLow]) normOn[fLow] = normOn[hLow];
-      }
-      wf.free();
-    } catch (e2) {}
-    var core = {
-      'ek':'I','mik':'me','mér':'me','mín':'my','minn':'my','mínum':'my','minni':'my','mínar':'my','mitt':'my',
-      'þú':'you','þik':'you','þér':'you','þín':'your','þinn':'your','þínum':'your','þinni':'your','þínar':'your','þitt':'your',
-      'sinn':'his','sínum':'his','sinni':'his','sínar':'his','sitt':'his',
-      'hann':'he','hon':'she','þat':'it','þetta':'this','allt':'all','allr':'all','allir':'all','ǫll':'all',
-      'þeir':'they','þær':'they','þau':'they','þá':'then','en':'but','eða':'or','ef':'if','at':'that','sem':'as',
-      'í':'in','á':'on','til':'to','af':'of','frá':'from','með':'with','við':'against','um':'about','eptir':'after','fyrir':'for',
-      'er':'is','var':'was','váru':'were','vera':'be','hafa':'have','hefir':'has','hafði':'had','eigi':'not','ekki':'not',
-      'hǫggva':'hew','stendr':'stands','standa':'stand','gata':'path','gǫtu':'path',
-      'faðir':'father','móðir':'mother','bróðir':'brother','systir':'sister','sonr':'son','dóttir':'daughter',
-      'konungr':'king','hestr':'horse','skip':'ship','maðr':'man','kona':'woman','land':'land','sverð':'sword'
-    };
-    Object.keys(core).forEach(function(k) {
-      normOn[k] = core[k];
-      var enK = core[k].toLowerCase();
-      if (!normEn[enK]) normEn[enK] = k;
-    });
-    window._glossMap = { on: normOn, en: normEn, meta: enMeta, prepGov: prepGov };
-  } catch (e) { console.error(e); }
+  if ((window._glossMap && window._glossMap.inflEn) || window._glossLoading) return;
+  window._glossLoading = true;
+  fetch('gloss_engine.json.gz?v=4.24')
+    .then(function(r) { return r.body.pipeThrough(new DecompressionStream('gzip')); })
+    .then(function(s) { return new Response(s).json(); })
+    .then(function(d) {
+      window._glossMap = d;
+      window._glossLoading = false;
+      var inp = document.getElementById('translateInput');
+      if (inp && inp.value.trim() && typeof runVerticalTranslate === 'function') runVerticalTranslate(inp.value);
+    })
+    .catch(function(e) { window._glossLoading = false; console.error(e); });
 }
 
 function resolveOnToken(lw, map) {
@@ -70,31 +25,23 @@ function resolveOnToken(lw, map) {
   for (var i = 0; i < stems.length; i++) {
     var st = stems.at(i);
     if (!st || st.length < 2) continue;
-    var cands = [st, st + 'r', st + 'a', st.replace(/ǫ/g, 'a').replace(/ö/g, 'a'), st.replace(/ǫ/g, 'a') + 'a', st.replace(/e/g, 'a') + 'a', st.replace(/ø/g, 'o') + 'a', st.replace(/y/g, 'u') + 'a'];
+    var cands = [st, st + 'r', st + 'a', st.replace(/ǫ/g, 'a'), st.replace(/ǫ/g, 'a') + 'a', st.replace(/e/g, 'a') + 'a'];
     for (var j = 0; j < cands.length; j++) {
-      var c = cands.at(j);
-      if (gm.on[c]) return gm.on[c];
+      if (gm.on[cands.at(j)]) return gm.on[cands.at(j)];
     }
   }
   return null;
 }
 
 function lookupInflectedOn(id, cas, num, def, fb) {
-  if (typeof db === 'undefined' || !db || !id) return fb;
-  try {
-    var st = db.prepare("SELECT form, case_name, number, definiteness FROM wordforms WHERE lemma_id = ?");
-    st.bind([id]);
-    var best = null, bestScore = -1;
-    while (st.step()) {
-      var r = st.getAsObject();
-      var score = (cas && String(r.case_name || '').toUpperCase() === cas ? 4 : 0) +
-                  (num && String(r.number || '').toUpperCase() === num ? 2 : 0) +
-                  (def && String(r.definiteness || '').toUpperCase() === def ? 3 : (!def && !r.definiteness ? 1 : 0));
-      if (score > bestScore && r.form) { bestScore = score; best = r.form; }
-    }
-    st.free();
-    return best || fb;
-  } catch (e) { return fb; }
+  var gm = window._glossMap;
+  if (!gm || !gm.inflEn || !id) return fb;
+  var d = def || 'INDEF';
+  return gm.inflEn[id + ':' + cas + ':' + num + ':' + d]
+      || gm.inflEn[id + ':' + cas + ':' + num + ':INDEF']
+      || gm.inflEn[id + ':' + cas + ':SG:' + d]
+      || gm.inflEn[id + ':NOM:' + num + ':' + d]
+      || fb;
 }
 
 function translateEnToOnGrammar(line, map) {
@@ -112,11 +59,11 @@ function translateEnToOnGrammar(line, map) {
     if (lw === 'they' || lw === 'we' || lw === 'you') plSubj = true;
     if ((lw === 'then' || lw === 'now' || lw === 'here' || lw === 'there') && i === 0) v2 = true;
     if (PAST[lw]) { out.push({t:PAST[lw], r:'verb', c:isCap, p:punct}); cas = 'ACC'; continue; }
-    var gen = /'s$/.test(lw), stem = gen ? lw.slice(0, -2) : lw, isPl = false, meta = gm.meta ? gm.meta[stem] : null;
-    if (!meta && stem.length > 3 && stem.endsWith('s') && gm.meta && gm.meta[stem.slice(0, -1)]) { meta = gm.meta[stem.slice(0, -1)]; isPl = true; }
+    var gen = /'s$/.test(lw), stem = gen ? lw.slice(0, -2) : lw, isPl = false, m = gm.meta ? gm.meta[stem] : null;
+    if (!m && stem.length > 3 && stem.endsWith('s') && gm.meta && gm.meta[stem.slice(0, -1)]) { m = gm.meta[stem.slice(0, -1)]; isPl = true; }
     var tCas = gen ? 'GEN' : cas, tNum = isPl ? 'PL' : 'SG', tDef = def ? 'DEF' : '';
-    var w = meta ? lookupInflectedOn(meta.id, tCas, tNum, tDef, meta.hw) : ((gm.en && gm.en[stem]) || core);
-    var role = meta && meta.pos.indexOf('verb') !== -1 ? 'verb' : (tCas === 'NOM' ? 'subj' : 'noun');
+    var w = m ? lookupInflectedOn(m.at(0), tCas, tNum, tDef, m.at(1)) : ((gm.en && gm.en[stem]) || core);
+    var role = m && m.at(2).indexOf('verb') !== -1 ? 'verb' : (tCas === 'NOM' ? 'subj' : 'noun');
     out.push({t:w, r:role, c:poss ? poss.c : isCap, p:poss ? '' : punct});
     if (poss) { out.push({t:poss.b, r:'poss', c:false, p:punct}); poss = null; }
     def = false; cas = (role === 'subj') ? 'ACC' : 'NOM';
