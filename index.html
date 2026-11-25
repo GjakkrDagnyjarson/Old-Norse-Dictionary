@@ -771,6 +771,76 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 </style>
 </head>
 <body>
+<style id="fullPageViewStyle">
+#fullScreenPage {
+  display: none !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  background: #140b05 !important;
+  z-index: 9999 !important;
+  flex-direction: column !important;
+  padding: 14px 14px 18px 14px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+#fullScreenPage.active {
+  display: flex !important;
+}
+#fsTopBar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding-bottom: 10px !important;
+  margin-bottom: 10px !important;
+  border-bottom: 1.5px solid #7d562b !important;
+  flex-shrink: 0 !important;
+}
+#fsTitle {
+  color: #f0d3a2 !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  letter-spacing: 0.5px !important;
+}
+#fsHomeBtn {
+  background: rgba(45, 26, 12, 0.96) !important;
+  color: #f0d3a2 !important;
+  border: 1.5px solid #8a5e32 !important;
+  border-radius: 8px !important;
+  padding: 6px 14px !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+}
+#fsBody {
+  flex: 1 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+#fsBody #searchBarDrawer {
+  margin-bottom: 10px !important;
+  flex-shrink: 0 !important;
+}
+#fsBody #futharkCard,
+#fsBody #bindruneCard,
+#fsBody #helpCard,
+#fsBody #listCard,
+#fsBody #detailCard {
+  flex: 1 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+</style>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
