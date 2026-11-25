@@ -742,7 +742,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="futharkCard" class="card-box" style="display:none;margin-top:8px;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
     <strong style="color:#e6c088;font-size:15px;">Younger Futhark (16 Runes)</strong>
-    <button onclick="toggleYoungerFuthark()" style="background:transparent;border:1px solid #6e4e26;color:#d6b17a;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button>
+    <button onclick="closeRuneCards()" style="background:transparent;border:1px solid #6e4e26;color:#d6b17a;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button>
   </div>
   <input id="futharkInput" type="text" oninput="renderFutharkTranslit(this.value)" placeholder="Type Old Norse to transliterate into runes..." style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:6px;border:1px solid #6e4e26;background:#160d06;color:#f3dcb8;margin-bottom:8px;font-size:14px;" />
   <div id="futharkOutput" style="min-height:32px;padding:8px 10px;border-radius:6px;background:#1a0f08;border:1px solid #4a3319;color:#ffd996;font-size:22px;letter-spacing:2px;word-break:break-word;margin-bottom:10px;">ᚠᚢᚦᚬᚱᚴ ᚼᚾᛁᛅᛋ ᛏᛒMLᚱ</div>
@@ -750,7 +750,19 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 </div>
 
 
-    <div id="alphaGrid">
+    <div id="bindruneCard" class="card-box" style="display:none;margin-top:8px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <strong style="color:#e6c088;font-size:15px;">Bindrune Forger (Horizontal Ligature)</strong>
+    <button onclick="closeRuneCards()" style="background:transparent;border:1px solid #6e4e26;color:#d6b17a;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button>
+  </div>
+  <input id="bindruneInput" type="text" oninput="renderBindruneFromText(this.value)" placeholder="Type Old Norse word or pick runes (e.g. sigr, friðr, þórr)..." style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:6px;border:1px solid #6e4e26;background:#160d06;color:#f3dcb8;margin-bottom:8px;font-size:14px;" />
+  <div id="bindruneChipBar" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:10px;"></div>
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;border-radius:8px;background:#160d06;border:1px solid #4a3319;">
+    <svg id="bindruneSvg" viewBox="0 0 320 110" style="width:100%;max-width:340px;height:110px;overflow:visible;"></svg>
+    <div id="bindruneCaption" style="margin-top:6px;color:#b8925a;font-size:12px;letter-spacing:1px;"></div>
+  </div>
+</div>
+<div id="alphaGrid">
 <div class="alpha-row"><button id="updateBtn" class="alpha-btn upd-ok" onclick="handleUpdateClick()" title="App is up to date">↻</button><button class="alpha-btn" onclick="filterByLetter('a')">a</button><button class="alpha-btn" onclick="filterByLetter('á')">á</button><button class="alpha-btn" onclick="filterByLetter('b')">b</button><button class="alpha-btn" onclick="filterByLetter('d')">d</button><button class="alpha-btn" onclick="filterByLetter('ð')">ð</button><button class="alpha-btn" onclick="filterByLetter('e')">e</button><button class="alpha-btn" onclick="filterByLetter('é')">é</button><button class="alpha-btn" onclick="filterByLetter('f')">f</button></div>
 <div class="alpha-row"><button class="alpha-btn" onclick="filterByLetter('g')">g</button><button class="alpha-btn" onclick="filterByLetter('h')">h</button><button class="alpha-btn" onclick="filterByLetter('i')">i</button><button class="alpha-btn" onclick="filterByLetter('í')">í</button><button class="alpha-btn" onclick="filterByLetter('j')">j</button><button class="alpha-btn" onclick="filterByLetter('k')">k</button><button class="alpha-btn" onclick="filterByLetter('l')">l</button><button class="alpha-btn" onclick="filterByLetter('m')">m</button><button class="alpha-btn" onclick="filterByLetter('n')">n</button></div>
 <div class="alpha-row"><button class="alpha-btn" onclick="filterByLetter('o')">o</button><button class="alpha-btn" onclick="filterByLetter('ó')">ó</button><button class="alpha-btn" onclick="filterByLetter('p')">p</button><button class="alpha-btn" onclick="filterByLetter('r')">r</button><button class="alpha-btn" onclick="filterByLetter('s')">s</button><button class="alpha-btn" onclick="filterByLetter('t')">t</button><button class="alpha-btn" onclick="filterByLetter('u')">u</button><button class="alpha-btn" onclick="filterByLetter('ú')">ú</button><button class="alpha-btn" onclick="filterByLetter('v')">v</button></div>
@@ -762,7 +774,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=115"></script>
+  <script src="app.js?v=116"></script>
 <script>
 const YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
@@ -802,12 +814,33 @@ function renderFutharkTranslit(val) {
   el.textContent = val && val.trim() ? toYoungerFuthark(val) : 'ᚠᚢᚦᚬᚱᚴ ᚼᚾᛁᛅᛋ ᛏᛒMᛚᛦ'.replace(/M/g, '\u16D8');
 }
 
+function closeRuneCards(restoreGrid = true) {
+  const fc = document.getElementById('futharkCard');
+  const bc = document.getElementById('bindruneCard');
+  const ag = document.getElementById('alphaGrid');
+  const hb = document.getElementById('homeBtn');
+  if (fc) fc.style.display = 'none';
+  if (bc) bc.style.display = 'none';
+  if (restoreGrid) {
+    if (ag) ag.style.display = '';
+    if (hb) hb.style.display = 'none';
+  }
+}
+document.addEventListener('click', e => {
+  if (e.target && (e.target.id === 'grammarBtn' || e.target.id === 'homeBtn')) {
+    closeRuneCards(e.target.id === 'homeBtn');
+  }
+}, true);
 function toggleYoungerFuthark() {
   const card = document.getElementById('futharkCard');
   const grid = document.getElementById('futharkGrid');
   if (!card) return;
   const open = card.style.display === 'none';
-  card.style.display = open ? 'block' : 'none';
+  closeRuneCards(!open);
+  if (!open) return;
+  card.style.display = 'block';
+  const ag = document.getElementById('alphaGrid'); if (ag) ag.style.display = 'none';
+  const hb = document.getElementById('homeBtn'); if (hb) hb.style.display = 'inline-block';
   if (open && grid && !grid.children.length) {
     const runes = [
       ['\u16A0','\u16A1','fé','f, v'], ['\u16A2','\u16A2','úr','u, o, y, ø'],
@@ -918,7 +951,11 @@ function toggleBindrune() {
   if (!card) return;
   if (yf) yf.style.display = 'none';
   const open = card.style.display === 'none';
-  card.style.display = open ? 'block' : 'none';
+  closeRuneCards(!open);
+  if (!open) return;
+  card.style.display = 'block';
+  const ag = document.getElementById('alphaGrid'); if (ag) ag.style.display = 'none';
+  const hb = document.getElementById('homeBtn'); if (hb) hb.style.display = 'inline-block';
   if (open) {
     if (bar && !bar.children.length) {
       bar.innerHTML = Object.keys(RUNE_BRANCHES).map(r =>
