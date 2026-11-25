@@ -858,7 +858,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 3.84</div>
+<div id="homeVersionFooter">ver 3.85</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1916,7 +1916,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 3.84</div>
+<div id="homeVersionFooter">ver 3.85</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -2483,6 +2483,75 @@ function toggleBindrune() {
       };
     }
   });
+})();
+</script>
+<script>
+(function(){
+  window._futharkBranch = "lb";
+  var R16 = [
+    ["\u16A0","\u16A1","fé","f, v"],["\u16A2","\u16A3","úr","u, o, y, ø"],
+    ["\u16A6","\u16A7","þurs","þ, ð"],["\u16AC","\u16AD","óss","ą, o"],
+    ["\u16B1","\u16B1","reið","r"],["\u16B4","\u16B5","kaun","k, g"],
+    ["\u16BC","\u16BD","hagall","h"],["\u16BE","\u16BF","nauðr","n"],
+    ["\u16C1","\u16C1","íss","i, e, j"],["\u16C5","\u16C6","ár","a, æ, ǫ"],
+    ["\u16CB","\u16CC","sól","s"],["\u16CF","\u16D0","týr","t, d"],
+    ["\u16D2","\u16D3","bjarkan","b, p"],["\u16D8","\u16D9","maðr","m"],
+    ["\u16DA","\u16DA","lǫgr","l"],["\u16E6","\u16E7","ýr","ʀ"]
+  ];
+  window.renderFutharkGridCards = function(){
+    var g = document.getElementById("futharkGrid");
+    if (!g) return;
+    if (!document.getElementById("futharkBranchBar")) {
+      var bar = document.createElement("div");
+      bar.id = "futharkBranchBar";
+      bar.style.cssText = "display:flex;gap:8px;margin-top:auto;padding-top:12px;margin-bottom:8px;";
+      bar.innerHTML = "<button type=\"button\" id=\"toggleLongBranch\" onclick=\"setFutharkBranch('lb')\" style=\"flex:1;padding:8px 10px;border-radius:8px;border:1.5px solid #b88446;background:#3a2210;color:#ffe2b0;font-weight:bold;font-size:13px;cursor:pointer;\">Long-Branch</button><button type=\"button\" id=\"toggleShortTwig\" onclick=\"setFutharkBranch('st')\" style=\"flex:1;padding:8px 10px;border-radius:8px;border:1.5px solid #4a3319;background:#1c1008;color:#a8875a;font-weight:bold;font-size:13px;cursor:pointer;\">Short-Twig</button>";
+      g.parentNode.insertBefore(bar, g);
+      g.style.marginTop = "0";
+      g.style.paddingTop = "0";
+    }
+    var isS = window._futharkBranch === "st";
+    g.innerHTML = R16.map(function(x){
+      var p = isS ? x[1] : x[0], q = isS ? x[0] : x[1];
+      return "<button type=\"button\" onclick=\"insertFutharkRune('"+p+"')\" style=\"width:100%;background:#1c1008;border:1px solid #5c3f21;border-radius:6px;padding:6px 4px;text-align:center;cursor:pointer;font-family:inherit;\"><div style=\"font-size:20px;color:#ffd096;\">"+p+" <span style=\"font-size:15px;color:#b8925a;\">"+q+"</span></div><div style=\"color:#e6c088;font-weight:700;\">"+x[2]+"</div><div style=\"color:#a8895c;font-size:11px;\">"+x[3]+"</div></button>";
+    }).join("");
+  };
+  window.toYoungerFuthark = function(t){
+    var s = (t||"").toLowerCase().replace(/ng|nk/g,"\u16B4").replace(/ey|au|ei/g,function(m){return m==="au"?"\u16A2":"\u16C1"});
+    var lb = {f:"\u16A0",v:"\u16A0",u:"\u16A2",ú:"\u16A2",o:"\u16A2",ó:"\u16A2",y:"\u16A2",ý:"\u16A2",ø:"\u16A2",œ:"\u16A2",ǫ:"\u16AC",þ:"\u16A6",ð:"\u16A6",ą:"\u16AC",r:"\u16B1",ʀ:"\u16E6",k:"\u16B4",g:"\u16B4",q:"\u16B4",c:"\u16B4",h:"\u16BC",n:"\u16BE",i:"\u16C1",í:"\u16C1",e:"\u16C1",é:"\u16C1",j:"\u16C1",a:"\u16C5",á:"\u16C5",æ:"\u16C5",s:"\u16CB",z:"\u16CB",t:"\u16CF",d:"\u16CF",b:"\u16D2",p:"\u16D2",m:"\u16D8",l:"\u16DA"};
+    var st = {f:"\u16A0",v:"\u16A0",u:"\u16A2",ú:"\u16A2",o:"\u16A2",ó:"\u16A2",y:"\u16A2",ý:"\u16A2",ø:"\u16A2",œ:"\u16A2",ǫ:"\u16AD",þ:"\u16A6",ð:"\u16A6",ą:"\u16AD",r:"\u16B1",ʀ:"\u16E7",k:"\u16B4",g:"\u16B4",q:"\u16B4",c:"\u16B4",h:"\u16BD",n:"\u16BF",i:"\u16C1",í:"\u16C1",e:"\u16C1",é:"\u16C1",j:"\u16C1",a:"\u16C6",á:"\u16C6",æ:"\u16C6",s:"\u16CC",z:"\u16CC",t:"\u16D0",d:"\u16D0",b:"\u16D3",p:"\u16D3",m:"\u16D9",l:"\u16DA"};
+    var m = window._futharkBranch === "st" ? st : lb, o = "";
+    for (const c of s) o += c === " " ? " · " : (m[c] || c);
+    return o;
+  };
+  window.renderFutharkTranslit = function(val){
+    var el = document.getElementById("futharkOutput");
+    if (!el) return;
+    if (!val || !val.trim()) {
+      el.textContent = window._futharkBranch === "st" ? "\u16A0\u16A2\u16A6\u16AD\u16B1\u16B4 \u16BD\u16BF\u16C1\u16C6\u16CC \u16D0\u16D3\u16D9\u16DA\u16E7" : "\u16A0\u16A2\u16A6\u16AC\u16B1\u16B4 \u16BC\u16BE\u16C1\u16C5\u16CB \u16CF\u16D2\u16D8\u16DA\u16E6";
+      return;
+    }
+    el.textContent = /[\u16A0-\u16EA]/.test(val) ? fromYoungerFuthark(val) : toYoungerFuthark(val);
+  };
+  window.setFutharkBranch = function(br){
+    window._futharkBranch = br === "st" ? "st" : "lb";
+    var l = document.getElementById("toggleLongBranch"), s = document.getElementById("toggleShortTwig");
+    if (l && s) {
+      var isS = window._futharkBranch === "st";
+      l.style.borderColor = isS ? "#4a3319" : "#b88446"; l.style.background = isS ? "#1c1008" : "#3a2210"; l.style.color = isS ? "#a8875a" : "#ffe2b0";
+      s.style.borderColor = isS ? "#b88446" : "#4a3319"; s.style.background = isS ? "#3a2210" : "#1c1008"; s.style.color = isS ? "#ffe2b0" : "#a8875a";
+    }
+    window.renderFutharkGridCards();
+    var i = document.getElementById("futharkInput");
+    window.renderFutharkTranslit(i ? i.value : "");
+  };
+  var origTYF = window.toggleYoungerFuthark;
+  window.toggleYoungerFuthark = function(){
+    if (typeof origTYF === "function") origTYF.apply(this, arguments);
+    window.renderFutharkGridCards();
+    var i = document.getElementById("futharkInput");
+    window.renderFutharkTranslit(i ? i.value : "");
+  };
 })();
 </script>
 </body>
