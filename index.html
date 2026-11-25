@@ -858,7 +858,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 3.89</div>
+<div id="homeVersionFooter">ver 3.90</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1916,7 +1916,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 3.89</div>
+<div id="homeVersionFooter">ver 3.90</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -2579,6 +2579,34 @@ function toggleBindrune() {
     };
     wrap.appendChild(btn);
   }
+})();
+</script>
+<script>
+(function(){
+  var inp = document.getElementById("futharkInput");
+  if (inp) {
+    inp.placeholder = "Type Old Norse or tap runes below...";
+    inp.addEventListener("input", function(){
+      var clean = this.value.replace(/[^a-zA-ZáéíóúýæœøǫþðʀÁÉÍÓÚÝÆŒØǪÞÐƦ\u16A0-\u16EA\s·:,.!?\-']/g, "");
+      if (clean !== this.value) this.value = clean;
+      if (typeof renderFutharkTranslit === "function") renderFutharkTranslit(this.value);
+    });
+  }
+  window.toYoungerFuthark = function(t){
+    var isS = window._futharkBranch === "st";
+    var s = (t || "").toLowerCase()
+      .replace(/ng|nk/g, "\u16B4")
+      .replace(/nd|nt/g, "\u16CF")
+      .replace(/mb|mp/g, "\u16D2")
+      .replace(/ey|ei/g, "\u16C1")
+      .replace(/au/g, "\u16A2")
+      .replace(/([a-záéíóúýæœøǫþðʀ])\1+/g, "$1");
+    var lb = {f:"\u16A0",v:"\u16A0",u:"\u16A2",ú:"\u16A2",o:"\u16A2",ó:"\u16A2",y:"\u16A2",ý:"\u16A2",ø:"\u16A2",œ:"\u16A2",ǫ:"\u16AC",þ:"\u16A6",ð:"\u16A6",ą:"\u16AC",r:"\u16B1",ʀ:"\u16E6",k:"\u16B4",g:"\u16B4",q:"\u16B4",c:"\u16B4",h:"\u16BC",n:"\u16BE",i:"\u16C1",í:"\u16C1",e:"\u16C1",é:"\u16C1",j:"\u16C1",a:"\u16C5",á:"\u16C5",æ:"\u16C5",s:"\u16CB",z:"\u16CB",t:"\u16CF",d:"\u16CF",b:"\u16D2",p:"\u16D2",m:"\u16D8",l:"\u16DA"};
+    var st = {f:"\u16A0",v:"\u16A0",u:"\u16A2",ú:"\u16A2",o:"\u16A2",ó:"\u16A2",y:"\u16A2",ý:"\u16A2",ø:"\u16A2",œ:"\u16A2",ǫ:"\u16AD",þ:"\u16A6",ð:"\u16A6",ą:"\u16AD",r:"\u16B1",ʀ:"\u16E7",k:"\u16B4",g:"\u16B4",q:"\u16B4",c:"\u16B4",h:"\u16BD",n:"\u16BF",i:"\u16C1",í:"\u16C1",e:"\u16C1",é:"\u16C1",j:"\u16C1",a:"\u16C6",á:"\u16C6",æ:"\u16C6",s:"\u16CC",z:"\u16CC",t:"\u16D0",d:"\u16D0",b:"\u16D3",p:"\u16D3",m:"\u16D9",l:"\u16DA"};
+    var m = isS ? st : lb, out = "";
+    for (var c of s) out += c === " " ? " · " : (m[c] || c);
+    return out;
+  };
 })();
 </script>
 </body>
