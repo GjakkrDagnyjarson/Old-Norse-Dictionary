@@ -1,49 +1,29 @@
-const UI_CACHE = 'old-norse-ui-v4.16';
-const DB_CACHE = 'old-norse-db-v4.16';
+const UI_CACHE = 'old-norse-ui-v4.17';
+const CORE = ['./', './index.html', './grammar.js', './manifest.json'];
 
 self.addEventListener('install', e => {
   self.skipWaiting();
+  e.waitUntil(caches.open(UI_CACHE).then(c => c.addAll(CORE)));
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== UI_CACHE && k !== DB_CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys().then(keys => Promise.all(keys.filter(k => k !== UI_CACHE && !k.includes('db')).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  const url = new URL(e.request.url);
-  if (url.pathname.endsWith('old_norse.db.gz') || url.pathname.endsWith('sql-wasm.wasm')) {
-    if (e.request.url.includes('nocache=')) { e.respondWith(fetch(e.request, { cache: 'no-store' })); return; }
-  const isAppShell = e.request.mode === 'navigate' || /\.(html|js|css)(\?|$)/.test(url.pathname);
-  if (isAppShell) {
+  if (e.request.mode === 'navigate' || e.request.url.includes('index.html') || e.request.url.includes('grammar.js')) {
     e.respondWith(
       fetch(e.request).then(res => {
         const copy = res.clone();
-        caches.open(UI_CACHE).then(cache => cache.put(e.request, copy));
+        caches.open(UI_CACHE).then(c => c.put(e.request, copy));
         return res;
       }).catch(() => caches.match(e.request))
     );
     return;
   }
-  e.respondWith(
-    caches.open(DB_CACHE).then(cache =>
-        cache.match(e.request).then(hit => hit || fetch(e.request).then(res => {
-          cache.put(e.request, res.clone());
-          return res;
-        }))
-      )
-    );
-    return;
-  }
-  e.respondWith(
-    fetch(e.request).then(res => {
-      const copy = res.clone();
-      caches.open(UI_CACHE).then(c => c.put(e.request, copy));
-      return res;
-    }).catch(() => caches.match(e.request))
-  );
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
 });
