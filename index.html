@@ -755,6 +755,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
     <strong style="color:#e6c088;font-size:15px;">Bindrune Forger (Horizontal Ligature)</strong>
     <button onclick="closeRuneCards()" style="background:transparent;border:1px solid #6e4e26;color:#d6b17a;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button>
   </div>
+  <p style="margin:0 0 8px;padding:6px 8px;border-left:2px solid #8b6331;background:rgba(26,15,8,0.75);color:#c9a673;font-size:12px;line-height:1.4;">Historical Note: This tool does not generate modern mystical or magical sigil-style bindrunes. It writes historically accurate bindrunes (<em>bandrúnir</em>) as horizontal ligatures sharing staves—the way Viking Age carvers genuinely wrote personal names, maker signatures, and space-saving inscriptions on wood, bone, and stone.</p>
   <input id="bindruneInput" type="text" oninput="renderBindruneFromText(this.value)" placeholder="Type Old Norse word or pick runes (e.g. sigr, friðr, þórr)..." style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:6px;border:1px solid #6e4e26;background:#160d06;color:#f3dcb8;margin-bottom:8px;font-size:14px;" />
   <div id="bindruneChipBar" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:10px;"></div>
   <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;border-radius:8px;background:#160d06;border:1px solid #4a3319;">
@@ -774,7 +775,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=118"></script>
+  <script src="app.js?v=119"></script>
 <script>
 const YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
