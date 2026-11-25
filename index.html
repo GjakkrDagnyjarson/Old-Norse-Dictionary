@@ -13,8 +13,9 @@ function applyUpdateBtnGlow() {
   }
 }
 function markUpdateReady() {
-  window.__updReady = true;
-  applyUpdateBtnGlow();
+  window._bifrostUpdatePending = true;
+  const b = document.getElementById('bifrostGridBtn');
+  if (b) b.classList.add('update-ready');
 }
 window.addEventListener('DOMContentLoaded', applyUpdateBtnGlow);
 async function handleUpdateClick() {
@@ -904,23 +905,53 @@ function renderFutharkTranslit(val) {
 
 
 function enableBifrostGlow() {
+  window._bifrostUpdatePending = true;
   const b = document.getElementById('bifrostGridBtn');
   if (b) b.classList.add('update-ready');
 }
-if (typeof markUpdateReady === 'function') {
-  const _origMarkUpdateReady = markUpdateReady;
-  markUpdateReady = function() {
-    enableBifrostGlow();
-    return _origMarkUpdateReady.apply(this, arguments);
-  };
-} else {
-  window.markUpdateReady = enableBifrostGlow;
-}
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    if (regs.some(r => r.waiting)) enableBifrostGlow();
-  }).catch(() => {});
-}
+if (window._bifrostUpdatePending) enableBifrostGlow();
+
+// Check both Service Worker updates and deployed asset headers (ETag / Last-Modified)
+(function initBifrostWatcher() {
+  const tracked = [window.location.pathname || './', './app.js'];
+  const baseline = {};
+
+  async function getStamp(url) {
+    try {
+      const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+      return (res.headers.get('etag') || '') + '|' + (res.headers.get('last-modified') || '');
+    } catch (e) {
+      return '';
+    }
+  }
+
+  async function checkUpdates() {
+    if ('serviceWorker' in navigator) {
+      try {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const r of regs) {
+          if (r.waiting) enableBifrostGlow();
+          r.update().catch(() => {});
+        }
+      } catch (e) {}
+    }
+    for (const url of tracked) {
+      const stamp = await getStamp(url);
+      if (!stamp) continue;
+      if (!baseline[url]) {
+        baseline[url] = stamp;
+      } else if (baseline[url] !== stamp) {
+        enableBifrostGlow();
+      }
+    }
+  }
+
+  window.addEventListener('load', () => setTimeout(checkUpdates, 1500));
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') checkUpdates();
+  });
+  setInterval(checkUpdates, 60000);
+})();
 
 async function triggerBifrostUpdate() {
   const t = document.getElementById('toast');
