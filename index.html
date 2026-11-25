@@ -771,6 +771,13 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 </style>
 </head>
 <body>
+<div id="fullScreenPage">
+  <div id="fsTopBar">
+    <span id="fsTitle">Old Norse</span>
+    <button id="fsHomeBtn" onclick="openFullScreenView('home')">← Home</button>
+  </div>
+  <div id="fsBody"></div>
+</div>
 <div id="carvedAlphaOverlay" aria-label="Old Norse Alphabet and Bifröst Update">
   <div class="carved-row">
     <button id="bifrostGridBtn" class="carved-hit" aria-label="Bifröst Update" title="Bifröst — Update & Reload" onclick="triggerBifrostUpdate()"></button>
