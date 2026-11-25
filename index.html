@@ -2613,8 +2613,33 @@ function toggleBindrune() {
 <script>
 window._transDir = 'on-en';
 window._glossMap = null;
-
-fetch('gloss_map.json?v=403').then(function(r){ return r.json(); }).then(function(d){ window._glossMap = d; });
+function buildGlossMapFromDb() {
+  if (window._glossMap || typeof db === 'undefined' || !db) return;
+  try {
+    var stop = {a:1,an:1,the:1,to:1,of:1,in:1,on:1,at:1,by:1,for:1,with:1,from:1,as:1,or:1,and:1,be:1,is:1,are:1,was:1,were:1,it:1,that:1,this:1,m:1,f:1,n:1,v:1,adj:1,adv:1,prep:1,conj:1,pron:1,pl:1,sg:1,nom:1,acc:1,dat:1,gen:1,pp:1,imp:1,pret:1,pres:1,pers:1,dem:1,indef:1,refl:1};
+    var normOn = {}, normEn = {};
+    var st = db.prepare("SELECT headword, zoega_def, cleasby_def FROM lemmas");
+    while (st.step()) {
+      var r = st.getAsObject();
+      if (!r.headword) continue;
+      var hw = String(r.headword).normalize('NFC').toLowerCase();
+      var raw = String(r.zoega_def || r.cleasby_def || '').replace(/<[^>]*>/g, ' ').replace(/\([^)]*\)/g, ' ');
+      var words = raw.match(/[a-zA-Z]{2,}/g) || [];
+      for (var i = 0; i < words.length; i++) {
+        var wl = words[i].toLowerCase();
+        if (!stop[wl]) {
+          if (!normOn[hw]) normOn[hw] = wl;
+          if (!normEn[wl] || hw.length < normEn[wl].length) normEn[wl] = hw;
+          break;
+        }
+      }
+    }
+    st.free();
+    var core = {'ek':'I','mik':'me','mér':'me','mín':'my','eitt':'my','minn':'my','mínum':'my','þú':'you','þik':'you','þér':'you','þitt':'your','þinn':'your','hann':'he','hon':'she','þat':'this','þetta':'this','þeir':'they','þær':'they','þau':'they','þá':'then','en':'but','eða':'or','ef':'if','at':'that','sem':'as','í':'in','á':'on','til':'to','af':'of','frá':'from','með':'with','við':'against','um':'about','eptir':'after','fyrir':'for','er':'is','var':'was','váru':'were','vera':'be','hefi':'have','hefir':'has','hafa':'have','hafði':'had','má':'may','megi':'may','skal':'shall','vil':'will','lát':'let','láta':'let','eigi':'not','ekki':'not'};
+    Object.keys(core).forEach(function(k) { normOn[k] = core[k]; normEn[core[k].toLowerCase()] = k; });
+    window._glossMap = { on: normOn, en: normEn };
+  } catch (e) { console.error(e); }
+} }).then(function(d){ window._glossMap = d; });
 
 function ensureTranslateUI() {
   var tc = document.getElementById('translateCard');
@@ -2806,6 +2831,7 @@ function runVerticalTranslate(raw) {
   if (!out) return;
   var txt = raw || '';
   if (!txt.trim()) { out.style.color = '#8a6b43'; out.textContent = 'Translation'; return; }
+  if (!window._glossMap) buildGlossMapFromDb();
   if (!window._glossMap) { out.textContent = 'Loading…'; return; }
   if (/[áéíóúýæœøǫþðʀÁÉÍÓÚÝÆŒØǪÞÐƦ]/.test(txt) && window._transDir !== 'on-en') {
     window._transDir = 'on-en';
