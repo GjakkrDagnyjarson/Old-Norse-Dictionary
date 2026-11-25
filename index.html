@@ -684,13 +684,13 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <body>
 <div id="root">
   <div class="title"><span>GJAKKR DAGNÝJARSON'S</span>OLD NORSE DICTIONARY</div>
-  <div class="top-bar" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;box-sizing:border-box;">
-  <button id="topHomeBtn" class="nav-btn" onclick="if(typeof closeRuneCards==='function')closeRuneCards();if(typeof renderHome==='function')renderHome();" style="width:100%;padding:7px 4px;font-size:12.5px;white-space:nowrap;">Home</button>
-  <button id="searchToggleBtn" class="nav-btn" onclick="toggleSearchBar()" style="width:100%;padding:7px 4px;font-size:12.5px;white-space:nowrap;">Search</button>
-  <button id="grammarBtn" class="nav-btn" style="width:100%;padding:7px 4px;font-size:12.5px;white-space:nowrap;">Grammar</button>
-  <button id="youngerFutharkBtn" class="nav-btn" onclick="toggleYoungerFuthark()" style="width:100%;padding:7px 4px;font-size:12.5px;white-space:nowrap;">ᚠ Fuþark</button>
-  <button id="bindruneBtn" class="nav-btn" onclick="toggleBindrune()" style="width:100%;padding:7px 4px;font-size:12.5px;white-space:nowrap;">ᛉ Bindrunes</button>
-  <button id="helpBtn" class="nav-btn" onclick="toggleHelpCard()" style="width:100%;padding:7px 4px;font-size:12.5px;white-space:nowrap;">Help</button>
+  <div class="top-bar" style="display:grid;grid-template-columns:repeat(3,1fr);row-gap:12px;column-gap:8px;width:100%;box-sizing:border-box;">
+  <button id="topHomeBtn" class="nav-btn" onclick="if(typeof closeRuneCards==='function')closeRuneCards();if(typeof renderHome==='function')renderHome();" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">Home</button>
+  <button id="searchToggleBtn" class="nav-btn" onclick="toggleSearchBar()" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">Search</button>
+  <button id="grammarBtn" class="nav-btn" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">Grammar</button>
+  <button id="youngerFutharkBtn" class="nav-btn" onclick="toggleYoungerFuthark()" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">ᚠ Fuþark</button>
+  <button id="bindruneBtn" class="nav-btn" onclick="toggleBindrune()" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">ᛉ Bindrunes</button>
+  <button id="helpBtn" class="nav-btn" onclick="toggleHelpCard()" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">Help</button>
 </div>
 <div id="searchBarDrawer" style="display:none;align-items:center;gap:6px;width:100%;margin:6px auto 2px;box-sizing:border-box;"><button id="homeBtn" class="nav-btn" style="display:none">Home</button><input id="searchBox" type="search" placeholder="Search Old Norse..." autocomplete="off" /><button class="nav-btn" onclick="toggleSearchBar(false)" style="padding:6px 10px;font-size:13px;">✕</button></div>
   <div id="subStatus" style="display:none">Loading Old Norse database...</div>
