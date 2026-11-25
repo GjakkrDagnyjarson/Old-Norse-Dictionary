@@ -5,7 +5,7 @@
 window.__updReady = false;
 function applyUpdateBtnGlow() {
   if (!window.__updReady) return;
-  const btn = document.getElementById('updateBtn');
+  var btn = document.getElementById('updateBtn');
   if (btn) {
     btn.classList.remove('upd-ok');
     btn.classList.add('upd-ready');
@@ -14,16 +14,16 @@ function applyUpdateBtnGlow() {
 }
 function markUpdateReady() {
   window._bifrostUpdatePending = true;
-  const b = document.getElementById('bifrostGridBtn');
+  var b = document.getElementById('bifrostGridBtn');
   if (b) b.classList.add('update-ready');
 }
 window.addEventListener('DOMContentLoaded', applyUpdateBtnGlow);
 async function handleUpdateClick() {
-  const btn = document.getElementById('updateBtn');
+  var btn = document.getElementById('updateBtn');
   if (btn) btn.style.transform = 'rotate(360deg)';
   try {
     if ('caches' in window) {
-      const keys = await caches.keys();
+      var keys = await caches.keys();
       await Promise.all(keys.map(k => caches.delete(k)));
     }
     function triggerAllUpdateChecks() {
@@ -40,7 +40,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) trig
 window.addEventListener('pageshow', triggerAllUpdateChecks);
 setInterval(triggerAllUpdateChecks, 60000);
 if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
+      var regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map(r => r.unregister()));
     }
   } catch (e) {}
@@ -52,7 +52,7 @@ if ('serviceWorker' in navigator) {
     if (!reg) return;
     if (reg.waiting) markUpdateReady();
     reg.addEventListener('updatefound', () => {
-      const nw = reg.installing;
+      var nw = reg.installing;
       if (nw) nw.addEventListener('statechange', () => {
         if (nw.state === 'installed' && navigator.serviceWorker.controller) markUpdateReady();
       });
@@ -858,7 +858,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 3.77</div>
+<div id="homeVersionFooter">ver 3.78</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -987,17 +987,17 @@ var YOUNGER_RUNES = [
 YOUNGER_RUNES[13] = ['M','ᛙ','maðr','m'];
 
 function toYoungerFuthark(txt) {
-  const s = (txt || '').toLowerCase()
+  var s = (txt || '').toLowerCase()
     .replace(/ng/g, 'ᚴ').replace(/nk/g, 'ᚴ')
     .replace(/ey|au|ei/g, m => m === 'ei' ? 'ᛅᛁ' : 'ᛅᚢ');
-  const map = {
+  var map = {
     'f':'ᚠ','v':'ᚠ','u':'ᚢ','ú':'ᚢ','o':'ᚢ','ó':'ᚢ','y':'ᚢ','ý':'ᚢ','ø':'ᚢ','œ':'ᚢ','w':'ᚢ',
     'þ':'ᚦ','ð':'ᚦ','ą':'ᚬ','r':'ᚱ','ʀ':'ᛦ','k':'ᚴ','g':'ᚴ','c':'ᚴ','q':'ᚴ',
     'h':'ᚼ','n':'ᚾ','i':'ᛁ','í':'ᛁ','e':'ᛁ','é':'ᛁ','j':'ᛁ',
     'a':'ᛅ','á':'ᛅ','æ':'ᛅ','ǣ':'ᛅ','ǫ':'ᛅ','ö':'ᛅ',
     's':'ᛋ','z':'ᛋ','t':'ᛏ','d':'ᛏ','b':'ᛒ','p':'ᛒ','m':'M','l':'ᛚ'
   };
-  let out = '';
+  var out = '';
   for (const ch of s) {
     if (ch === ' ') out += ' ᛬ ';
     else if (map[ch]) out += map[ch];
@@ -1007,7 +1007,7 @@ function toYoungerFuthark(txt) {
 }
 
 function renderFutharkTranslit(val) {
-  const el = document.getElementById('futharkOutput');
+  var el = document.getElementById('futharkOutput');
   if (!el) return;
   el.textContent = val && val.trim() ? toYoungerFuthark(val) : 'ᚠᚢᚦᚬᚱᚴ ᚼᚾᛁᛅᛋ ᛏᛒMᛚᛦ'.replace(/M/g, '\u16D8');
 }
@@ -1016,12 +1016,12 @@ function renderFutharkTranslit(val) {
 
 function enableBifrostGlow() {
   window._bifrostUpdatePending = true;
-  const b = document.getElementById('bifrostGridBtn');
+  var b = document.getElementById('bifrostGridBtn');
   if (b) b.classList.add('update-ready');
 }
 function disableBifrostGlow() {
   window._bifrostUpdatePending = false;
-  const b = document.getElementById('bifrostGridBtn');
+  var b = document.getElementById('bifrostGridBtn');
   if (b) b.classList.remove('update-ready');
 }
 if (window._bifrostUpdatePending) enableBifrostGlow();
@@ -1031,7 +1031,7 @@ window._bifrostTracked = [window.location.pathname || './', './app.js'];
 
 async function getBifrostStamp(url) {
   try {
-    const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+    var res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
     return (res.headers.get('etag') || '') + '|' + (res.headers.get('last-modified') || '');
   } catch (e) {
     return '';
@@ -1039,10 +1039,10 @@ async function getBifrostStamp(url) {
 }
 
 async function checkBifrostUpdates() {
-  let found = false;
+  var found = false;
   if ('serviceWorker' in navigator) {
     try {
-      const regs = await navigator.serviceWorker.getRegistrations();
+      var regs = await navigator.serviceWorker.getRegistrations();
       for (const r of regs) {
         if (r.waiting) found = true;
         r.update().catch(() => {});
@@ -1050,7 +1050,7 @@ async function checkBifrostUpdates() {
     } catch (e) {}
   }
   for (const url of window._bifrostTracked) {
-    const stamp = await getBifrostStamp(url);
+    var stamp = await getBifrostStamp(url);
     if (!stamp) continue;
     if (!window._bifrostBaseline[url]) {
       window._bifrostBaseline[url] = stamp;
@@ -1071,8 +1071,8 @@ async function checkBifrostUpdates() {
 })();
 
 async function triggerBifrostUpdate() {
-  const t = document.getElementById('toast');
-  const showToast = (msg) => {
+  var t = document.getElementById('toast');
+  var showToast = (msg) => {
     if (!t) return;
     t.textContent = msg;
     t.style.display = 'block';
@@ -1085,33 +1085,33 @@ async function triggerBifrostUpdate() {
   try {
     // 1. Clear cached UI/app-shell entries without reloading
     if ('caches' in window) {
-      const keys = await caches.keys();
+      var keys = await caches.keys();
       await Promise.all(keys.map(k => caches.delete(k)));
     }
     if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
+      var regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map(r => r.update().catch(() => {})));
     }
 
     // 2. Fetch fresh index.html and app.js in background
-    const [htmlRes, jsRes] = await Promise.all([
+    var [htmlRes, jsRes] = await Promise.all([
       fetch(window.location.pathname || './', { cache: 'no-store' }),
       fetch('./app.js?t=' + Date.now(), { cache: 'no-store' })
     ]);
 
     if (htmlRes.ok) {
-      const freshHtml = await htmlRes.text();
-      const doc = new DOMParser().parseFromString(freshHtml, 'text/html');
+      var freshHtml = await htmlRes.text();
+      var doc = new DOMParser().parseFromString(freshHtml, 'text/html');
 
       // Hot-swap body content & inline scripts in place (zero page reload)
       if (doc.body) {
-        const inlineScripts = Array.from(doc.body.querySelectorAll('script')).map(s => s.textContent);
+        var inlineScripts = Array.from(doc.body.querySelectorAll('script')).map(s => s.textContent);
         doc.body.querySelectorAll('script').forEach(s => s.remove());
         document.body.innerHTML = doc.body.innerHTML;
 
         for (const code of inlineScripts) {
           if (code && code.trim()) {
-            const s = document.createElement('script');
+            var s = document.createElement('script');
             s.textContent = code;
             document.body.appendChild(s);
           }
@@ -1120,7 +1120,7 @@ async function triggerBifrostUpdate() {
     }
 
     if (jsRes.ok) {
-      const freshJs = await jsRes.text();
+      var freshJs = await jsRes.text();
       if (window._lastAppJsText && window._lastAppJsText !== freshJs) {
         window.location.reload();
         return;
@@ -1130,7 +1130,7 @@ async function triggerBifrostUpdate() {
 
     // 3. Refresh baseline stamps and turn off glow
     for (const url of window._bifrostTracked) {
-      const stamp = await getBifrostStamp(url);
+      var stamp = await getBifrostStamp(url);
       if (stamp) window._bifrostBaseline[url] = stamp;
     }
     disableBifrostGlow();
@@ -1142,13 +1142,13 @@ async function triggerBifrostUpdate() {
 
 
 window.addEventListener('load', () => {
-  const wrapDisplayFn = (fnName) => {
+  var wrapDisplayFn = (fnName) => {
     if (typeof window[fnName] === 'function' && !window[fnName]._wrapped) {
-      const orig = window[fnName];
+      var orig = window[fnName];
       window[fnName] = function() {
-        const ao = document.getElementById('carvedAlphaOverlay');
+        var ao = document.getElementById('carvedAlphaOverlay');
         if (ao) ao.style.display = 'none';
-        const ma = document.getElementById('mainArea');
+        var ma = document.getElementById('mainArea');
         if (ma) {
           ma.style.background = 'rgba(18, 10, 5, 0.96)';
           ma.style.border = '1.5px solid #7d562b';
@@ -1168,8 +1168,8 @@ window.addEventListener('load', () => {
 
 function openCarvedLetter(letter) {
   setMainView('letter');
-  const lc = document.getElementById('listCard');
-  const sb = document.getElementById('searchBox');
+  var lc = document.getElementById('listCard');
+  var sb = document.getElementById('searchBox');
   if (lc) {
     lc.style.display = 'block';
     lc.innerHTML = '<div style="color:#e6c088;padding:14px;text-align:center;">Searching for "' + letter + '"…</div>';
@@ -1181,15 +1181,15 @@ function openCarvedLetter(letter) {
 }
 
 function setMainView(view) {
-  const sd = document.getElementById('searchBarDrawer');
-  const lc = document.getElementById('listCard');
-  const dc = document.getElementById('detailCard');
-  const fc = document.getElementById('futharkCard');
-  const bc = document.getElementById('bindruneCard');
-  const hc = document.getElementById('helpCard');
-  const hb = document.getElementById('homeBtn');
-  const sb = document.getElementById('searchBox');
-  const ma = document.getElementById('mainArea');
+  var sd = document.getElementById('searchBarDrawer');
+  var lc = document.getElementById('listCard');
+  var dc = document.getElementById('detailCard');
+  var fc = document.getElementById('futharkCard');
+  var bc = document.getElementById('bindruneCard');
+  var hc = document.getElementById('helpCard');
+  var hb = document.getElementById('homeBtn');
+  var sb = document.getElementById('searchBox');
+  var ma = document.getElementById('mainArea');
 
   // Hide all sub-page panels first
   if (sd) sd.style.display = 'none';
@@ -1197,14 +1197,14 @@ function setMainView(view) {
   if (bc) bc.style.display = 'none';
   if (hc) hc.style.display = 'none';
 
-  const rt = document.getElementById('root');
+  var rt = document.getElementById('root');
   if (view === 'home') {
     if (rt) rt.classList.remove('open');
     if (rt) rt.classList.remove('open');
     if (lc) lc.style.display = 'none';
     if (dc) dc.style.display = 'none';
     if (hb) hb.style.display = 'none';
-    const ao = document.getElementById('carvedAlphaOverlay'); if (ao) ao.style.display = 'flex';
+    var ao = document.getElementById('carvedAlphaOverlay'); if (ao) ao.style.display = 'flex';
     if (ma) {
       ma.style.background = 'transparent';
       ma.style.border = 'none';
@@ -1214,7 +1214,7 @@ function setMainView(view) {
     return;
   }
 
-  const aoHide = document.getElementById('carvedAlphaOverlay'); if (aoHide) aoHide.style.display = 'none';
+  var aoHide = document.getElementById('carvedAlphaOverlay'); if (aoHide) aoHide.style.display = 'none';
   if (rt) rt.classList.add('open');
   if (rt) rt.classList.add('open');
   // Sub-page mode: solid dark wood backdrop over the carved alphabet grid
@@ -1251,8 +1251,8 @@ function setMainView(view) {
 }
 
 function toggleSearchBar(force) {
-  const sd = document.getElementById('searchBarDrawer');
-  const isOpen = sd && sd.style.display !== 'none';
+  var sd = document.getElementById('searchBarDrawer');
+  var isOpen = sd && sd.style.display !== 'none';
   if (force === false || (force === undefined && isOpen)) {
     setMainView('home');
   } else {
@@ -1261,25 +1261,25 @@ function toggleSearchBar(force) {
 }
 
 function toggleHelpCard() {
-  const hc = document.getElementById('helpCard');
-  const isOpen = hc && hc.style.display !== 'none';
+  var hc = document.getElementById('helpCard');
+  var isOpen = hc && hc.style.display !== 'none';
   setMainView(isOpen ? 'home' : 'help');
 }function closeRuneCards() { setMainView('home'); }
 document.addEventListener('click', e => {
-  const btn = e.target && e.target.closest ? e.target.closest('button') : e.target;
+  var btn = e.target && e.target.closest ? e.target.closest('button') : e.target;
   if (!btn) return;
   if (btn.id === 'grammarBtn') setMainView('grammar');
   else if (btn.id === 'homeBtn') setMainView('home');
 }, true);
 function toggleYoungerFuthark() {
-  const card = document.getElementById('futharkCard');
-  const grid = document.getElementById('futharkGrid');
+  var card = document.getElementById('futharkCard');
+  var grid = document.getElementById('futharkGrid');
   if (!card) return;
-  const open = card.style.display === 'none';
+  var open = card.style.display === 'none';
   if (!open) { setMainView('home'); return; }
   setMainView(card.id === 'futharkCard' ? 'futhark' : 'bindrune');
   if (open && grid && !grid.children.length) {
-    const runes = [
+    var runes = [
       ['\u16A0','\u16A1','fé','f, v'], ['\u16A2','\u16A2','úr','u, o, y, ø'],
       ['\u16A6','\u16A6','þurs','þ, ð'], ['\u16AC','\u16AD','óss','ą, o'],
       ['\u16B1','\u16B1','reið','r'], ['\u16B4','\u16B4','kaun','k, g'],
@@ -1319,35 +1319,35 @@ var H_RUNES = {
   '\u16DA': { hasStave: true,  w: 26, segs: [[0,22, 22,48]] },
   '\u16E6': { hasStave: true,  w: 30, segs: [[0,55, -14,82], [0,55, 14,82]] }
 };
-const RUNE_BRANCHES = H_RUNES;
+var RUNE_BRANCHES = H_RUNES;
 
-let activeBindRunes = ['\u16CF', '\u16A2', '\u16B1'];
+var activeBindRunes = ['\u16CF', '\u16A2', '\u16B1'];
 
 function drawBindrune(runes) {
-  const svg = document.getElementById('bindruneSvg');
-  const cap = document.getElementById('bindruneCaption');
+  var svg = document.getElementById('bindruneSvg');
+  var cap = document.getElementById('bindruneCaption');
   if (!svg) return;
-  const list = runes.filter(r => r in H_RUNES);
+  var list = runes.filter(r => r in H_RUNES);
   if (!list.length) {
     svg.innerHTML = '';
     if (cap) cap.textContent = 'Select runes or type an Old Norse word';
     return;
   }
-  const items = [];
-  let x = 24;
+  var items = [];
+  var x = 24;
   for (let i = 0; i < list.length; i++) {
-    const r = list[i];
-    const def = H_RUNES[r];
-    const prev = i > 0 ? H_RUNES[list[i - 1]] : null;
+    var r = list[i];
+    var def = H_RUNES[r];
+    var prev = i > 0 ? H_RUNES[list[i - 1]] : null;
     // Fuse adjacent stave-bearing runes onto the shared vertical stave when branches don't collide
-    const shareStave = prev && def.hasStave && prev.hasStave && prev.segs.every(s => s[0] <= 0 && s[2] <= 0);
+    var shareStave = prev && def.hasStave && prev.hasStave && prev.segs.every(s => s[0] <= 0 && s[2] <= 0);
     if (i > 0 && !shareStave) x += prev.w;
     items.push({ x, def });
   }
-  const totalW = Math.max(120, x + items[items.length - 1].def.w + 18);
+  var totalW = Math.max(120, x + items[items.length - 1].def.w + 18);
   svg.setAttribute('viewBox', `0 0 ${totalW} 110`);
-  let out = '';
-  const drawnStaves = new Set();
+  var out = '';
+  var drawnStaves = new Set();
   for (const it of items) {
     if (it.def.hasStave && !drawnStaves.has(it.x)) {
       drawnStaves.add(it.x);
@@ -1366,16 +1366,16 @@ function renderBindruneFromText(val) {
     drawBindrune(activeBindRunes);
     return;
   }
-  const runes = [...toYoungerFuthark(val)].filter(ch => ch in RUNE_BRANCHES);
+  var runes = [...toYoungerFuthark(val)].filter(ch => ch in RUNE_BRANCHES);
   activeBindRunes = runes;
   drawBindrune(runes);
 }
 
 function toggleBindRuneChip(r) {
-  const idx = activeBindRunes.indexOf(r);
+  var idx = activeBindRunes.indexOf(r);
   if (idx >= 0) activeBindRunes.splice(idx, 1);
   else activeBindRunes.push(r);
-  const inp = document.getElementById('bindruneInput');
+  var inp = document.getElementById('bindruneInput');
   if (inp) inp.value = activeBindRunes.join('');
   drawBindrune(activeBindRunes);
 }
@@ -1384,12 +1384,12 @@ function toggleBindRuneChip(r) {
 
 
 function toggleBindrune() {
-  const card = document.getElementById('bindruneCard');
-  const yf = document.getElementById('futharkCard');
-  const bar = document.getElementById('bindruneChipBar');
+  var card = document.getElementById('bindruneCard');
+  var yf = document.getElementById('futharkCard');
+  var bar = document.getElementById('bindruneChipBar');
   if (!card) return;
   if (yf) yf.style.display = 'none';
-  const open = card.style.display === 'none';
+  var open = card.style.display === 'none';
   if (!open) { setMainView('home'); return; }
   setMainView(card.id === 'futharkCard' ? 'futhark' : 'bindrune');
   if (open) {
@@ -1407,7 +1407,7 @@ function toggleBindrune() {
 <script>window.openFullScreenView=function(v,t){var fs=document.getElementById("fullScreenPage"),fb=document.getElementById("fsBody"),ft=document.getElementById("fsTitle"),ma=document.getElementById("mainArea"),ao=document.getElementById("carvedAlphaOverlay"),rt=document.getElementById("root"),hv=document.getElementById("homeVersionFooter"),ids=["searchBarDrawer","subStatus","futharkCard","bindruneCard","helpCard","listCard","detailCard"];if(v==="home"){if(fs)fs.classList.remove("active");if(rt)rt.style.display="";if(ao)ao.style.display="flex";if(hv)hv.style.display="block";document.body.style.backgroundImage="";ids.forEach(function(id){var e=document.getElementById(id);if(e){e.style.display="none";if(ma&&e.parentElement!==ma)ma.appendChild(e)}});var sb=document.getElementById("searchBox");if(sb)sb.value="";return}if(fb)ids.forEach(function(id){var e=document.getElementById(id);if(e&&e.parentElement!==fb)fb.appendChild(e)});var m={search:"Search Dictionary",grammar:"Grammar & Coinage",futhark:"Younger Fuþark",bindrune:"Bindrunes",help:"Help & Guide",letter:t||"Dictionary Entries",entry:t||"Dictionary Entry"};if(ft)ft.textContent=t||m[v]||"Old Norse";["searchBarDrawer","subStatus","futharkCard","bindruneCard","helpCard","listCard","detailCard"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display="none"});if(v==="search"){var sd=document.getElementById("searchBarDrawer"),sb=document.getElementById("searchBox");if(sd)sd.style.display="flex";if(sb)setTimeout(function(){sb.focus()},50)}else if(v==="grammar"){if(typeof openGrammarTool==="function")openGrammarTool();var dc=document.getElementById("detailCard");if(dc)dc.style.display="block"}else if(v==="futhark"){var fc=document.getElementById("futharkCard");if(fc)fc.style.display="block"}else if(v==="bindrune"){var bc=document.getElementById("bindruneCard");if(bc)bc.style.display="block"}else if(v==="help"){var hc=document.getElementById("helpCard");if(hc)hc.style.display="block"}else if(v==="letter"){var lc=document.getElementById("listCard"),st=document.getElementById("subStatus");if(lc)lc.style.display="block";if(st&&st.textContent.trim())st.style.display="block"}else if(v==="entry"){var dc=document.getElementById("detailCard");if(dc)dc.style.display="block"}if(ao)ao.style.display="none";if(hv)hv.style.display="none";if(rt)rt.style.display="none";document.body.style.backgroundImage="none";document.body.style.backgroundColor="#140b05";if(fs)fs.classList.add("active")};</script>
 <script>
 (function bindTopNavFullScreen() {
-  const map = [
+  var map = [
     ['topHomeBtn', 'home'],
     ['searchToggleBtn', 'search'],
     ['grammarBtn', 'grammar'],
@@ -1416,7 +1416,7 @@ function toggleBindrune() {
     ['helpBtn', 'help']
   ];
   map.forEach(([id, view]) => {
-    const btn = document.getElementById(id);
+    var btn = document.getElementById(id);
     if (btn) {
       btn.removeAttribute('onclick');
       btn.onclick = function(e) {
