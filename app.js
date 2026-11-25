@@ -34,7 +34,14 @@ function renderHome() {
 }
 
 function filterByLetter(letter) {
-  if (!db) return showToast("Loading dictionary database...");
+  if (!db) {
+    window._pendingSearch = q;
+    if ($('listCard')) {
+      $('listCard').style.display = 'block';
+      $('listCard').innerHTML = '<div class="word-row" style="color:#e6c088;padding:16px;text-align:center;">Loading Old Norse dictionary database…</div>';
+    }
+    return;
+  }
   const stmt = db.prepare("SELECT id, headword, pos, gender FROM lemmas WHERE SUBSTR(LTRIM(headword, '*'),1,1) = ? ORDER BY sort_key, headword");
   stmt.bind([letter.toLowerCase()]);
   const rows = [];
@@ -262,7 +269,14 @@ window.onerror = (m, u, l) => { const st = $("subStatus"); if (st) { st.style.di
     }
     db = new SQL.Database(new Uint8Array(buf));
     st.style.display = 'none'; st.textContent = '';
-    renderHome();
+    if (window._pendingSearch) {
+      const pq = window._pendingSearch;
+      window._pendingSearch = null;
+      $('searchBox').value = pq;
+      $('searchBox').dispatchEvent(new Event('input'));
+    } else {
+      renderHome();
+    }
   } catch (err) {
     $('subStatus').style.display = 'block'; $('subStatus').textContent = 'Error loading database: ' + err.message;
   }
