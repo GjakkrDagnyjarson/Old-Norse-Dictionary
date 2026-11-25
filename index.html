@@ -1033,10 +1033,35 @@ async function triggerBifrostUpdate() {
   }
 }
 
+
+window.addEventListener('load', () => {
+  const wrapDisplayFn = (fnName) => {
+    if (typeof window[fnName] === 'function' && !window[fnName]._wrapped) {
+      const orig = window[fnName];
+      window[fnName] = function() {
+        const ao = document.getElementById('carvedAlphaOverlay');
+        if (ao) ao.style.display = 'none';
+        const ma = document.getElementById('mainArea');
+        if (ma) {
+          ma.style.background = 'rgba(18, 10, 5, 0.96)';
+          ma.style.border = '1.5px solid #7d562b';
+          ma.style.borderRadius = '12px';
+          ma.style.padding = '12px';
+          ma.style.boxSizing = 'border-box';
+        }
+        return orig.apply(this, arguments);
+      };
+      window[fnName]._wrapped = true;
+    }
+  };
+  wrapDisplayFn('renderList');
+  wrapDisplayFn('openEntry');
+});
+
 function openCarvedLetter(letter) {
   setMainView('letter');
   const lc = document.getElementById('listCard');
-  if (lc) lc.style.setProperty('display', 'block', 'important');
+  if (lc) lc.style.display = 'block';
   if (typeof filterByLetter === 'function') filterByLetter(letter);
 }
 
@@ -1053,14 +1078,16 @@ function setMainView(view) {
 
   // Hide all sub-page panels first
   if (sd) sd.style.display = 'none';
-  if (fc) fc.style.setProperty('display', 'none', 'important');
-  if (bc) bc.style.setProperty('display', 'none', 'important');
-  if (hc) hc.style.setProperty('display', 'none', 'important');
+  if (fc) fc.style.display = 'none';
+  if (bc) bc.style.display = 'none';
+  if (hc) hc.style.display = 'none';
 
+  const rt = document.getElementById('root');
   if (view === 'home') {
-    if (lc) lc.style.setProperty('display', 'none', 'important');
-    if (dc) dc.style.setProperty('display', 'none', 'important');
-    if (hb) hb.style.setProperty('display', 'none', 'important');
+    if (rt) rt.classList.remove('open');
+    if (lc) lc.style.display = 'none';
+    if (dc) dc.style.display = 'none';
+    if (hb) hb.style.display = 'none';
     const ao = document.getElementById('carvedAlphaOverlay'); if (ao) ao.style.display = 'flex';
     if (ma) {
       ma.style.background = 'transparent';
@@ -1071,6 +1098,7 @@ function setMainView(view) {
   }
 
   const aoHide = document.getElementById('carvedAlphaOverlay'); if (aoHide) aoHide.style.display = 'none';
+  if (rt) rt.classList.add('open');
   // Sub-page mode: solid dark wood backdrop over the carved alphabet grid
   if (ma) {
     ma.style.background = 'rgba(18, 10, 5, 0.96)';
@@ -1081,25 +1109,25 @@ function setMainView(view) {
   }
 
   if (view === 'search') {
-    if (lc) lc.style.setProperty('display', 'none', 'important');
-    if (dc) dc.style.setProperty('display', 'none', 'important');
+    if (lc) lc.style.display = 'none';
+    if (dc) dc.style.display = 'none';
     if (sd) sd.style.display = 'flex';
     if (sb) setTimeout(() => sb.focus(), 40);
   } else if (view === 'grammar') {
-    if (lc) lc.style.setProperty('display', 'none', 'important');
-    if (dc) dc.style.setProperty('display', 'block', 'important');
+    if (lc) lc.style.display = 'none';
+    if (dc) dc.style.display = 'block';
   } else if (view === 'futhark') {
-    if (lc) lc.style.setProperty('display', 'none', 'important');
-    if (dc) dc.style.setProperty('display', 'none', 'important');
-    if (fc) fc.style.setProperty('display', 'block', 'important');
+    if (lc) lc.style.display = 'none';
+    if (dc) dc.style.display = 'none';
+    if (fc) fc.style.display = 'block';
   } else if (view === 'bindrune') {
-    if (lc) lc.style.setProperty('display', 'none', 'important');
-    if (dc) dc.style.setProperty('display', 'none', 'important');
-    if (bc) bc.style.setProperty('display', 'block', 'important');
+    if (lc) lc.style.display = 'none';
+    if (dc) dc.style.display = 'none';
+    if (bc) bc.style.display = 'block';
   } else if (view === 'help') {
-    if (lc) lc.style.setProperty('display', 'none', 'important');
-    if (dc) dc.style.setProperty('display', 'none', 'important');
-    if (hc) hc.style.setProperty('display', 'block', 'important');
+    if (lc) lc.style.display = 'none';
+    if (dc) dc.style.display = 'none';
+    if (hc) hc.style.display = 'block';
   }
 }
 
