@@ -859,7 +859,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.15</div>
+<div id="homeVersionFooter">ver 4.16</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1917,7 +1917,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.15</div>
+<div id="homeVersionFooter">ver 4.16</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -2676,8 +2676,8 @@ function swapVerticalLangs() {
   window._transDir = (window._transDir === 'on-en') ? 'en-on' : 'on-en';
   var isOnEn = window._transDir === 'on-en';
   var sL = document.getElementById('tSrcLang'), dL = document.getElementById('tDstLang');
-  if (sL) sL.textContent = isOnEn ? 'OLD NORSE' : 'ENGLISH';
-  if (dL) dL.textContent = isOnEn ? 'ENGLISH' : 'OLD NORSE';
+  if (sL) sL.textContent = (window._transDir === 'on-en') ? 'OLD NORSE' : 'ENGLISH';
+  if (dL) dL.textContent = (window._transDir === 'on-en') ? 'ENGLISH' : 'OLD NORSE';
   var inp = document.getElementById('translateInput'), out = document.getElementById('translateOutputBox');
   if (inp && out && out.textContent && out.textContent !== 'Translation') inp.value = out.textContent;
   if (inp) runVerticalTranslate(inp.value);
@@ -2780,7 +2780,7 @@ function translateLineOrdered(line, isOnEn, map) {
     var prevLw = wi > 0 ? parts[wordIdx[wi - 1]].normalize('NFC').toLowerCase() : '';
     var prevIsPrep = !!ON_PREPS[prevLw];
     var isCap = orig.charAt(0) === orig.charAt(0).toUpperCase() && orig.charAt(0) !== orig.charAt(0).toLowerCase();
-    if (isOnEn) {
+    if ((window._transDir === 'on-en')) {
       var tokObj = analyzeOnToken(orig, map, prevIsPrep, sawVerb);
       if (tokObj.role === 'verb') sawVerb = true;
       tokObj.isCap = isCap;
@@ -2793,14 +2793,14 @@ function translateLineOrdered(line, isOnEn, map) {
 
   for (var j = 0; j < outWords.length - 1; j++) {
     var cur = outWords[j], nxt = outWords[j + 1];
-    if (isOnEn && (nxt.role === 'poss' || ON_DEM[nxt.lw]) && cur.role !== 'verb' && cur.role !== 'poss') {
+    if ((window._transDir === 'on-en') && (nxt.role === 'poss' || ON_DEM[nxt.lw]) && cur.role !== 'verb' && cur.role !== 'poss') {
       var mPoss = ON_DEM[nxt.lw] || nxt.text;
       var mNoun = cur.text.replace(/^the /, '');
       if (cur.isCap) mPoss = mPoss.charAt(0).toUpperCase() + mPoss.slice(1);
       outWords[j] = { text: mPoss, isCap: false, role: 'poss' };
       outWords[j + 1] = { text: mNoun.toLowerCase(), isCap: false, role: 'noun' };
       j++;
-    } else if (!isOnEn && cur.role === 'poss' && nxt.role !== 'poss') {
+    } else if (!(window._transDir === 'on-en') && cur.role === 'poss' && nxt.role !== 'poss') {
       var mOnNoun = nxt.text;
       var mOnPoss = cur.text.toLowerCase();
       if (cur.isCap) mOnNoun = mOnNoun.charAt(0).toUpperCase() + mOnNoun.slice(1);
@@ -2810,7 +2810,7 @@ function translateLineOrdered(line, isOnEn, map) {
     }
   }
 
-  if (isOnEn && outWords.length >= 3 && ON_V2_ADV[outWords[0].lw]) {
+  if ((window._transDir === 'on-en') && outWords.length >= 3 && ON_V2_ADV[outWords[0].lw]) {
     var w1 = outWords[1], w2 = outWords[2];
     if (w1.role === 'verb' && (w2.role === 'subj' || w2.cas === 'NOM')) {
       outWords[1] = w2;
@@ -2843,7 +2843,7 @@ function runVerticalTranslate(raw) {
   }
   out.style.color = '#ffd096';
   var map = (window._transDir === 'on-en') ? window._glossMap.on : window._glossMap.en;
-  var lines = txt.split('\n').map(function(line) { return translateLineOrdered(line, isOnEn, map); });
+  var lines = txt.split('\n').map(function(line) { return translateLineOrdered(line, (window._transDir === 'on-en'), map); });
   out.textContent = lines.join('\n');
 }
 
