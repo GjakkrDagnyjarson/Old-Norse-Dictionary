@@ -877,7 +877,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=142"></script>
+  <script src="app.js?v=143"></script>
 <script>
 const YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
@@ -1026,11 +1026,11 @@ async function triggerBifrostUpdate() {
 
     if (jsRes.ok) {
       const freshJs = await jsRes.text();
-      const oldApp = document.querySelector('script[src*="app.js"]');
-      if (oldApp) oldApp.remove();
-      const s = document.createElement('script');
-      s.textContent = freshJs;
-      document.body.appendChild(s);
+      if (window._lastAppJsText && window._lastAppJsText !== freshJs) {
+        window.location.reload();
+        return;
+      }
+      window._lastAppJsText = freshJs;
     }
 
     // 3. Refresh baseline stamps and turn off glow

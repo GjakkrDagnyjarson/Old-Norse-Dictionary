@@ -1,4 +1,4 @@
-let db = null;
+var db = null;
 const $ = id => document.getElementById(id);
 
 function showToast(msg) {
