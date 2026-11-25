@@ -73,7 +73,7 @@ function translateEnToOnGrammar(line, map) {
     var gen = /'s$/.test(lw), stem = gen ? lw.slice(0, -2) : lw, isPl = false, meta = map.meta ? map.meta[stem] : null;
     if (!meta && stem.length > 3 && stem.endsWith('s') && map.meta && map.meta[stem.slice(0, -1)]) { meta = map.meta[stem.slice(0, -1)]; isPl = true; }
     var tCas = gen ? 'GEN' : cas, tNum = isPl ? 'PL' : 'SG', tDef = def ? 'DEF' : '';
-    var w = meta ? lookupInflectedOn(meta.id, tCas, tNum, tDef, meta.hw) : (map.en[stem] || core);
+    var w = meta ? lookupInflectedOn(meta.id, tCas, tNum, tDef, meta.hw) : ((map && map.en && map.en[stem]) || core);
     var role = meta && meta.pos.indexOf('verb') !== -1 ? 'verb' : (tCas === 'NOM' ? 'subj' : 'noun');
     out.push({t:w, r:role, c:poss ? poss.c : isCap, p:poss ? '' : punct});
     if (poss) { out.push({t:poss.b, r:'poss', c:false, p:punct}); poss = null; }
