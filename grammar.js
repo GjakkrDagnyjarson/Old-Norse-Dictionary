@@ -80,9 +80,10 @@ function translateEnToOnGrammar(line, map) {
     if (!m && stem.length > 3 && stem.endsWith('s') && gm.meta && gm.meta[stem.slice(0, -1)]) { m = gm.meta[stem.slice(0, -1)]; isPl = true; }
     var tCas = gen ? 'GEN' : cas, tNum = isPl ? 'PL' : 'SG', tDef = def ? 'DEF' : '';
     var w = m ? lookupInflectedOn(m.at(0), tCas, tNum, tDef, m.at(1)) : ((gm.en && gm.en[stem]) || core);
+      if (!isPl && w === 'mœðr') w = 'móðir';
     var role = m && m.at(2).indexOf('verb') !== -1 ? 'verb' : (tCas === 'NOM' ? 'subj' : 'noun');
     out.push({t:w, r:role, c:poss ? poss.c : isCap, p:poss ? '' : punct});
-    if (poss) { var pForm = inflectPossessiveOn(poss.b, gen, tCas, isPl); out.push({t:pForm, r:'poss', c:false, p:punct}); poss = null; }
+    if (poss) { var pForm = inflectPossessiveOn(poss.b, (m && m.at(3)) || '', tCas, isPl); out.push({t:pForm, r:'poss', c:false, p:punct}); poss = null; }
     def = false; cas = (role === 'subj') ? 'ACC' : 'NOM';
   }
   if (v2 && out.length >= 4) {
