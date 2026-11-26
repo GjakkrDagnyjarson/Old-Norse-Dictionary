@@ -21,11 +21,69 @@ function stripOnDiacritics(s) {
     .replace(/æ/g, 'ae').replace(/œ/g, 'oe').replace(/ð/g, 'd').replace(/þ/g, 'th');
 }
 
-function resolveOnToken(lw, map) {
+function cleanOnGloss(raw, gm, depth) {
+  if (!raw || typeof raw !== 'string') return raw;
+  var s = raw.trim();
+  // Follow "inflection of X" / "form of X" / "plural of X" / "past of X" recursively across all 100k+ entries
+  var m = s.match(/^(?:inflection|form|plural|singular|genitive|dative|accusative|nominative|past|participle|comparative|superlative)\s+of\s+([a-záéíóúýǫøæœðþ]+)/i);
+  if (m && gm && gm.on && (depth || 0) < 3) {
+    var target = m.at(1).toLowerCase();
+    if (gm.on[target]) return cleanOnGloss(gm.on[target], gm, (depth || 0) + 1);
+  }
+  // Strip dictionary meta-notes globally
+  s = s.replace(/\boften spelt\b.*$/i, '')
+       .replace(/\balternative form of\b.*$/i, '')
+       .replace(/\bof a plant\b/gi, '')
+       .replace(/\([^)]*\)/g, '')
+       .replace(/\s{2,}/g, ' ')
+       .replace(/[,;:\s]+$/, '')
+       .trim();
+  return s || raw;
+}
+
+function resolveOnToken(lw, map, _depth) {
   var gm = (window._glossMap && window._glossMap.on) ? window._glossMap : { on: map || {} };
   if (!lw || !gm.on) return null;
   var w = String(lw).normalize('NFC').toLowerCase();
-  if (gm.on[w]) return gm.on[w];
+  if (gm.on[w]) return cleanOnGloss(gm.on[w], gm, _depth);
+
+  // Layer 1: Peel enclitic definite articles & middle-voice/reflexive suffixes globally
+  var artMatch = w.match(/^(.{2,}?)(arnir|irnir|urnar|anar|unum|anna|inn|in|it|na|nu)$/);
+  var refMatch = w.match(/^(.{2,}?)(skt|sk|st|zt)$/);
+  if (refMatch && (_depth || 0) < 2) {
+    var baseRef = resolveOnToken(refMatch.at(1), gm.on, (_depth || 0) + 1)
+               || resolveOnToken(refMatch.at(1) + 'a', gm.on, (_depth || 0) + 1)
+               || resolveOnToken(refMatch.at(1) + 'ask', gm.on, (_depth || 0) + 1);
+    if (baseRef) return baseRef;
+  }
+  if (artMatch && (_depth || 0) < 2) {
+    var baseArt = resolveOnToken(artMatch.at(1), gm.on, (_depth || 0) + 1)
+               || resolveOnToken(artMatch.at(1) + 'r', gm.on, (_depth || 0) + 1);
+    if (baseArt && !/^the\b/i.test(baseArt)) return 'the ' + baseArt;
+    if (baseArt) return baseArt;
+  }
+
+  // Layer 2: Universal inflectional stemmer + u-umlaut restoration (ǫ -> a, ø -> o)
+  var stems = [
+    w,
+    w.replace(/(um|ar|ir|ur|an|in|un|na|ra|ði|ti|du|tu)$/, ''),
+    w.replace(/(r|s|i|u|a|t)$/, ''),
+    w.replace(/(um|ar|ir|ur|an|in|un|na|r|s|i|u|a|t)$/, '')
+  ];
+  for (var i = 0; i < stems.length; i++) {
+    var st = stems[i];
+    if (!st || st.length < 2) continue;
+    var unUmlaut = st.replace(/ǫ/g, 'a').replace(/ø/g, 'o');
+    var cands = [
+      st, st + 'r', st + 'a', st + 'i', st + 'u',
+      unUmlaut, unUmlaut + 'r', unUmlaut + 'a', unUmlaut + 'i', unUmlaut + 'u'
+    ];
+    for (var j = 0; j < cands.length; j++) {
+      if (gm.on[cands[j]]) return cleanOnGloss(gm.on[cands[j]], gm, _depth);
+    }
+  }
+
+  // Layer 3: Diacritic-insensitive fallback (e.g., min -> mín, modir -> móðir)
   if (!gm._normOn) {
     gm._normOn = {};
     var keys = Object.keys(gm.on);
@@ -35,18 +93,8 @@ function resolveOnToken(lw, map) {
     }
   }
   var nw = stripOnDiacritics(w);
-  if (gm._normOn[nw]) return gm._normOn[nw];
-  var strip = w.replace(/(inn|in|it|num|nar|nna|sk|st)$/, '');
-  if (strip && gm.on[strip]) return gm.on[strip];
-  var stems = [w.replace(/(um|ar|ir|ur|an|na)$/, ''), w.replace(/(r|s|i|u|a)$/, ''), strip.replace(/(um|ar|ir|ur|r|s|i|u|a)$/, '')];
-  for (var i = 0; i < stems.length; i++) {
-    var st = stems.at(i);
-    if (!st || st.length < 2) continue;
-    var cands = [st, st + 'r', st + 'a', st.replace(/ǫ/g, 'a'), st.replace(/ǫ/g, 'a') + 'a', st.replace(/e/g, 'a') + 'a'];
-    for (var j = 0; j < cands.length; j++) {
-      if (gm.on[cands.at(j)]) return gm.on[cands.at(j)];
-    }
-  }
+  if (gm._normOn[nw]) return cleanOnGloss(gm._normOn[nw], gm, _depth);
+
   return null;
 }
 
@@ -131,6 +179,13 @@ function reorderOnToEnClauses(words) {
   var i = 0;
   while (i < words.length) {
     var w = words[i];
+    // Handle post-posed possessives globally: [Noun] + [Poss] (e.g., "gǫtu þinni" -> "your path")
+    if ((w.role === 'subj' || w.role === 'obj' || w.pos === 'noun') && (i + 1) < words.length && words[i + 1].role === 'poss') {
+      var pTok = words[i + 1];
+      chunks.push({ role: w.role, cas: w.cas || '', items: [pTok, w] });
+      i += 2;
+      continue;
+    }
     if (w.role === 'poss' || w.pos === 'adj' || w.pos === 'det') {
       var grp = [w];
       var j = i + 1;
