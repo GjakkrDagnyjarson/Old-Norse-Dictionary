@@ -769,7 +769,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   animation: bifrostUpdateGlow 1.8s ease-in-out infinite;
 }
 </style>
-<script src="grammar.js?v=4.25"></script>
+<script src="grammar.js?v=4.27"></script>
 </head>
 <body>
 <style id="fullPageViewStyle">
@@ -859,7 +859,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.25</div>
+<div id="homeVersionFooter">ver 4.27</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1917,7 +1917,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.25</div>
+<div id="homeVersionFooter">ver 4.27</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -2628,18 +2628,18 @@ function ensureTranslateUI() {
       '<button type="button" onclick="swapVerticalLangs()" style="background:#3a2210;border:1.5px solid #b88446;border-radius:6px;color:#ffe2b0;font-weight:bold;font-size:13px;padding:4px 12px;cursor:pointer;">⇄</button>' +
       '<span id="tDstLang" style="flex:1;text-align:center;color:#f0d3a2;font-size:12px;font-weight:bold;letter-spacing:0.5px;">ENGLISH</span>' +
     '</div>' +
-    '<div style="display:grid;grid-template-columns:1fr;grid-template-rows:1fr 1fr;gap:10px;flex:1;min-height:0;">' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;min-height:0;">' +
       '<div style="background:#1c1008;border:1.5px solid #6e4e26;border-radius:10px;padding:10px;display:flex;flex-direction:column;min-height:0;">' +
         '<div style="display:flex;justify-content:flex-end;margin-bottom:6px;flex-shrink:0;">' +
           '<button type="button" onclick="clearVerticalTrans()" style="background:#2b190c;border:1px solid #6e4e26;border-radius:5px;color:#e6c088;font-size:12px;padding:4px 10px;cursor:pointer;">Clear</button>' +
         '</div>' +
-        '<textarea id="translateInput" oninput="runVerticalTranslate(this.value)" placeholder="Type here..." style="flex:1;width:100%;box-sizing:border-box;background:transparent;border:none;outline:none;resize:none;color:#f3d6a8;font-size:18px;line-height:1.5;font-family:inherit;"></textarea>' +
+        '<textarea id="translateInput" oninput="runVerticalTranslate(this.value)" placeholder="Type here..." style="flex:1;width:100%;box-sizing:border-box;background:transparent;border:none;outline:none;resize:none;color:#f3d6a8;font-size:14px;line-height:1.55;font-family:inherit;"></textarea>' +
       '</div>' +
       '<div style="background:#160d06;border:1.5px solid #5c3f21;border-radius:10px;padding:10px;display:flex;flex-direction:column;min-height:0;">' +
         '<div style="display:flex;justify-content:flex-end;margin-bottom:6px;flex-shrink:0;">' +
           '<button type="button" id="tCopyBtn" onclick="copyVerticalTrans()" style="background:#2b190c;border:1px solid #6e4e26;border-radius:5px;color:#e6c088;font-size:12px;padding:4px 10px;cursor:pointer;">Copy</button>' +
         '</div>' +
-        '<div id="translateOutputBox" style="flex:1;overflow-y:auto;color:#8a6b43;font-size:18px;line-height:1.5;white-space:pre-wrap;word-break:break-word;">Translation</div>' +
+        '<div id="translateOutputBox" style="flex:1;overflow-y:auto;color:#8a6b43;font-size:14px;line-height:1.55;white-space:pre-wrap;word-break:break-word;">Translation</div>' +
       '</div>' +
     '</div>';
   document.body.appendChild(tc);
