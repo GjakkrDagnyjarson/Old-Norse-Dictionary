@@ -769,7 +769,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   animation: bifrostUpdateGlow 1.8s ease-in-out infinite;
 }
 </style>
-<script src="grammar.js?v=4.29"></script>
+<script src="grammar.js?v=4.30"></script>
 </head>
 <body>
 <style id="fullPageViewStyle">
@@ -859,7 +859,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.29</div>
+<div id="homeVersionFooter">ver 4.30</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1613,7 +1613,7 @@ function copyVerticalTrans() {
 }
 
 
-var ON_POSS = {'minn':'my','mín':'my','mitt':'my','mínum':'my','mínir':'my','mínar':'my','mína':'my','míns':'my','minnar':'my','þinn':'your','þín':'your','þitt':'your','þínum':'your','sinn':'his','sín':'his','sitt':'his','sínum':'his','várr':'our','vár':'our','várt':'our','várum':'our'};
+var ON_POSS = {'min':'my','mitt':'my','minn':'my','minir':'my','minar':'my','minum':'my','minn':'my','mín':'my','mitt':'my','mínum':'my','mínir':'my','mínar':'my','mína':'my','míns':'my','minnar':'my','þinn':'your','þín':'your','þitt':'your','þínum':'your','sinn':'his','sín':'his','sitt':'his','sínum':'his','várr':'our','vár':'our','várt':'our','várum':'our'};
 var ON_DEM = {'þessi':'this','þetta':'this','þessir':'these','þessar':'these','þessu':'this','þessum':'these','sá':'that','sú':'that','þat':'that','þeir':'those','þær':'those','þau':'those'};
 var EN_POSS_TO_ON = {'my':'minn','your':'þinn','thy':'þinn','his':'sinn','her':'hennar','our':'várr','their':'þeirra'};
 var ON_PAST_VERBS = {'sagði':'said','sögðu':'said','mælti':'spoke','mæltu':'spoke','skreið':'crept','skriðu':'crept','var':'was','váru':'were','hafði':'had','höfðu':'had','fór':'went','fóru':'went','kom':'came','kómu':'came','sá':'saw','sáu':'saw','tók':'took','tóku':'took','gaf':'gave','gáfu':'gave','féll':'fell','féllu':'fell','dó':'died','dóu':'died','reið':'rode','riðu':'rode','bar':'bore','báru':'bore','drakk':'drank','drukku':'drank','fann':'found','fundu':'found','gekk':'walked','gengu':'walked','hét':'was called','hétu':'were called','leit':'looked','litu':'looked','nam':'took','námu':'took','stóð':'stood','stóðu':'stood','varð':'became','urðu':'became','vissi':'knew','vissu':'knew','þótti':'seemed','þóttu':'seemed','mátti':'might','skyldi':'should','vildi':'would'};
@@ -1726,12 +1726,8 @@ function translateLineOrdered(line, isOnEn, map) {
     }
   }
 
-  if ((window._transDir === 'on-en') && outWords.length >= 3 && ON_V2_ADV[outWords[0].lw]) {
-    var w1 = outWords[1], w2 = outWords[2];
-    if (w1.role === 'verb' && (w2.role === 'subj' || w2.cas === 'NOM')) {
-      outWords[1] = w2;
-      outWords[2] = w1;
-    }
+  if (window._transDir === 'on-en' && typeof reorderOnToEnClauses === 'function') {
+    outWords = reorderOnToEnClauses(outWords);
   }
 
   for (var m = 0; m < wordIdx.length; m++) {
