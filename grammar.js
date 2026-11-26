@@ -149,15 +149,19 @@ function reorderOnToEnClauses(words) {
     i++;
   }
 
-  // Case 1: OVS (e.g., "Þat mælti mín móðir" -> [obj: Þat] [verb: mælti] [subj: mín móðir])
-  if (chunks.length >= 3 && chunks.at(0).role === 'obj' && chunks.at(1).role === 'verb') {
+  var c0 = chunks.at(0), c1 = chunks.at(1);
+  var c0Word = (c0 && c0.items && c0.items.at(0)) ? c0.items.at(0).lw : '';
+  var c0IsAmbObj = (c0 && (c0.role === 'obj' || c0.cas === 'ACC' || c0.cas === 'DAT' || c0Word === 'þat' || c0Word === 'hann' || c0Word === 'hon'));
+
+  // Case 1: OVS (e.g., "Þat mælti mín móðir" -> [obj: Þat] [verb: mælti] [subj: mín móðir] -> SVO)
+  if (chunks.length >= 3 && c0IsAmbObj && c1 && c1.role === 'verb') {
     var subjIdx = -1;
     for (var s = 2; s < chunks.length; s++) {
       if (chunks[s].role === 'subj' || chunks[s].cas === 'NOM') { subjIdx = s; break; }
     }
     if (subjIdx !== -1) {
-      var objChunk = chunks.at(0);
-      var verbChunk = chunks.at(1);
+      var objChunk = c0;
+      var verbChunk = c1;
       var subjChunk = chunks[subjIdx];
       if (objChunk.items.length === 1 && objChunk.items.at(0).lw === 'þat') {
         objChunk.items.at(0).text = 'that';
@@ -175,11 +179,12 @@ function reorderOnToEnClauses(words) {
     }
   }
 
-  // Case 2: Adv + V + Subj (VSO after fronted adverbial, e.g., "Þá mælti mín móðir")
-  if (chunks.length >= 3 && chunks.at(1).role === 'verb' && (chunks.at(2).role === 'subj' || chunks.at(2).cas === 'NOM')) {
+  // Case 2: Adv + V + Subj (VSO only after fronted adverbials like "Þá mælti mín móðir")
+  var isFrontedAdv = (typeof ON_V2_ADV !== 'undefined' && ON_V2_ADV[c0Word]) || (c0 && c0.items && c0.items.at(0) && c0.items.at(0).pos === 'adv');
+  if (chunks.length >= 3 && isFrontedAdv && c1 && c1.role === 'verb' && (chunks.at(2).role === 'subj' || chunks.at(2).cas === 'NOM')) {
     var vChunk = chunks.at(1);
-    chunks[1] = chunks.at(2);
-    chunks[2] = vChunk;
+    chunks = chunks.at(2);
+    chunks = vChunk;
     var flat2 = [];
     for (var r2 = 0; r2 < chunks.length; r2++) {
       for (var k2 = 0; k2 < chunks[r2].items.length; k2++) flat2.push(chunks[r2].items[k2]);
