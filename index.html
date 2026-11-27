@@ -859,7 +859,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.44</div>
+<div id="homeVersionFooter">ver 4.45</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1631,7 +1631,9 @@ function runSkaldicAnalyzer() {
     return '<div style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:8px 10px;font-size:13px;"><div style="display:flex;justify-content:space-between;color:#ffd28d;font-weight:bold;"><span>'+(i+1)+'. '+line+'</span><span style="color:'+(ok?'#9be082':'#f0b875')+';">'+syl+' syl (tgt '+tgt+')</span></div><div style="font-size:12px;color:#d6b88d;margin-top:3px;">'+(allit?allit+' · ':'')+'Hendingar: '+(rh.join(', ')||'none')+'</div></div>';
   }).join('');
 }
+var _origOpenFS = window.openFullscreenView;
 window.openFullscreenView = function(v) {
+  if (typeof _origOpenFS === 'function') _origOpenFS(v);
   var fs = document.getElementById('fullscreenPage'), fb = document.getElementById('fsBody'), tc = document.getElementById('translateCard');
   if (!fs || !fb) return;
   if (tc && tc.parentElement !== fb) fb.appendChild(tc);
