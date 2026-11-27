@@ -769,7 +769,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   animation: bifrostUpdateGlow 1.8s ease-in-out infinite;
 }
 </style>
-<script src="grammar.js?v=4.33"></script>
+<script src="grammar.js?v=4.34"></script>
 </head>
 <body>
 <style id="fullPageViewStyle">
@@ -859,7 +859,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.33</div>
+<div id="homeVersionFooter">ver 4.34</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1636,7 +1636,7 @@ function pluralizeEnWord(w) {
 function getWordGrammar(lw) {
   if (typeof db === 'undefined' || !db) return null;
   try {
-    var st = db.prepare("SELECT l.pos, l.gender, wf.case_name, wf.number, wf.definiteness FROM wordforms wf JOIN lemmas l ON wf.lemma_id = l.id WHERE LOWER(wf.form) = ? LIMIT 1");
+    var st = db.prepare("SELECT l.pos, l.gender, wf.case_name, wf.number, wf.definiteness FROM wordforms wf JOIN lemmas l ON wf.lemma_id = l.id WHERE LOWER(wf.form) = ? ORDER BY CASE UPPER(COALESCE(wf.case_name,'')) WHEN 'NOM' THEN 1 WHEN 'ACC' THEN 2 WHEN 'DAT' THEN 3 WHEN 'GEN' THEN 4 ELSE 5 END LIMIT 1");
     st.bind([lw]);
     var r = st.step() ? st.getAsObject() : null;
     st.free();
@@ -1672,9 +1672,10 @@ function analyzeOnToken(orig, map, prevIsPrep, afterVerb) {
   if (pos.indexOf('noun') !== -1 || (!pos && (cas || def || num))) {
     if (num === 'PL') base = pluralizeEnWord(base);
     if (def === 'DEF') base = 'the ' + base;
-    if (cas === 'GEN') {
-      base = /s$/.test(base) ? base + "'" : base + "'s";
-    } else if (cas === 'DAT' && !prevIsPrep && afterVerb) {
+    var isResolved = (base.toLowerCase() !== orig.toLowerCase());
+  if (isResolved && cas === 'GEN' && pos.indexOf('noun') !== -1) {
+    base = /s$/.test(base) ? base + "'" : base + "'s";
+  } else if (cas === 'DAT' && !prevIsPrep && afterVerb) {
       base = 'to ' + base;
     }
   }
