@@ -14,6 +14,17 @@ function buildGlossMapFromDb() {
     .catch(function(e) { window._glossLoading = false; console.error(e); });
 }
 
+var CORE_ON_GLOSS = {
+  'at': 'to', 'í': 'in', 'á': 'on', 'af': 'of', 'við': 'with', 'um': 'about', 'undir': 'under', 'yfir': 'over',
+  'ok': 'and', 'en': 'but', 'eða': 'or', 'er': 'is', 'var': 'was', 'váru': 'were', 'sé': 'be',
+  'þat': 'it', 'þetta': 'this', 'sá': 'that', 'sú': 'that', 'þeir': 'they', 'þær': 'they', 'þau': 'they',
+  'ek': 'I', 'mik': 'me', 'mér': 'me', 'mín': 'my', 'minn': 'my', 'mitt': 'my',
+  'þú': 'you', 'þik': 'you', 'þér': 'you', 'þín': 'your', 'þinn': 'your', 'þitt': 'your',
+  'hann': 'he', 'hon': 'she', 'hana': 'her', 'henni': 'her', 'honum': 'him',
+  'sér': 'sees', 'sjá': 'see', 'sá': 'saw', 'mælti': 'spoke', 'mælir': 'speaks', 'sagði': 'said',
+  'opnast': 'opens', 'opnask': 'opens', 'bein': 'bone', 'beini': 'bone', 'steinn': 'stone', 'steini': 'stone'
+};
+
 function stripOnDiacritics(s) {
   return String(s || '').normalize('NFC').toLowerCase()
     .replace(/[áàâä]/g, 'a').replace(/[éèêë]/g, 'e').replace(/[íìîï]/g, 'i')
@@ -36,7 +47,7 @@ function cleanOnGloss(raw, gm, depth) {
        .replace(/\bof a plant\b/gi, '')
        .replace(/\([^)]*\)/g, '')
        .replace(/\s{2,}/g, ' ')
-       .replace(/[,;:\s]+$/, '')
+       .split(/\s*[,;/]\s*/).at(0).replace(/[,;:\s]+$/, '')
        .trim();
   return s || raw;
 }
@@ -45,6 +56,7 @@ function resolveOnToken(lw, map, _depth) {
   var gm = (window._glossMap && window._glossMap.on) ? window._glossMap : { on: map || {} };
   if (!lw || !gm.on) return null;
   var w = String(lw).normalize('NFC').toLowerCase();
+  if (CORE_ON_GLOSS[w]) return CORE_ON_GLOSS[w];
   if (gm.on[w]) return cleanOnGloss(gm.on[w], gm, _depth);
 
   // Layer 1: Peel enclitic definite articles & middle-voice/reflexive suffixes globally
