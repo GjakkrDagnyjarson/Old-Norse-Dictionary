@@ -123,35 +123,58 @@ function lookupInflectedOn(id, cas, num, def, fb) {
 
 function translateEnToOnGrammar(line, map) {
   var gm = (window._glossMap && window._glossMap.en) ? window._glossMap : { en: map || {}, meta: {} };
-  var PREP = {'to':{o:'til',c:'GEN'},'from':{o:'frá',c:'DAT'},'of':{o:'af',c:'DAT'},'with':{o:'með',c:'DAT'},'in':{o:'í',c:'DAT'},'into':{o:'í',c:'ACC'},'on':{o:'á',c:'DAT'},'onto':{o:'á',c:'ACC'},'at':{o:'at',c:'DAT'},'for':{o:'fyrir',c:'DAT'},'after':{o:'eptir',c:'ACC'},'about':{o:'um',c:'ACC'},'against':{o:'við',c:'DAT'}};
-  var PAST = {'went':'fór','said':'sagði','spoke':'mælti','came':'kom','saw':'sá','took':'tók','gave':'gaf','fell':'fell','died':'dó','was':'var','were':'váru','had':'hafði','knew':'vissi','stood':'stóð','walked':'gekk','rode':'reið'};
-  var toks = line.trim().split(/\s+/), out = [], def = false, cas = 'NOM', poss = null, plSubj = false, v2 = false;
+  var SUBJ = {'i':'ek','you':'þú','he':'hann','she':'hón','it':'þat','we':'vér','they':'þeir'};
+  var OBJ  = {'me':'mik','you':'þik','him':'hann','her':'hana','it':'þat','us':'oss','them':'þá'};
+  var PREP = {'in':{b:'í',c:'DAT'},'into':{b:'í',c:'ACC'},'on':{b:'á',c:'DAT'},'onto':{b:'á',c:'ACC'},'at':{b:'at',c:'DAT'},'for':{b:'fyrir',c:'DAT'},'after':{b:'eptir',c:'ACC'},'about':{b:'um',c:'ACC'},'with':{b:'með',c:'DAT'},'by':{b:'at',c:'DAT'},'from':{b:'af',c:'DAT'},'to':{b:'til',c:'GEN'},'of':{b:'af',c:'DAT'},'under':{b:'undir',c:'DAT'},'over':{b:'yfir',c:'DAT'}};
+  var EN_3SG_ON = {'sees':'sér','opens':'opnast','speaks':'mælir','says':'segir','stands':'stendr','knows':'veit','goes':'ferr','comes':'kemr','gives':'gefr','takes':'tekr'};
+  var PAST = {'went':'fór','said':'sagði','spoke':'mælti','came':'kom','saw':'sá','took':'tók','gave':'gaf','fell':'féll','died':'dó','was':'var','were':'váru','had':'hafði','knew':'vissi','stood':'stóð','walked':'gekk','rode':'reið'};
+  var toks = line.trim().split(/\s+/), out = [], cas = 'NOM', pSubj = false, v2 = false;
+  var def = false, poss = null;
+
   for (var i = 0; i < toks.length; i++) {
-    var orig = toks.at(i), pm = orig.match(/([.,!?;:]+)$/), punct = pm ? pm.at(1) : '', core = orig.replace(/[.,!?;:]+$/g, ''), lw = core.toLowerCase();
+    var orig = toks[i], m = orig.match(/^([^.,!?;:]+)([.,!?;:]*)$/);
+    var core = m ? m[1] : orig, punct = m ? m[2] : '';
     var isCap = core && core.charAt(0) === core.charAt(0).toUpperCase() && core.charAt(0) !== core.charAt(0).toLowerCase();
-    if (!lw || lw === 'a' || lw === 'an') continue;
+    var lw = core.toLowerCase();
+
+    if (lw === 'a' || lw === 'an') continue;
     if (lw === 'the') { def = true; continue; }
-    if (PREP[lw]) { out.push({t:PREP[lw].o, r:'prep', c:isCap, p:punct}); cas = PREP[lw].c; if (i === 0) v2 = true; continue; }
+    if (PREP[lw]) { out.push({t:PREP[lw].b, r:'prep', c:isCap, p:punct}); cas = PREP[lw].c; if (i === 0) v2 = true; continue; }
     if (typeof EN_POSS_TO_ON !== 'undefined' && EN_POSS_TO_ON[lw]) { poss = {b:EN_POSS_TO_ON[lw], c:isCap}; continue; }
-    if (lw === 'they' || lw === 'we' || lw === 'you') plSubj = true;
-    if ((lw === 'then' || lw === 'now' || lw === 'here' || lw === 'there') && i === 0) v2 = true;
-    if (PAST[lw]) { out.push({t:PAST[lw], r:'verb', c:isCap, p:punct}); cas = 'ACC'; continue; }
-    var gen = /'s$/.test(lw), stem = gen ? lw.slice(0, -2) : lw, isPl = false, m = gm.meta ? gm.meta[stem] : null;
-    if (!m && stem.length > 3 && stem.endsWith('s') && gm.meta && gm.meta[stem.slice(0, -1)]) { m = gm.meta[stem.slice(0, -1)]; isPl = true; }
-    var tCas = gen ? 'GEN' : cas, tNum = isPl ? 'PL' : 'SG', tDef = def ? 'DEF' : '';
-    var w = m ? lookupInflectedOn(m.at(0), tCas, tNum, tDef, m.at(1)) : ((gm.en && gm.en[stem]) || core);
-      if (!isPl && w === 'mœðr') w = 'móðir';
-    var role = m && m.at(2).indexOf('verb') !== -1 ? 'verb' : (tCas === 'NOM' ? 'subj' : 'noun');
-    out.push({t:w, r:role, c:poss ? poss.c : isCap, p:poss ? '' : punct});
-    if (poss) { var pForm = inflectPossessiveOn(poss.b, (m && m.at(3)) || '', tCas, isPl); out.push({t:pForm, r:'poss', c:false, p:punct}); poss = null; }
+    if (EN_3SG_ON[lw]) { out.push({t:EN_3SG_ON[lw], r:'verb', c:isCap, p:punct}); pSubj = false; continue; }
+    if (lw === 'then' || lw === 'now' || lw === 'here' || lw === 'there') { if (i === 0) v2 = true; }
+    if (SUBJ[lw] && (i === 0 || pSubj)) { out.push({t:SUBJ[lw], r:'subj', c:isCap, p:punct}); pSubj = false; continue; }
+    if (OBJ[lw]) { out.push({t:OBJ[lw], r:'obj', c:isCap, p:punct}); cas = 'ACC'; continue; }
+    if (PAST[lw]) { out.push({t:PAST[lw], r:'verb', c:isCap, p:punct}); pSubj = false; continue; }
+
+    var gen = /'s$/.test(lw), baseLw = lw.replace(/'s$/, '');
+    var isPl = baseLw.length > 3 && /s$/.test(baseLw) && !gm.meta[baseLw] && !gm.en[baseLw];
+    var stem = isPl ? baseLw.slice(0, -1) : baseLw;
+    var meta = gm.meta[stem] || null;
+    var tCas = gen ? 'GEN' : cas, tNum = isPl ? 'PL' : 'SG', tDef = def ? 'DEF' : 'INDEF';
+    var w = meta ? lookupInflectedOn(meta[0], tCas, tNum, tDef, meta[1]) : ((gm.en && gm.en[stem]) || core);
+    if (!isPl && w === 'mœðr') w = 'móðir';
+    var role = meta && meta[2].indexOf('verb') !== -1 ? 'verb' : (tCas === 'NOM' ? 'subj' : 'noun');
+
+    out.push({t:w, r:role, c:isCap, p:poss ? '' : punct});
+    if (poss) {
+      var pForm = inflectPossessiveOn(poss.b, (meta && meta[3]) || '', tCas, isPl);
+      out.push({t:pForm, r:'poss', c:false, p:punct});
+      poss = null;
+    }
     def = false; cas = (role === 'subj') ? 'ACC' : 'NOM';
   }
+
   if (v2 && out.length >= 4) {
     for (var k = 1; k < out.length - 1; k++) {
-      if (out.at(k).r === 'subj' && out.at(k + 1).r === 'verb') { var s = out.at(k); out.splice(k, 2, out.at(k + 1), s); break; }
+      if (out[k].r === 'subj' && out[k + 1].r === 'verb') {
+        var s = out.splice(k, 2);
+        out.splice(1, 0, s[0], s[1]);
+        break;
+      }
     }
   }
-  return out.map(function(x) { return (x.c && x.t ? x.t.charAt(0).toUpperCase() + x.t.slice(1) : x.t) + (x.p || ''); }).join(' ');
+  return out.map(function(x) { return (x.c ? x.t.charAt(0).toUpperCase() + x.t.slice(1) : x.t) + (x.p || ''); }).join(' ');
 }
 
 function inflectPossessiveOn(base, gen, cas, isPl) {
