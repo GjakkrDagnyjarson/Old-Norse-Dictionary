@@ -859,7 +859,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.45</div>
+<div id="homeVersionFooter">ver 4.46</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -955,7 +955,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 
 <div id="helpCard" class="card-box" style="display:none;margin-top:8px;">
   <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.5;color:#f3dcb8;">
-    <div onclick="openFullscreenView('search')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
+    <div onclick="document.getElementById('helpCard').style.display='none';document.getElementById('searchToggleBtn').click();" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
         <strong style="color:#ffd28d;font-size:14px;">Search</strong>
         <span style="color:#e8b75a;font-size:12px;">Open →</span>
@@ -963,7 +963,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
       <div>Look up Old Norse headwords or English meanings. ASCII spellings (<code>th→þ</code>, <code>dh→ð</code>, <code>ae→æ</code>, <code>oe→œ</code>, <code>o,→ǫ</code>) match automatically.</div>
     </div>
 
-    <div onclick="openFullscreenView('translate')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
+    <div onclick="document.getElementById('helpCard').style.display='none';openFullscreenView('translate');" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
         <strong style="color:#ffd28d;font-size:14px;">Skáldic Meter</strong>
         <span style="color:#e8b75a;font-size:12px;">Open →</span>
@@ -971,7 +971,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
       <div>Analyze syllable counts, couplet alliteration, and internal <em>hendingar</em> rhymes across <em>dróttkvætt</em>, <em>fornyrðislag</em>, and <em>ljóðaháttr</em>.</div>
     </div>
 
-    <div onclick="openFullscreenView('grammar')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
+    <div onclick="document.getElementById('helpCard').style.display='none';if(typeof openGrammarTool==='function')openGrammarTool();" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
         <strong style="color:#ffd28d;font-size:14px;">Grammar</strong>
         <span style="color:#e8b75a;font-size:12px;">Open →</span>
@@ -979,7 +979,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
       <div>Review Old Norse cases, V2 word order, enclitic articles, post-posed possessives, and vowel mutations.</div>
     </div>
 
-    <div onclick="openFullscreenView('futhark')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
+    <div onclick="document.getElementById('helpCard').style.display='none';document.getElementById('futharkBtn').click();" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
         <strong style="color:#ffd28d;font-size:14px;">ᚠ Fuþark</strong>
         <span style="color:#e8b75a;font-size:12px;">Open →</span>
@@ -987,7 +987,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
       <div>Transliterate Old Norse or Latin text into Younger Fuþark (16-rune Viking Age alphabet).</div>
     </div>
 
-    <div onclick="openFullscreenView('bindrune')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
+    <div onclick="document.getElementById('helpCard').style.display='none';document.getElementById('bindruneBtn').click();" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
         <strong style="color:#ffd28d;font-size:14px;">ᛉ Bindrunes</strong>
         <span style="color:#e8b75a;font-size:12px;">Open →</span>
