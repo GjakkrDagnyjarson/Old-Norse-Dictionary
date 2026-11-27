@@ -22,7 +22,7 @@ var CORE_ON_GLOSS = {
   'þú': 'you', 'þik': 'you', 'þér': 'you', 'þín': 'your', 'þinn': 'your', 'þitt': 'your',
   'hann': 'he', 'hon': 'she', 'hana': 'her', 'henni': 'her', 'honum': 'him',
   'sér': 'sees', 'sjá': 'see', 'sá': 'saw', 'mælti': 'spoke', 'mælir': 'speaks', 'sagði': 'said',
-  'opnast': 'opens', 'opnask': 'opens', 'bein': 'bone', 'beini': 'bone', 'steinn': 'stone', 'steini': 'stone'
+  'opnast': 'opens', 'opnask': 'opens', 'birki': 'birch', 'bein': 'bone', 'beini': 'bone', 'steinn': 'stone', 'steini': 'stone'
 };
 
 function stripOnDiacritics(s) {
@@ -187,6 +187,18 @@ function inflectPossessiveOn(base, gen, cas, isPl) {
 
 function reorderOnToEnClauses(words) {
   if (!words || words.length < 3) return words;
+  // Idiom: [Noun X] + (af|at) + [same Noun X] -> "X by X" (e.g. "steinn af/at steini" -> "stone by stone")
+  for (var idx = 1; idx < words.length - 1; idx++) {
+    var mid = (words[idx].lw || '').toLowerCase();
+    if (mid === 'af' || mid === 'at') {
+      var prevTxt = String(words[idx - 1].text || '').toLowerCase().trim();
+      var nextTxt = String(words[idx + 1].text || '').toLowerCase().trim();
+      if (prevTxt && prevTxt === nextTxt) {
+        words[idx].text = 'by';
+      }
+    }
+  }
+
   var chunks = [];
   var i = 0;
   while (i < words.length) {
