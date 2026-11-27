@@ -1397,7 +1397,7 @@ function openGrammarTool() {
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span class="dkt-hw" style="font-size:18px;">Grammar Analyzer</span>
-        <button class="back-pill" onclick="renderHome()">← Back</button>
+        
       </div>
       <textarea id="gramInput" class="gram-area" placeholder="Enter Old Norse text (e.g. Þat mælti mín móðir)..." style="width:100%;min-height:84px;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #7a562e;background:#140b05;color:#f3dcb8;font-size:15px;">${esc(LAST_GRAMMAR_TEXT)}</textarea>
       <div style="display:flex;gap:8px;">

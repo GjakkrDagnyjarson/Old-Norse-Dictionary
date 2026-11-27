@@ -859,7 +859,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.58</div>
+<div id="homeVersionFooter">ver 4.59</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1067,7 +1067,7 @@ function closeHelpTopic() {
 <div id="toast"></div>
 <script src="sql-wasm.js"></script>
 <script src="on_grammar_data.js?v=72"></script>
-  <script src="app.js?v=4.58"></script>
+  <script src="app.js?v=4.59"></script>
 <script>
 var YOUNGER_RUNES = [
   ['ᚠ','ᚡ','fé','f / v'], ['ᚢ','ᚢ','úr','u / ú / o / ó / y / ý / ø / œ / w'],
@@ -1122,7 +1122,7 @@ function disableBifrostGlow() {
 if (window._bifrostUpdatePending) enableBifrostGlow();
 
 window._bifrostBaseline = window._bifrostBaseline || {};
-window._bifrostTracked = [window.location.pathname || './', './app.js?v=4.58'];
+window._bifrostTracked = [window.location.pathname || './', './app.js?v=4.59'];
 
 async function getBifrostStamp(url) {
   try {
@@ -1188,10 +1188,10 @@ async function triggerBifrostUpdate() {
       await Promise.all(regs.map(r => r.update().catch(() => {})));
     }
 
-    // 2. Fetch fresh index.html and app.js?v=4.58 in background
+    // 2. Fetch fresh index.html and app.js?v=4.59 in background
     var [htmlRes, jsRes] = await Promise.all([
       fetch(window.location.pathname || './', { cache: 'no-store' }),
-      fetch('./app.js?v=4.58?t=' + Date.now(), { cache: 'no-store' })
+      fetch('./app.js?v=4.59?t=' + Date.now(), { cache: 'no-store' })
     ]);
 
     if (htmlRes.ok) {
