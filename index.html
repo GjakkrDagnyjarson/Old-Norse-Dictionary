@@ -859,7 +859,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.46</div>
+<div id="homeVersionFooter">ver 4.49</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -954,49 +954,111 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 </div>
 
 <div id="helpCard" class="card-box" style="display:none;margin-top:8px;">
-  <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.5;color:#f3dcb8;">
-    <div onclick="document.getElementById('helpCard').style.display='none';document.getElementById('searchToggleBtn').click();" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
+  <div id="helpMenu" style="display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.5;color:#f3dcb8;">
+    <div onclick="openHelpTopic('search')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
         <strong style="color:#ffd28d;font-size:14px;">Search</strong>
-        <span style="color:#e8b75a;font-size:12px;">Open →</span>
+        <span style="color:#e8b75a;font-size:12px;">Guide →</span>
       </div>
-      <div>Look up Old Norse headwords or English meanings. ASCII spellings (<code>th→þ</code>, <code>dh→ð</code>, <code>ae→æ</code>, <code>oe→œ</code>, <code>o,→ǫ</code>) match automatically.</div>
+      <div>How to look up Old Norse headwords, English meanings, and use ASCII character shortcuts.</div>
     </div>
 
-    <div onclick="document.getElementById('helpCard').style.display='none';openFullscreenView('translate');" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
+    <div onclick="openHelpTopic('skaldic')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
         <strong style="color:#ffd28d;font-size:14px;">Skáldic Meter</strong>
-        <span style="color:#e8b75a;font-size:12px;">Open →</span>
+        <span style="color:#e8b75a;font-size:12px;">Guide →</span>
       </div>
-      <div>Analyze syllable counts, couplet alliteration, and internal <em>hendingar</em> rhymes across <em>dróttkvætt</em>, <em>fornyrðislag</em>, and <em>ljóðaháttr</em>.</div>
+      <div>Rules for dróttkvætt, fornyrðislag, ljóðaháttr, alliteration (stuðlar &amp; höfuðstafr), and hendingar.</div>
     </div>
 
-    <div onclick="document.getElementById('helpCard').style.display='none';if(typeof openGrammarTool==='function')openGrammarTool();" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
+    <div onclick="openHelpTopic('grammar')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
         <strong style="color:#ffd28d;font-size:14px;">Grammar</strong>
-        <span style="color:#e8b75a;font-size:12px;">Open →</span>
+        <span style="color:#e8b75a;font-size:12px;">Guide →</span>
       </div>
-      <div>Review Old Norse cases, V2 word order, enclitic articles, post-posed possessives, and vowel mutations.</div>
+      <div>Guide to Old Norse cases, V2 word order, enclitic definite articles, and umlaut vowel shifts.</div>
     </div>
 
-    <div onclick="document.getElementById('helpCard').style.display='none';document.getElementById('futharkBtn').click();" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
+    <div onclick="openHelpTopic('futhark')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
         <strong style="color:#ffd28d;font-size:14px;">ᚠ Fuþark</strong>
-        <span style="color:#e8b75a;font-size:12px;">Open →</span>
+        <span style="color:#e8b75a;font-size:12px;">Guide →</span>
       </div>
-      <div>Transliterate Old Norse or Latin text into Younger Fuþark (16-rune Viking Age alphabet).</div>
+      <div>How Younger Fuþark (16-rune Viking Age alphabet) maps Old Norse sounds and vowels.</div>
     </div>
 
-    <div onclick="document.getElementById('helpCard').style.display='none';document.getElementById('bindruneBtn').click();" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
+    <div onclick="openHelpTopic('bindrunes')" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px 12px;cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
         <strong style="color:#ffd28d;font-size:14px;">ᛉ Bindrunes</strong>
-        <span style="color:#e8b75a;font-size:12px;">Open →</span>
+        <span style="color:#e8b75a;font-size:12px;">Guide →</span>
       </div>
-      <div>Forge vertical stave-sharing bindrunes from Old Norse words or individual runes.</div>
+      <div>Historical guidelines for Viking Age stave-sharing bindrunes (bandrúnir).</div>
     </div>
   </div>
+
+  <div id="helpTopicView" style="display:none;flex-direction:column;gap:10px;font-size:13px;line-height:1.55;color:#f3dcb8;">
+    <div>
+      <button type="button" onclick="closeHelpTopic()" style="background:#2f1c0c;border:1px solid #6e4d28;color:#e8b75a;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;">← Back to Help &amp; Guide</button>
+    </div>
+    <div id="helpTopicBody" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:12px;"></div>
+  </div>
 </div>
-</div>
+<script>
+var HELP_TOPICS = {
+  search: {
+    title: 'Help & Guide: Search',
+    html: '<div style="color:#ffd28d;font-weight:bold;font-size:15px;margin-bottom:6px;">Searching the Dictionary</div>' +
+          '<p style="margin:0 0 8px;">Type any Old Norse headword, inflected wordform, or English keyword in the search bar.</p>' +
+          '<div style="color:#e8b75a;font-weight:bold;margin-bottom:4px;">ASCII Keyboard Shortcuts:</div>' +
+          '<div>• <code>th</code> → <strong>þ</strong> (þorn)</div>' +
+          '<div>• <code>dh</code> → <strong>ð</strong> (eð)</div>' +
+          '<div>• <code>ae</code> → <strong>æ</strong> · <code>oe</code> → <strong>œ</strong> / <strong>ø</strong></div>' +
+          '<div>• <code>o,</code> or <code>o</code> → <strong>ǫ</strong> (o-ogonek)</div>' +
+          '<p style="margin:8px 0 0;">Tapping any search result opens its full entry with definitions, etymology, and declension/conjugation tables.</p>'
+  },
+  skaldic: {
+    title: 'Help & Guide: Skáldic Meter',
+    html: '<div style="color:#ffd28d;font-weight:bold;font-size:15px;margin-bottom:6px;">Old Norse Poetic Meters</div>' +
+          '<p style="margin:0 0 8px;"><strong>Dróttkvætt (Court Meter):</strong> 6 syllables and 3 stressed lifts per line. Odd lines contain <em>skothending</em> (half-rhyme: matching consonants, different vowels); even lines contain <em>aðalhending</em> (full rhyme: matching vowel + consonants).</p>' +
+          '<p style="margin:0 0 8px;"><strong>Fornyrðislag (Old Lore Meter):</strong> 4–5 syllables and 2 lifts per half-line, linked across odd/even pairs by alliteration.</p>' +
+          '<p style="margin:0 0 8px;"><strong>Ljóðaháttr (Song Meter):</strong> Paired short lines linked by alliteration, followed by a 3-lift full line with its own internal alliteration.</p>' +
+          '<p style="margin:0;"><strong>Alliteration Rules:</strong> Odd lines carry 1–2 <em>stuðlar</em> (props) that alliterate with the <em>höfuðstafr</em> (head-stave, 1st lift of the even line). Any vowel alliterates with any other vowel; <code>sk-</code>, <code>sp-</code>, and <code>st-</code> only alliterate with themselves.</p>'
+  },
+  grammar: {
+    title: 'Help & Guide: Grammar',
+    html: '<div style="color:#ffd28d;font-weight:bold;font-size:15px;margin-bottom:6px;">Old Norse Grammar Basics</div>' +
+          '<p style="margin:0 0 8px;"><strong>Four Cases:</strong> <em>Nominative</em> (subject), <em>Accusative</em> (direct object), <em>Dative</em> (indirect object / instrument), and <em>Genitive</em> (possession).</p>' +
+          '<p style="margin:0 0 8px;"><strong>Enclitic Definite Article:</strong> "The" attaches to the end of the noun (<em>hrafn</em> → <em>hrafninn</em> "the raven", <em>hrafnarnir</em> "the ravens").</p>' +
+          '<p style="margin:0;"><strong>Umlaut Mutations:</strong> Suffixes trigger stem vowel shifts—<em>U-umlaut</em> shifts <code>a → ǫ</code> (<em>land → lǫnd</em>), while <em>I-umlaut</em> fronts back vowels (<em>maðr → menn</em>, <em>fara → ferr</em>).</p>'
+  },
+  futhark: {
+    title: 'Help & Guide: Fuþark',
+    html: '<div style="color:#ffd28d;font-weight:bold;font-size:15px;margin-bottom:6px;">Younger Fuþark (16-Rune Alphabet)</div>' +
+          '<p style="margin:0 0 8px;">During the Viking Age, the 24-rune Elder Fuþark streamlined into the 16-rune <strong>Younger Fuþark</strong> (ᚠ ᚢ ᚦ ᚬ ᚱ ᚴ ᚼ ᚾ ᛁ ᛅ ᛋ ᛏ ᛒ ᛘ ᛚ ᛦ).</p>' +
+          '<p style="margin:0 0 8px;"><strong>Sound Mergers:</strong> Single runes represent multiple Old Norse phonemes—for example, <strong>ᚢ</strong> covers <em>u, ú, o, ó, y, ý, v, w</em>; <strong>ᛁ</strong> covers <em>i, í, e, é, j</em>; and <strong>ᚴ</strong> covers <em>k, g</em>.</p>' +
+          '<p style="margin:0;"><strong>Double Letters:</strong> Viking Age inscriptions never double identical runes (<em>hann</em> is carved <strong>ᚼᛅᚾ</strong>, not ᚼᛅᚾᚾ).</p>'
+  },
+  bindrunes: {
+    title: 'Help & Guide: Bindrunes',
+    html: '<div style="color:#ffd28d;font-weight:bold;font-size:15px;margin-bottom:6px;">Historical Bindrunes (Bandrúnir)</div>' +
+          '<p style="margin:0 0 8px;">In historical Viking Age inscriptions, <strong>bindrunes</strong> (<em>bandrúnir</em>) are practical ligatures where adjacent runes share a vertical stave (<em>staf</em>) to save space on stone, wood, or bone.</p>' +
+          '<p style="margin:0;">Enter an Old Norse word or select individual runes to preview historically styled stave-sharing ligatures.</p>'
+  }
+};
+function openHelpTopic(key) {
+  var t = HELP_TOPICS[key];
+  if (!t) return;
+  document.getElementById('fsTitle').textContent = t.title;
+  document.getElementById('helpMenu').style.display = 'none';
+  document.getElementById('helpTopicBody').innerHTML = t.html;
+  document.getElementById('helpTopicView').style.display = 'flex';
+}
+function closeHelpTopic() {
+  document.getElementById('fsTitle').textContent = 'Help & Guide';
+  document.getElementById('helpTopicView').style.display = 'none';
+  document.getElementById('helpMenu').style.display = 'flex';
+}
+</script>
 <div id="listCard" class="card-box" style="display:none;flex:1;min-height:0;overflow-y:auto;"></div>
     <div id="detailCard" class="card-box" style="display:none;flex:1;min-height:0;overflow-y:auto;"></div>
   </div>
