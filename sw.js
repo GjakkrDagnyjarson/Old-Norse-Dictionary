@@ -1,4 +1,4 @@
-const UI_CACHE = 'old-norse-ui-v4.34';
+const UI_CACHE = 'old-norse-ui-v4.37';
 const CORE = ['./', './index.html', './grammar.js', './manifest.json'];
 
 self.addEventListener('install', e => {
@@ -15,7 +15,7 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  if (e.request.mode === 'navigate' || e.request.url.includes('index.html') || e.request.url.includes('grammar.js')) {
+  if (e.request.mode === 'navigate' || e.request.url.includes('index.html') || e.request.url.includes('grammar.js') || e.request.url.includes('gloss_engine.json.gz')) {
     e.respondWith(
       fetch(e.request).then(res => {
         const copy = res.clone();
