@@ -859,7 +859,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.51</div>
+<div id="homeVersionFooter">ver 4.55</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -1694,7 +1694,21 @@ function runSkaldicAnalyzer() {
   }).join('');
 }
 var _origOpenFS = window.openFullscreenView;
+function clearAllCardsToHome() {
+  ['mainArea','detailCard','listCard','helpCard','translateCard','futharkCard','bindruneCard'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  var root = document.getElementById('root');
+  if (root) root.classList.remove('open');
+  if (typeof renderHome === 'function') renderHome();
+}
+document.addEventListener('click', function(e) {
+  var btn = e.target && e.target.closest('button');
+  if (btn && /Home/.test(btn.textContent || '')) clearAllCardsToHome();
+}, true);
 window.openFullscreenView = function(v) {
+  if (v === 'home') clearAllCardsToHome();
   if (v === 'home' && typeof renderHome === 'function') renderHome();
   if (typeof _origOpenFS === 'function') _origOpenFS(v);
   var fs = document.getElementById('fullscreenPage'), fb = document.getElementById('fsBody'), tc = document.getElementById('translateCard');
