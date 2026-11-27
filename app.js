@@ -1389,22 +1389,34 @@ function openGrammarTool() {
   $('listCard').style.display = 'none';
   $('homeBtn').style.display = 'inline-block';
   $('subStatus').style.display = 'block';
-  $('subStatus').textContent = 'Sentence & Grammar Analyzer';
+  $('subStatus').textContent = 'Old Norse Grammar Rules';
   $('root').classList.add('open');
-  $('mainArea').style.flex = '1';
+  $('mainArea').style.display = 'block';
   $('detailCard').style.display = 'block';
   $('detailCard').innerHTML = `
-    <div class="det-top">
-      <span class="det-hw" style="font-size:18px">Grammar &amp; Syntax Analyzer
-      <button class="back-pill" onclick="renderHome()">←</button>
-    </div>
-    <textarea id="gramInput" class="gram-area" placeholder="Enter Old Norse text (e.g. Ek held hinu fornu blóði)...">${esc(LAST_GRAMMAR_TEXT)}</textarea>
-    <button class="gram-run" onclick="runGrammarAnalysis()">Analyze Sentence</button>
-    <div id="gramResults"></div>
-  `;
-  if (LAST_GRAMMAR_TEXT) runGrammarAnalysis();
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="dkt-hw" style="font-size:18px;">Old Norse Grammar</span>
+        <button class="back-pill" onclick="renderHome()">← Back</button>
+      </div>
+      <div style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px;font-size:13px;line-height:1.5;color:#f3dcb8;">
+        <div style="color:#ffd28d;font-weight:bold;margin-bottom:4px;">1. Cases</div>
+        <div><b>NOM:</b> Subject (<i>konungrinn mælti</i>) · <b>ACC:</b> Direct object (<i>tók sverðit</i>)</div>
+        <div><b>DAT:</b> Indirect/instrument (<i>með sverði</i>) · <b>GEN:</b> Possession (<i>sverð konungs</i>)</div>
+      </div>
+      <div style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px;font-size:13px;line-height:1.5;color:#f3dcb8;">
+        <div style="color:#ffd28d;font-weight:bold;margin-bottom:4px;">2. Syntax &amp; Word Order</div>
+        <div><b>V2 Order:</b> Conjugated verb stays 2nd in main clauses (<i>Þá mælti hann</i>).</div>
+        <div><b>Topicalization (OVS):</b> Object can front for emphasis (<i>Þat mælti mín móðir</i>).</div>
+        <div><b>Enclitic Articles &amp; Possessives:</b> Suffixes attach to nouns (<i>hrafnarnir</i>); possessives follow (<i>faðir minn</i>).</div>
+      </div>
+      <div style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px;font-size:13px;line-height:1.5;color:#f3dcb8;">
+        <div style="color:#ffd28d;font-weight:bold;margin-bottom:4px;">3. Vowel Mutations (Umlaut)</div>
+        <div><b>U-Umlaut (a → ǫ):</b> <i>land → lǫnd</i>, <i>fagr → fǫgru</i>, <i>gata → gǫtu</i>.</div>
+        <div><b>I-Umlaut (a→e, o→ø, u→y, á→æ, ó→œ):</b> <i>maðr → menn</i>, <i>fara → ferr</i>.</div>
+      </div>
+    </div>`;
 }
-
 if ($('grammarBtn')) $('grammarBtn').onclick = openGrammarTool;
 
 

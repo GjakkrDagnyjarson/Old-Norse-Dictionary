@@ -859,7 +859,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
   z-index: 20;
 }
 </style>
-<div id="homeVersionFooter">ver 4.41</div>
+<div id="homeVersionFooter">ver 4.42</div>
 <div id="fullScreenPage">
   <div id="fsTopBar">
     <span id="fsTitle">Old Norse</span>
@@ -918,7 +918,7 @@ footer *, .footer *, #footer *, .credits *, #credits * {
 <div id="root">
   <div class="title"><span>GJAKKR DAGNÝJARSON'S</span>OLD NORSE DICTIONARY</div>
   <div class="top-bar" style="display:grid;grid-template-columns:repeat(3,1fr);row-gap:18px;column-gap:10px;margin-bottom:10px;width:100%;box-sizing:border-box;">
-  <button id="topHomeBtn" class="nav-btn" onclick="if(typeof closeRuneCards==='function')closeRuneCards();if(typeof renderHome==='function')renderHome();" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">Translate</button>
+  <button id="topHomeBtn" class="nav-btn" onclick="if(typeof closeRuneCards==='function')closeRuneCards();if(typeof renderHome==='function')renderHome();" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">Skáldic Meter</button>
   <button id="searchToggleBtn" class="nav-btn" onclick="toggleSearchBar()" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">Search</button>
   <button id="grammarBtn" class="nav-btn" onclick="setMainView('grammar')" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">Grammar</button>
   <button id="youngerFutharkBtn" class="nav-btn" onclick="toggleYoungerFuthark()" style="width:100%;padding:10px 6px;font-size:14px;white-space:nowrap;">ᚠ Fuþark</button>
@@ -1405,7 +1405,7 @@ function toggleBindrune() {
 
 </script>
 <script>window.addEventListener("load",function(){if(typeof window.renderList==="function"){const o=window.renderList;window.renderList=function(){const r=o.apply(this,arguments),s=document.getElementById("searchBox"),q=s&&s.value?s.value.trim():"";openFullScreenView("letter",q?"Matches for \""+q+"\"":"Dictionary Entries");return r}};if(typeof window.openEntry==="function"){const o=window.openEntry;window.openEntry=function(){const r=o.apply(this,arguments),d=document.getElementById("detailCard"),w=d?d.querySelector(".det-hw"):null;var hwOnly=w&&w.childNodes.length?w.childNodes[0].textContent.trim():(w?w.textContent.trim():"Dictionary Entry");var st=document.getElementById("subStatus");if(st)st.style.display="none";openFullScreenView("entry",hwOnly);return r}}});</script>
-<script>window.openFullScreenView=function(v,t){var fs=document.getElementById("fullScreenPage"),fb=document.getElementById("fsBody"),ft=document.getElementById("fsTitle"),ma=document.getElementById("mainArea"),ao=document.getElementById("carvedAlphaOverlay"),rt=document.getElementById("root"),hv=document.getElementById("homeVersionFooter"),ids=["searchBarDrawer","subStatus","futharkCard","bindruneCard","helpCard","listCard","detailCard"];if(v==="home"){if(fs)fs.classList.remove("active");if(rt)rt.style.display="";if(ma)ma.style.display="none";if(ao)ao.style.display="flex";if(hv)hv.style.display="block";document.body.style.backgroundImage="";ids.forEach(function(id){var e=document.getElementById(id);if(e){e.style.display="none";if(ma&&e.parentElement!==ma)ma.appendChild(e)}});var sb=document.getElementById("searchBox");if(sb)sb.value="";return}if(fb)ids.forEach(function(id){var e=document.getElementById(id);if(e&&e.parentElement!==fb)fb.appendChild(e)});var m={search:"Search Dictionary",grammar:"Grammar & Coinage",futhark:"Younger Fuþark",bindrune:"Bindrunes",help:"Help & Guide",letter:t||"Dictionary Entries",entry:t||"Dictionary Entry"};if(ft)ft.textContent=t||m[v]||"Old Norse";["searchBarDrawer","subStatus","futharkCard","bindruneCard","helpCard","listCard","detailCard"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display="none"});if(v==="search"){var sd=document.getElementById("searchBarDrawer"),sb=document.getElementById("searchBox");if(sd)sd.style.display="flex";if(sb)setTimeout(function(){sb.focus()},50)}else if(v==="grammar"){if(typeof openGrammarTool==="function")openGrammarTool();var dc=document.getElementById("detailCard");if(dc)dc.style.display="block"}else if(v==="futhark"){var fc=document.getElementById("futharkCard"),fg=document.getElementById("futharkGrid");if(fc){fc.style.display="none";if(typeof toggleYoungerFuthark==="function")toggleYoungerFuthark();fc.style.display="flex";fc.style.flexDirection="column";}if(fg){fg.style.marginTop="auto";fg.style.paddingTop="12px";}}else if(v==="bindrune"){var bc=document.getElementById("bindruneCard");if(bc){bc.style.display="none";if(typeof toggleBindrune==="function")toggleBindrune();bc.style.display="block";}}else if(v==="help"){var hc=document.getElementById("helpCard");if(hc)hc.style.display="block"}else if(v==="letter"){var lc=document.getElementById("listCard"),st=document.getElementById("subStatus");if(lc)lc.style.display="block";if(st&&st.textContent.trim())st.style.display="block"}else if(v==="entry"){var dc=document.getElementById("detailCard");if(dc)dc.style.display="block"}if(ao)ao.style.display="none";if(hv)hv.style.display="none";if(rt)rt.style.display="none";document.body.style.backgroundImage="none";document.body.style.backgroundColor="#140b05";if(fs)fs.classList.add("active")};</script>
+<script>window.openFullScreenView=function(v,t){var fs=document.getElementById("fullScreenPage"),fb=document.getElementById("fsBody"),ft=document.getElementById("fsTitle"),ma=document.getElementById("mainArea"),ao=document.getElementById("carvedAlphaOverlay"),rt=document.getElementById("root"),hv=document.getElementById("homeVersionFooter"),ids=["searchBarDrawer","subStatus","futharkCard","bindruneCard","helpCard","listCard","detailCard"];if(v==="home"){if(fs)fs.classList.remove("active");if(rt)rt.style.display="";if(ma)ma.style.display="none";if(ao)ao.style.display="flex";if(hv)hv.style.display="block";document.body.style.backgroundImage="";ids.forEach(function(id){var e=document.getElementById(id);if(e){e.style.display="none";if(ma&&e.parentElement!==ma)ma.appendChild(e)}});var sb=document.getElementById("searchBox");if(sb)sb.value="";return}if(fb)ids.forEach(function(id){var e=document.getElementById(id);if(e&&e.parentElement!==fb)fb.appendChild(e)});var m={search:"Search Dictionary",grammar:"Grammar",futhark:"Younger Fuþark",bindrune:"Bindrunes",help:"Help & Guide",letter:t||"Dictionary Entries",entry:t||"Dictionary Entry"};if(ft)ft.textContent=t||m[v]||"Old Norse";["searchBarDrawer","subStatus","futharkCard","bindruneCard","helpCard","listCard","detailCard"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display="none"});if(v==="search"){var sd=document.getElementById("searchBarDrawer"),sb=document.getElementById("searchBox");if(sd)sd.style.display="flex";if(sb)setTimeout(function(){sb.focus()},50)}else if(v==="grammar"){if(typeof openGrammarTool==="function")openGrammarTool();var dc=document.getElementById("detailCard");if(dc)dc.style.display="block"}else if(v==="futhark"){var fc=document.getElementById("futharkCard"),fg=document.getElementById("futharkGrid");if(fc){fc.style.display="none";if(typeof toggleYoungerFuthark==="function")toggleYoungerFuthark();fc.style.display="flex";fc.style.flexDirection="column";}if(fg){fg.style.marginTop="auto";fg.style.paddingTop="12px";}}else if(v==="bindrune"){var bc=document.getElementById("bindruneCard");if(bc){bc.style.display="none";if(typeof toggleBindrune==="function")toggleBindrune();bc.style.display="block";}}else if(v==="help"){var hc=document.getElementById("helpCard");if(hc)hc.style.display="block"}else if(v==="letter"){var lc=document.getElementById("listCard"),st=document.getElementById("subStatus");if(lc)lc.style.display="block";if(st&&st.textContent.trim())st.style.display="block"}else if(v==="entry"){var dc=document.getElementById("detailCard");if(dc)dc.style.display="block"}if(ao)ao.style.display="none";if(hv)hv.style.display="none";if(rt)rt.style.display="none";document.body.style.backgroundImage="none";document.body.style.backgroundColor="#140b05";if(fs)fs.classList.add("active")};</script>
 <script>
 (function bindTopNavFullScreen() {
   var map = [
@@ -1552,229 +1552,66 @@ function toggleBindrune() {
   };
 })();
 </script>
-<div id="translateCard" style="display:none;flex-direction:column;gap:10px;"><div style="display:flex;gap:6px;"><button type="button" id="tModeAuto" onclick="setTransDir('auto')" style="flex:1;padding:6px;border-radius:6px;border:1.5px solid #b88446;background:#3a2210;color:#ffe2b0;font-weight:bold;font-size:12px;">Auto</button><button type="button" id="tModeOnEn" onclick="setTransDir('on-en')" style="flex:1;padding:6px;border-radius:6px;border:1px solid #4a3319;background:#1c1008;color:#a8875a;font-weight:bold;font-size:12px;">ON → Eng</button><button type="button" id="tModeEnOn" onclick="setTransDir('en-on')" style="flex:1;padding:6px;border-radius:6px;border:1px solid #4a3319;background:#1c1008;color:#a8875a;font-weight:bold;font-size:12px;">Eng → ON</button></div><div style="position:relative;display:flex;align-items:center;"><input id="translateInput" type="text" oninput="runOnEngTranslate(this.value)" placeholder="Type Old Norse or English..." style="width:100%;box-sizing:border-box;padding:10px 64px 10px 10px;border-radius:8px;border:1.5px solid #7d562b;background:#160d06;color:#f3d6a8;font-size:15px;"><button type="button" onclick="document.getElementById('translateInput').value='';runOnEngTranslate('')" style="position:absolute;right:8px;background:#2b190c;border:1px solid #6e4e26;border-radius:6px;color:#e6c088;font-size:12px;padding:4px 8px;">Clear</button></div><div id="translateSummaryBox" style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:10px;min-height:48px;color:#f3d6a8;font-size:15px;line-height:1.45;">Type any Old Norse or English word or phrase above.</div><div id="translateBreakdown" style="display:flex;flex-direction:column;gap:8px;"></div></div>
+<div id="translateCard" style="display:none;flex-direction:column;gap:8px;">
+  <div style="display:flex;gap:6px;">
+    <button type="button" id="mBtnDrott" onclick="setSkaldicMeter('drottkvaett')" style="flex:1;padding:6px;border-radius:6px;border:1px solid #e8b75a;background:#3a2310;color:#ffd28d;font-weight:bold;font-size:12px;">Dróttkvætt</button>
+    <button type="button" id="mBtnForn" onclick="setSkaldicMeter('fornyrdislag')" style="flex:1;padding:6px;border-radius:6px;border:1px solid #4a3119;background:#1c1008;color:#e8b75a;font-weight:bold;font-size:12px;">Fornyrðislag</button>
+    <button type="button" id="mBtnLjod" onclick="setSkaldicMeter('ljodahattr')" style="flex:1;padding:6px;border-radius:6px;border:1px solid #4a3119;background:#1c1008;color:#e8b75a;font-weight:bold;font-size:12px;">Ljóðaháttr</button>
+  </div>
+  <textarea id="skaldicInput" oninput="runSkaldicAnalyzer()" placeholder="Enter Old Norse lines (or separate with /)..." style="width:100%;min-height:105px;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #7a562e;background:#140b05;color:#f3dcb8;font-size:15px;line-height:1.5;"></textarea>
+  <div id="skaldicResults" style="display:flex;flex-direction:column;gap:8px;"></div>
+</div>
 <script>
-window._transDir = 'on-en';
-window._glossMap = null;
-
-
+window._skaldicMeter = 'drottkvaett';
 function ensureTranslateUI() {
-  var tc = document.getElementById('translateCard');
-  if (tc) tc.remove();
-  tc = document.createElement('div');
-  tc.id = 'translateCard';
-  tc.style.cssText = 'display:none;flex-direction:column;gap:8px;height:100%;';
-  tc.innerHTML =
-    '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;background:#1c1008;border:1px solid #6e4e26;border-radius:8px;padding:6px 8px;flex-shrink:0;">' +
-      '<span id="tSrcLang" style="flex:1;text-align:center;color:#f0d3a2;font-size:12px;font-weight:bold;letter-spacing:0.5px;">OLD NORSE</span>' +
-      '<button type="button" onclick="swapVerticalLangs()" style="background:#3a2210;border:1.5px solid #b88446;border-radius:6px;color:#ffe2b0;font-weight:bold;font-size:13px;padding:4px 12px;cursor:pointer;">⇄</button>' +
-      '<span id="tDstLang" style="flex:1;text-align:center;color:#f0d3a2;font-size:12px;font-weight:bold;letter-spacing:0.5px;">ENGLISH</span>' +
-    '</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;min-height:0;">' +
-      '<div style="background:#1c1008;border:1.5px solid #6e4e26;border-radius:10px;padding:10px;display:flex;flex-direction:column;min-height:0;">' +
-        '<div style="display:flex;justify-content:flex-end;margin-bottom:6px;flex-shrink:0;">' +
-          '<button type="button" onclick="clearVerticalTrans()" style="background:#2b190c;border:1px solid #6e4e26;border-radius:5px;color:#e6c088;font-size:12px;padding:4px 10px;cursor:pointer;">Clear</button>' +
-        '</div>' +
-        '<textarea id="translateInput" oninput="runVerticalTranslate(this.value)" placeholder="Type here..." style="flex:1;width:100%;box-sizing:border-box;background:transparent;border:none;outline:none;resize:none;color:#f3d6a8;font-size:14px;line-height:1.55;font-family:inherit;"></textarea>' +
-      '</div>' +
-      '<div style="background:#160d06;border:1.5px solid #5c3f21;border-radius:10px;padding:10px;display:flex;flex-direction:column;min-height:0;">' +
-        '<div style="display:flex;justify-content:flex-end;margin-bottom:6px;flex-shrink:0;">' +
-          '<button type="button" id="tCopyBtn" onclick="copyVerticalTrans()" style="background:#2b190c;border:1px solid #6e4e26;border-radius:5px;color:#e6c088;font-size:12px;padding:4px 10px;cursor:pointer;">Copy</button>' +
-        '</div>' +
-        '<div id="translateOutputBox" style="flex:1;overflow-y:auto;color:#8a6b43;font-size:14px;line-height:1.55;white-space:pre-wrap;word-break:break-word;">Translation</div>' +
-      '</div>' +
-    '</div>';
-  document.body.appendChild(tc);
-  return tc;
+  var tc = document.getElementById('translateCard'), fb = document.getElementById('fsBody');
+  if (tc && fb && tc.parentElement !== fb) fb.appendChild(tc);
 }
-
-function swapVerticalLangs() {
-  window._transDir = (window._transDir === 'on-en') ? 'en-on' : 'on-en';
-  var isOnEn = window._transDir === 'on-en';
-  var sL = document.getElementById('tSrcLang'), dL = document.getElementById('tDstLang');
-  if (sL) sL.textContent = (window._transDir === 'on-en') ? 'OLD NORSE' : 'ENGLISH';
-  if (dL) dL.textContent = (window._transDir === 'on-en') ? 'ENGLISH' : 'OLD NORSE';
-  var inp = document.getElementById('translateInput'), out = document.getElementById('translateOutputBox');
-  if (inp && out && out.textContent && out.textContent !== 'Translation') inp.value = out.textContent;
-  if (inp) runVerticalTranslate(inp.value);
+function setSkaldicMeter(m) {
+  window._skaldicMeter = m;
+  var ids = { drottkvaett:'mBtnDrott', fornyrdislag:'mBtnForn', ljodahattr:'mBtnLjod' };
+  Object.keys(ids).forEach(function(k) {
+    var b = document.getElementById(ids[k]);
+    if (b) { b.style.borderColor = k===m?'#e8b75a':'#4a3119'; b.style.background = k===m?'#3a2310':'#1c1008'; }
+  });
+  runSkaldicAnalyzer();
 }
-
-function clearVerticalTrans() {
-  var inp = document.getElementById('translateInput');
-  if (inp) inp.value = '';
-  runVerticalTranslate('');
-}
-
-function copyVerticalTrans() {
-  var out = document.getElementById('translateOutputBox'), btn = document.getElementById('tCopyBtn');
-  if (!out || !out.textContent || out.textContent === 'Translation') return;
-  if (navigator.clipboard) navigator.clipboard.writeText(out.textContent);
-  if (btn) { btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1200); }
-}
-
-
-var ON_POSS = {'min':'my','mitt':'my','minn':'my','minir':'my','minar':'my','minum':'my','minn':'my','mín':'my','mitt':'my','mínum':'my','mínir':'my','mínar':'my','mína':'my','míns':'my','minnar':'my','þinn':'your','þín':'your','þitt':'your','þínum':'your','sinn':'his','sín':'his','sitt':'his','sínum':'his','várr':'our','vár':'our','várt':'our','várum':'our'};
-var ON_DEM = {'þessi':'this','þetta':'this','þessir':'these','þessar':'these','þessu':'this','þessum':'these','sá':'that','sú':'that','þat':'that','þeir':'those','þær':'those','þau':'those'};
-var EN_POSS_TO_ON = {'my':'minn','your':'þinn','thy':'þinn','his':'sinn','her':'hennar','our':'várr','their':'þeirra'};
-var ON_PAST_VERBS = {'sagði':'said','sögðu':'said','mælti':'spoke','mæltu':'spoke','skreið':'crept','skriðu':'crept','var':'was','váru':'were','hafði':'had','höfðu':'had','fór':'went','fóru':'went','kom':'came','kómu':'came','sá':'saw','sáu':'saw','tók':'took','tóku':'took','gaf':'gave','gáfu':'gave','féll':'fell','féllu':'fell','dó':'died','dóu':'died','reið':'rode','riðu':'rode','bar':'bore','báru':'bore','drakk':'drank','drukku':'drank','fann':'found','fundu':'found','gekk':'walked','gengu':'walked','hét':'was called','hétu':'were called','leit':'looked','litu':'looked','nam':'took','námu':'took','stóð':'stood','stóðu':'stood','varð':'became','urðu':'became','vissi':'knew','vissu':'knew','þótti':'seemed','þóttu':'seemed','mátti':'might','skyldi':'should','vildi':'would'};
-var ON_SUBJ_MODALS = {'megi':'may','má':'may','skal':'shall','skulu':'shall','skalt':'shall','vil':'will','vili':'will','vilja':'will'};
-var ON_DAT_PRON = {'mér':'to me','þér':'to you','honum':'to him','henni':'to her','oss':'to us','yðr':'to you','þeim':'to them'};
-var ON_NOM_PRON = {'ek':'I','þú':'you','hann':'he','hon':'she','þat':'it','vér':'we','þér':'you','þeir':'they','þær':'they','þau':'they'};
-var ON_ACC_PRON = {'mik':'me','þik':'you','hann':'him','hana':'her','þat':'it','oss':'us','yðr':'you','þá':'them','þær':'them','þau':'them'};
-var ON_PREPS = {'í':1,'á':1,'til':1,'af':1,'frá':1,'með':1,'við':1,'um':1,'eptir':1,'fyrir':1,'undir':1,'yfir':1,'hjá':1,'ór':1,'úr':1,'at':1};
-var ON_V2_ADV = {'þá':'then','nú':'now','hér':'here','þar':'there','svá':'so','eigi':'not','aldri':'never','opt':'often'};
-
-function pluralizeEnWord(w) {
-  if (!w || /s$/.test(w)) return w;
-  if (/(sh|ch|x|z)$/.test(w)) return w + 'es';
-  if (/[^aeiou]y$/.test(w)) return w.slice(0, -1) + 'ies';
-  if (/fe$/.test(w)) return w.slice(0, -2) + 'ves';
-  if (/f$/.test(w)) return w.slice(0, -1) + 'ves';
-  return w + 's';
-}
-
-function getWordGrammar(lw) {
-  if (typeof db === 'undefined' || !db) return null;
-  try {
-    var st = db.prepare("SELECT l.pos, l.gender, wf.case_name, wf.number, wf.definiteness FROM wordforms wf JOIN lemmas l ON wf.lemma_id = l.id WHERE LOWER(wf.form) = ? ORDER BY CASE UPPER(COALESCE(wf.case_name,'')) WHEN 'NOM' THEN 1 WHEN 'ACC' THEN 2 WHEN 'DAT' THEN 3 WHEN 'GEN' THEN 4 ELSE 5 END LIMIT 1");
-    st.bind([lw]);
-    var r = st.step() ? st.getAsObject() : null;
-    st.free();
-    return r;
-  } catch (e) { return null; }
-}
-
-function analyzeOnToken(orig, map, prevIsPrep, afterVerb) {
-  var lw = orig.toLowerCase();
-  var g = getWordGrammar(lw);
-  var pos = g && g.pos ? g.pos.toLowerCase() : '';
-  var cas = g && g.case_name ? g.case_name.toUpperCase() : '';
-  var num = g && g.number ? g.number.toUpperCase() : '';
-  var def = g && g.definiteness ? g.definiteness.toUpperCase() : '';
-
-  if (ON_POSS[lw]) return { lw: lw, text: ON_POSS[lw], role: 'poss', pos: 'pron', cas: cas };
-  if (ON_PAST_VERBS[lw]) return { lw: lw, text: ON_PAST_VERBS[lw], role: 'verb', pos: 'verb', cas: '' };
-  if (ON_SUBJ_MODALS[lw]) return { lw: lw, text: ON_SUBJ_MODALS[lw], role: 'verb', pos: 'verb', cas: '' };
-  if (ON_NOM_PRON[lw]) return { lw: lw, text: ON_NOM_PRON[lw], role: 'subj', pos: 'pron', cas: 'NOM' };
-  if (ON_DAT_PRON[lw]) return { lw: lw, text: prevIsPrep ? ON_DAT_PRON[lw].replace(/^to /, '') : ON_DAT_PRON[lw], role: 'obj', pos: 'pron', cas: 'DAT' };
-  if (ON_ACC_PRON[lw]) return { lw: lw, text: ON_ACC_PRON[lw], role: 'obj', pos: 'pron', cas: 'ACC' };
-
-  var base = resolveOnToken(lw, map) || orig;
-  if (!g && /(ði|ti|ðu|tu)$/.test(lw) && lw.length > 4) {
-    var vStem = lw.replace(/(ði|ti|ðu|tu)$/, '');
-    var vBase = resolveOnToken(vStem + 'a', map) || resolveOnToken(vStem, map);
-    if (vBase) {
-      base = /e$/.test(vBase) ? vBase + 'd' : vBase + 'ed';
-      pos = 'verb';
+function runSkaldicAnalyzer() {
+  var ta = document.getElementById('skaldicInput'), out = document.getElementById('skaldicResults');
+  if (!ta || !out) return;
+  var lines = ta.value.trim().split(/\n+|\s*\/\s*/).map(function(s){return s.trim();}).filter(Boolean);
+  var m = window._skaldicMeter || 'drottkvaett';
+  out.innerHTML = lines.map(function(line, i) {
+    var words = line.split(/\s+/);
+    var syl = (line.toLowerCase().match(/(?:au|ei|ey|[aáeéiíoóuúyýǫøæœ])/g) || []).length;
+    var tgt = m==='drottkvaett' ? '6' : (m==='fornyrdislag' ? '4-5' : (i%3===2 ? '5-6' : '4'));
+    var ok = m==='drottkvaett' ? syl===6 : (syl>=4 && syl<=6);
+    var allit = '';
+    if (i%2===0 && i+1<lines.length) {
+      var ak = function(w){ var x=w.toLowerCase().replace(/^[^a-záéíóúýǫøæœðþ]+/,''); return /^[aáeéiíoóuúyýǫøæœ]/.test(x)?'V':(/^(sk|sp|st)/.test(x)?x.slice(0,2):x.charAt(0)); };
+      var k1 = words.map(ak).filter(Boolean), k2 = lines[i+1].split(/\s+/).map(ak).filter(Boolean);
+      var sh = k1.filter(function(k){return k2.indexOf(k)!==-1;});
+      allit = sh.length ? 'Allit: ' + (sh[0]==='V'?'vowel':sh[0]+'-') : 'No allit';
     }
-  }
-
-  if (pos.indexOf('noun') !== -1 || (!pos && (cas || def || num))) {
-    if (num === 'PL') base = pluralizeEnWord(base);
-    if (def === 'DEF') base = 'the ' + base;
-    var isResolved = (base.toLowerCase() !== orig.toLowerCase());
-  if (isResolved && cas === 'GEN' && pos.indexOf('noun') !== -1) {
-    base = /s$/.test(base) ? base + "'" : base + "'s";
-  } else if (cas === 'DAT' && !prevIsPrep && afterVerb) {
-      base = 'to ' + base;
-    }
-  }
-  return { lw: lw, text: base, role: pos.indexOf('verb') !== -1 ? 'verb' : (cas === 'NOM' ? 'subj' : 'other'), pos: pos, cas: cas };
+    var stems = words.map(function(w){ var x=w.toLowerCase().match(/([aáeéiíoóuúyýǫøæœ]+)([bcdfghjklmnpqrstvwxzðþ]+)/); return x?{w:w,v:x[1],c:x[2]}:null; }).filter(Boolean);
+    var rh = [];
+    for (var a=0;a<stems.length;a++) for (var b=a+1;b<stems.length;b++) if (stems[a].c===stems[b].c) rh.push(stems[a].w+'/'+stems[b].w+' ('+(stems[a].v===stems[b].v?'aðal':'skot')+')');
+    return '<div style="background:#1c1008;border:1px solid #5c3f21;border-radius:8px;padding:8px 10px;font-size:13px;"><div style="display:flex;justify-content:space-between;color:#ffd28d;font-weight:bold;"><span>'+(i+1)+'. '+line+'</span><span style="color:'+(ok?'#9be082':'#f0b875')+';">'+syl+' syl (tgt '+tgt+')</span></div><div style="font-size:12px;color:#d6b88d;margin-top:3px;">'+(allit?allit+' · ':'')+'Hendingar: '+(rh.join(', ')||'none')+'</div></div>';
+  }).join('');
 }
-
-function translateLineOrdered(line, isOnEn, map) {
-  if (window._transDir !== 'on-en' && typeof translateEnToOnGrammar === 'function') return translateEnToOnGrammar(line, map);
-  var parts = line.split(/([\p{L}\p{M}']+)/u);
-  var wordIdx = [];
-  for (var i = 0; i < parts.length; i++) {
-    if (/^[\p{L}\p{M}']+$/u.test(parts[i])) wordIdx.push(i);
+window.openFullscreenView = function(v) {
+  var fs = document.getElementById('fullscreenPage'), fb = document.getElementById('fsBody'), tc = document.getElementById('translateCard');
+  if (!fs || !fb) return;
+  if (tc && tc.parentElement !== fb) fb.appendChild(tc);
+  if (tc) tc.style.display = 'none';
+  if (typeof nPS === 'function') nPS(v);
+  if (v === 'translate') {
+    document.getElementById('fsTitle').textContent = 'Skáldic Meter';
+    if (tc) tc.style.display = 'flex';
+    var inp = document.getElementById('skaldicInput');
+    if (inp) setTimeout(function(){inp.focus();}, 50);
   }
-  var outWords = [];
-  var sawVerb = false;
-  for (var wi = 0; wi < wordIdx.length; wi++) {
-    var orig = parts[wordIdx[wi]].normalize('NFC');
-    var lw = orig.toLowerCase();
-    var prevLw = wi > 0 ? parts[wordIdx[wi - 1]].normalize('NFC').toLowerCase() : '';
-    var prevIsPrep = !!ON_PREPS[prevLw];
-    var isCap = orig.charAt(0) === orig.charAt(0).toUpperCase() && orig.charAt(0) !== orig.charAt(0).toLowerCase();
-    if ((window._transDir === 'on-en')) {
-      var tokObj = analyzeOnToken(orig, map, prevIsPrep, sawVerb);
-      if (tokObj.role === 'verb') sawVerb = true;
-      tokObj.isCap = isCap;
-      outWords.push(tokObj);
-    } else {
-      var res = EN_POSS_TO_ON[lw] || resolveEnToken(lw, map) || orig;
-      outWords.push({ lw: lw, text: res, role: EN_POSS_TO_ON[lw] ? 'poss' : 'other', isCap: isCap });
-    }
-  }
-
-  for (var j = 0; j < outWords.length - 1; j++) {
-    var cur = outWords[j], nxt = outWords[j + 1];
-    if ((window._transDir === 'on-en') && (nxt.role === 'poss' || ON_DEM[nxt.lw]) && cur.role !== 'verb' && cur.role !== 'poss') {
-      var mPoss = ON_DEM[nxt.lw] || nxt.text;
-      var mNoun = cur.text.replace(/^the /, '');
-      if (cur.isCap) mPoss = mPoss.charAt(0).toUpperCase() + mPoss.slice(1);
-      outWords[j] = { text: mPoss, isCap: false, role: 'poss' };
-      outWords[j + 1] = { text: mNoun.toLowerCase(), isCap: false, role: 'noun' };
-      j++;
-    } else if (!(window._transDir === 'on-en') && cur.role === 'poss' && nxt.role !== 'poss') {
-      var mOnNoun = nxt.text;
-      var mOnPoss = cur.text.toLowerCase();
-      if (cur.isCap) mOnNoun = mOnNoun.charAt(0).toUpperCase() + mOnNoun.slice(1);
-      outWords[j] = { text: mOnNoun, isCap: false };
-      outWords[j + 1] = { text: mOnPoss, isCap: false };
-      j++;
-    }
-  }
-
-  if (window._transDir === 'on-en' && typeof reorderOnToEnClauses === 'function') {
-    outWords = reorderOnToEnClauses(outWords);
-  }
-
-  for (var m = 0; m < wordIdx.length; m++) {
-    var item = outWords[m];
-    var finalTxt = item.text;
-    if (item.isCap && finalTxt) finalTxt = finalTxt.charAt(0).toUpperCase() + finalTxt.slice(1);
-    parts[wordIdx[m]] = finalTxt;
-  }
-  return parts.join('');
-}
-
-function runVerticalTranslate(raw) {
-  var out = document.getElementById('translateOutputBox'), st = document.getElementById('subStatus');
-  if (st) { st.textContent = ''; st.style.display = 'none'; }
-  if (!out) return;
-  var txt = raw || '';
-  if (!txt.trim()) { out.style.color = '#8a6b43'; out.textContent = 'Translation'; return; }
-  if (!window._glossMap) buildGlossMapFromDb();
-  if (!window._glossMap) { out.textContent = 'Loading…'; return; }
-  if (/[áéíóúýæœøǫþðʀÁÉÍÓÚÝÆŒØǪÞÐƦ]/.test(txt) && window._transDir !== 'on-en') {
-    window._transDir = 'on-en';
-    var sL = document.getElementById('tSrcLang'), dL = document.getElementById('tDstLang');
-    if (sL) sL.textContent = 'OLD NORSE';
-    if (dL) dL.textContent = 'ENGLISH';
-  }
-  out.style.color = '#ffd096';
-  var map = (window._transDir === 'on-en') ? window._glossMap.on : window._glossMap.en;
-  var lines = txt.split('\n').map(function(line) { return translateLineOrdered(line, (window._transDir === 'on-en'), map); });
-  out.textContent = lines.join('\n');
-}
-
-(function(){
-  var oFS = window.openFullScreenView;
-  window.openFullScreenView = function(v, t) {
-    var tc = ensureTranslateUI(), fb = document.getElementById('fsBody');
-    if (tc && fb && tc.parentElement !== fb) fb.appendChild(tc);
-    if (tc) tc.style.display = 'none';
-    if (typeof oFS === 'function') oFS(v, t);
-    if (v === 'translate') {
-      var ft = document.getElementById('fsTitle');
-      if (ft) ft.textContent = 'Translate';
-      if (tc) tc.style.display = 'flex';
-      var i = document.getElementById('translateInput');
-      if (i) setTimeout(function(){ i.focus(); }, 50);
-    }
-  };
-})();</script>
+};
+</script>
 </body>
 </html>
